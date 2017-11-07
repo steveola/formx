@@ -5,13 +5,16 @@
 <body>
 <style>
 .active_tab {background:grey;width:100px; text-align:center;	border-top-left-radius: 1em;border-top-right-radius: 1em;}
+.active_tab input {width:100%;background:none;border:none;}
 
 .inactive_tab {background:blue;width:100px; text-align:center;	border-top-left-radius: 1em;border-top-right-radius: 1em;}
+.inactive_tab input {width:100%;background:none;border:none;}
 
 .each_tab {background:grey;}
 
-.inactive_tab:hover {background:grey;width:100px; text-align:center;}
-#tabs {margin:0px;}
+.inactive_tab:hover {background:grey;width:100px; text-align:center;cursor: pointer;}
+#tabs {margin:0px; }
+#tabs div {margin:0px; float:left;}
 #tabs td {border:0px;padding:0px;}
 </style>
 <?php
@@ -259,6 +262,15 @@ public $printer = array();
 public $update_success = false;
 ////END RENDER FORM ITEMS	
 public $separator = array();
+
+////TAB SEPARATOR PROPERTIES
+public $tab_separator = array();
+
+
+
+
+////END TAB PROPERTIES
+
 function ValidateAsEmail($name,$value,$validate_error){
 	if(preg_match("/^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-._]+..[a-zA-Z0-9-.]+$/",$value))////email
 	{
@@ -337,10 +349,56 @@ function CustomValidation($name,$value,$label,$arr,$validation_callback,$validat
 }
 
 
+//////CALLBACK METHODS
+function insert_callback($callback){
+	if(is_callable($callback)){	
+		$call_callback = call_user_func($callback);
+	}
+	else
+	{
+		echo $callback;
+	}	
+}
+
+function insert_failure($callback){
+	if(is_callable($callback)){	
+		$call_callback = call_user_func($callback);
+	}
+	else
+	{
+		echo $callback;
+	}	
+}
+
+
+function update_callback($callback){
+	if(is_callable($callback)){	
+		$call_callback = call_user_func($callback);
+	}
+	else
+	{
+		echo $callback;
+	}	
+}
+
+
+function update_failure($callback){
+	if(is_callable($callback)){	
+		$call_callback = call_user_func($callback);
+	}
+	else
+	{
+		echo $callback;
+	}	
+}
+
+//////END CALLBACK METHODS
+
+
 
 ///////Simple INSERTION Form Generator from database table////////
 ////// add form type later
-function formx($tablename, $print_form, $exception,$sort_array, $display, $addtional_field,$add_free_field,$field_processor, $costume_to_db, $lang)
+function formx($tablename, $print_form, $exception,$sort_array, $display, $addtional_field,$add_free_field,$field_processor, $custom_to_db, $lang)
 {
 
 //include("connectdb.php");
@@ -348,6 +406,41 @@ function formx($tablename, $print_form, $exception,$sort_array, $display, $addti
 //$this->run_db();
 
 $reprint =  (object) array();
+
+////Define form callbacks
+if(isset($display->insert_callback)){	
+$insert_callback = $display->insert_callback;
+}
+else
+{
+$insert_callback = false;	
+}
+
+if(isset($display->insert_failure)){	
+$insert_failure = $display->insert_failure;
+}
+else
+{
+$insert_failure = false;	
+}		
+
+if(isset($display->update_callback)){	
+$update_callback = $display->update_callback;
+}
+else
+{
+$update_callback = false;	
+}	
+
+if(isset($display->update_failure)){	
+$update_failure = $display->update_failure;
+}
+else
+{
+$update_failure = false;	
+}
+////End Define form callbacks
+
 
 
 	/////In case $display parameter is not set
@@ -409,8 +502,12 @@ if($form_method == 'GET' && isset($_GET["$sub"]))
 
 }
 
+
+
 //////////////////////
 if ($method != "blank"){
+
+//$this->alert("$method");
 
 	
 	$type = $method_type;
@@ -947,23 +1044,26 @@ if ($name != $sub){
 			///removing from table
 
 //check this letter reinsertion
-//			$delete_multirow_sql .= "DELETE FROM $other_tr_table WHERE $other_tr_key = '$update_data_pre';";
+			$delete_multirow_sql .= "DELETE FROM $other_tr_table WHERE $other_tr_key = '$update_data_pre';";
 
 				
 				
 				}
 				
 			}	
+			
+			
 				foreach ($other_data_column_array as $other_value =>$other_column) 
 					{
 					echo "***** $other_column >>>>>> $other_value<br />";
-					$ocolumn_sql_value .= "$other_column,";
+				//	$ocolumn_sql_value .= "$other_column,";
 					$mod_other_value = "". $$other_value. "";
-					$orow_sql_value .= "'".$mod_other_value."',"; ////remove $ sign
+				//	$orow_sql_value .= "'".$mod_other_value."',"; ////remove $ sign
 					///for update
 					$update_othertr .= "$other_column =" . "'" .$$other_value . "',";
 					
 					}
+					
 			
 				$oarrayvalue = $value; 
 				//$update_othertr = "";	
@@ -973,9 +1073,9 @@ if ($name != $sub){
 				$arrayupdate_sql .= $this_arrayupdate;
 				
 				///SQL for insertion		
-				//$arrayinsert_sql .= "INSERT INTO $othertablename ($ocolumn_sql_value) VALUES ($orow_sql_value"."'$oarrayvalue');";
+				$arrayinsert_sql .= "INSERT INTO $othertablename ($ocolumn_sql_value) VALUES ($orow_sql_value"."'$oarrayvalue');";
 				
-				$arrayinsert_sql .= $this_arrayupdate;
+			//	$arrayinsert_sql .= $this_arrayupdate;
 				
 
 						
@@ -1420,7 +1520,7 @@ if ($_FILES["$name"]["size"] > $max_size) {
 		} ///End file type check
 //	*/	
 		
-		
+			
 			}		
 			
 	else{   ///execute multiple file codes here
@@ -1438,7 +1538,7 @@ $reprint->$name = "";
 		
   echo "<br /> >>>>>>>>>>$name -- ". $_FILES["$name"]["name"][$f] . " %%%%%%%%<br />";
 		
-	$reprint->$name .= $name. ",";		
+//	$reprint->$name .= $name. ",";		
 
 		if(isset($display->fields->$name->type)){
 		
@@ -1535,7 +1635,7 @@ if ($_FILES["$name"]["size"][$f] > $max_size) {
 		//$check_empty = $name_files;
 		
 		}
-			
+/*			
 			if (!($newnamedb_files == "")){ // allow blank field replace //check for empty files in update
 			if(in_array($name,$all_db_field_array)){	
 			
@@ -1546,6 +1646,165 @@ if ($_FILES["$name"]["size"][$f] > $max_size) {
 				$sql_array["$name"] = $newnamedb_files;				
 			}
 			}
+			
+			*/
+	/////newww	
+	if (!($newnamedb_files == "")){ // allow blank field replace //check for empty files in update
+	
+		if(in_array($name,$all_db_field_array) || isset($display->fields->$name->to_other_tr)){
+
+						if(isset($display->fields->$name->to_other_tr))
+				{
+	
+	
+$other_tobj = $display->fields->$name->to_other_tr; ///other table object	
+$othertablename = $other_tobj->tablename;
+$this_data_column = $other_tobj->this_column;
+$other_data_column_array = $other_tobj->other_column;
+
+				
+				$ocolumn_sql_value = "";
+				$orow_sql_value = "";
+				$update_othertr = "";
+
+//////call check from db
+$update_set = false;
+				if (isset($display->update->set))
+{
+$update_set = $display->update->set;
+}
+
+
+if (isset($display->fields->$name->to_other_tr) && $update_set === true)
+{
+	{//otyher tr values
+	$other_tr_details = $display->fields->$name->to_other_tr;
+	$other_tr_table = $other_tr_details->tablename;
+	$other_tr_this_column = $other_tr_details->this_column;
+	$other_tr_identifier = $other_tr_details->identifier;
+	$other_tr_this_column_oc = $other_tr_details->other_column;
+	$other_tr_key = $other_tr_this_column_oc["$other_tr_identifier"];
+//	alert($other_tr_key);
+	///get from table
+	$update_table_where = $display->update->where;
+
+//	include("connectdb.php");
+$con = $this->con();
+$this_result = $this->run_query( "SELECT * FROM $tablename WHERE $update_table_where");
+	while($obj = $this->fetch_assoc($this_result)){	  
+$typex = $obj;
+$ax=$typex;
+$value_namex = array_keys($ax);
+$postsx = $value_namex;
+foreach ($postsx as $valuex) 
+{	
+		$namex = $valuex;	
+		$$valuex = "$typex[$namex]";
+		$$namex = $obj[$valuex]; 
+}	
+$update_data_pre = $obj[$other_tr_identifier]; 
+//alert($update_data_pre);	  
+												}
+//////use to remove values from tables		
+
+///removing from table
+									
+
+
+$delete_multirow_sql .= "DELETE FROM $other_tr_table WHERE $other_tr_key = '$update_data_pre';";
+
+	
+	}
+	
+		}	
+//////end call check from db 
+
+
+				foreach ($other_data_column_array as $other_value =>$other_column) 
+					{
+					echo "***** $other_column >>>>>> $other_value<br />";
+					$ocolumn_sql_value .= "$other_column,";
+					$mod_other_value = "". $$other_value. "";
+					$orow_sql_value .= "'".$mod_other_value."',"; ////remove $ sign
+					///for update
+					$update_othertr .= "$other_column =" . "'" .$$other_value . "',";
+					
+					}
+					$ocolumn_sql_value .= "$this_data_column"; ////adding curremt data
+					///update
+					
+					//$update_othertr .= "$this_data_column =" . "" .$$other_value . ""
+					//$update_othertr = substr($update_othertr, 0, -1);
+					///update 
+			
+					foreach ($value as $oarrayvalue) 
+					{
+						//$oarrayvalue = "$oarrayvalue";
+				
+				///SQL for updation
+				$this_arrayupdate = "UPDATE $othertablename SET $update_othertr ". "$this_data_column = $oarrayvalue " ." WHERE $other_tr_key='$update_data_pre';";
+				$arrayupdate_sql .= $this_arrayupdate;
+
+				
+				///SQL for insertion		
+				$arrayinsert_sql .= "INSERT INTO $othertablename ($ocolumn_sql_value) VALUES ($orow_sql_value"."'$oarrayvalue');";
+				
+					}	
+					
+			///// Per row execution
+						
+			echo "<pre>$arrayinsert_sql</pre> <br />";
+			echo "<pre>$$arrayupdate_sql</pre> <br />";
+			
+	//////DO not ececute a pack all quesries and run at once			
+/*
+		if (mysqlo_multiiiiiiii_query($con,"$arrayinsert_sql"))
+			{	echo "Multidata capture captured <br />";	}
+			else
+			{	
+				echo "<span style='color:red'>
+				An error occurred  >>>
+				</span>". mysqloo_error();	
+			}
+*/			
+	///// End Per row execution	
+	
+
+				
+				}
+			else
+				{
+					$column_sql_value .= "$name,";  //// column for original table
+					$addarrayvalue = "";	
+if(isset($display->fields->$name->field_separator))
+				{
+					$field_separator = $display->fields->$name->field_separator;
+				}
+				else
+				{
+					$field_separator = "+";
+				}
+					
+					foreach ($value as $arrayvalue) 
+					{
+						
+					//	using seperators
+						$addarrayvalue .= "$arrayvalue$field_separator";
+					}	
+			
+			$row_sql_value = substr($row_sql_value, 0, -1);
+			$newnamedb_files = substr($newnamedb_files, 0, -1);
+			
+				$row_sql_value .= "',";
+				$sql_array["$name"] = $newnamedb_files;			
+						
+						
+				}
+				
+//$reprint->$name = $newnamedb_files;		
+		
+		}
+	}		
 	
 	//	echo "<hr /><pre>";	
 	//	print_r($_FILES);
@@ -1553,7 +1812,7 @@ if ($_FILES["$name"]["size"][$f] > $max_size) {
 		
 		
 
-		
+	$reprint->$name .= implode(",",$value);	/// in view check this
 	//	$this->alert("multiple file detected");*
 	} ///END execute multiple file codes here
 		}
@@ -1566,11 +1825,11 @@ if ($_FILES["$name"]["size"][$f] > $max_size) {
 //	echo "<br />";
 	echo "<br />";
 ///Trims out the comma(",") from the $column_sql_value and 	$row_sql_value
-//$costume_to_db
+//$custom_to_db
 
 //////////////////////////////////////
 /////////////////////////////////////
-//print_r($costume_to_db);
+//print_r($custom_to_db);
 ////////////////////////////////////
 /////////////////////////////////////
 if(!(isset($_FILES))){
@@ -1578,17 +1837,17 @@ $uploadOk = "1";
 
 }
 
-/////ADDDING COSTUME TO DB/////
-foreach($costume_to_db as $costume_column => $costume_value)
+/////ADDDING custom TO DB/////
+foreach($custom_to_db as $custom_column => $custom_value)
 {
-	$column_sql_value .= "$costume_column,";
+	$column_sql_value .= "$custom_column,";
 	////where to replace the values we wish
-	$row_sql_value .= "'$costume_value',";
-	$sql_array["$costume_column"] = $costume_value;
-	//echo "$costume_column => $costume_value <br />";
+	$row_sql_value .= "'$custom_value',";
+	$sql_array["$custom_column"] = $custom_value;
+	//echo "$custom_column => $custom_value <br />";
 }
 
-/////END ADDDING COSTUME TO DB/////
+/////END ADDDING custom TO DB/////
 
 ///check sql
 $column_sql_value = "";
@@ -1694,6 +1953,12 @@ echo "</pre>";
 
 $other_tr_sql = $delete_multirow_sql.$arrayinsert_sql;
 
+
+
+
+
+
+
 echo "<b>$insert_sql |||| $other_tr_sql</b>";	
 if ($query = $this->multi_query($insert_sql)) ///break apart use loops to return errors in loop
 			{	
@@ -1707,7 +1972,9 @@ if ($query = $this->multi_query($insert_sql)) ///break apart use loops to return
 		if(($display->update->set == true)){	
 		if(isset($display->update_callback)){	
 		
-			eval($display->update_callback);
+		//eval($display->update_callback);
+		//	$this->update_callback($update_callback);
+			$this->update_callback($update_callback);
 			$this->update_success =1;
 		
 		}
@@ -1717,7 +1984,7 @@ if ($query = $this->multi_query($insert_sql)) ///break apart use loops to return
 		
 		if(isset($display->insert_callback)){
 			
-			eval($display->insert_callback);
+			$this->insert_callback($insert_callback);
 		}
 									}
 		}
@@ -1726,7 +1993,7 @@ if ($query = $this->multi_query($insert_sql)) ///break apart use loops to return
 		
 		if(isset($display->insert_callback)){
 			
-			eval($display->insert_callback);
+			$this->insert_callback($insert_callback);
 		}
 									}
 		////End callbacks	
@@ -1762,7 +2029,7 @@ if ($query = $this->multi_query($insert_sql)) ///break apart use loops to return
 		if(isset($display->update)){
 		if(($display->update->set == true )){
 		if(isset($display->update_failure)){			
-			eval($display->update_failure);
+			$this->update_failure($update_failure);
 		}
 									}
 			else {
@@ -1770,7 +2037,7 @@ if ($query = $this->multi_query($insert_sql)) ///break apart use loops to return
 		
 		if(isset($display->insert_failure)){
 			
-			eval($display->insert_failure);
+			$this->insert_failure($insert_failure);
 		}
 									}
 	
@@ -1779,7 +2046,7 @@ if ($query = $this->multi_query($insert_sql)) ///break apart use loops to return
 		
 		if(isset($display->insert_failure)){
 			
-			eval($display->insert_failure);
+			$this->insert_failure($insert_failure);
 		}
 									}
 								
@@ -1807,7 +2074,7 @@ $sql_error = "";
 		if(isset($display->update)){
 		if(($display->update->set == true )){
 		if(isset($display->update_failure)){			
-			eval($display->update_failure);
+		$this->update_failure($update_failure);
 		}
 									}
 			else {
@@ -1815,7 +2082,7 @@ $sql_error = "";
 		
 		if(isset($display->insert_failure)){
 			
-			eval($display->insert_failure);
+			$this->insert_failure($insert_failure);
 		}
 									}
 	
@@ -1824,7 +2091,7 @@ $sql_error = "";
 		
 		if(isset($display->insert_failure)){
 			
-			eval($display->insert_failure);
+			$this->insert_failure($insert_failure);
 		}
 									}
 								
@@ -1843,7 +2110,30 @@ $sql_error = "";
 		}
 else
 {
-	///////If post IS NOT SET
+	///////If post,get method of form IS NOT SET
+	
+	if($_REQUEST){
+//	$this->alert(implode(",",$_REQUEST));
+//	$this->alert(print_r($_REQUEST));
+	
+	$typex = $_REQUEST;
+	$ax=$typex;
+	$value_namex = array_keys($ax);
+	$postsx = $value_namex;
+	foreach ($postsx as $valuex) 
+	{	
+			$namex = $valuex;	
+			$$valuex = $typex[$namex];
+			$$namex = $typex[$valuex]; 
+			$this_name = $namex;
+			$this_value = $$namex;
+
+//			$this->alert($this_name); 
+//			$this->alert("value--" . $this_value);
+			$reprint->$this_name = $this_value;
+	}	
+	
+	}
 	
 }
 /////Check Post /////
@@ -2027,15 +2317,30 @@ $val_error_print = str_replace("@value", $this_value, $val_error_print);
 
 	
 ///----//draw type check////////******@@@@@@@@@@@@@@@
-/*costume */		$container_open = "";
+/*custom */		$container_open = "";
 					$container_close = "";
 					$row_begin = "";
 					$row_end = "";
 					$column_textdisplay_open = "";
 					$column_textdisplay_close = "";
 					$column_formdisplay_open = "";
-/*END costume*/		$column_formdisplay_close = "";
+/*END custom*/		$column_formdisplay_close = "";
 
+///// tab variables
+
+$tab_start = "";
+$tab_end = "";
+
+$tab_menu_area_start = "";
+$tab_menu_area_end = "";
+
+$tab_button_start = "";
+$tab_button_end = "";
+
+$tab_body_start_element = ""; 
+$tab_body_end_element = ""; 
+
+/////end tab variables
 
 ////FORM ELEMENT SEPAROTOR		
 if(isset($display->separator))
@@ -2053,6 +2358,23 @@ if(isset($display->separator))
 		$column_textdisplay_close = "</td>";
 		$column_formdisplay_open = "<td>";
 		$column_formdisplay_close = "</td>";
+
+///for tabs
+
+
+$tab_start = "<tr><td colspan='2'>";
+$tab_end = "</td></tr>";
+
+$tab_menu_area_start = "<table id='tabs'><tr>";
+$tab_menu_area_end = "</tr></table>";
+
+$tab_button_start = "<td>";
+$tab_button_end = "</td>";
+
+$tab_body_start_element = "table"; 
+$tab_body_end_element = "table";		
+		
+		
 		}
 			break;
 		case "table1c":
@@ -2065,7 +2387,20 @@ if(isset($display->separator))
 		$column_textdisplay_close = "</td></tr>";
 		$column_formdisplay_open = "<tr><td>";
 		$column_formdisplay_close = "</td></tr>";	
-			
+
+
+
+$tab_start = "<tr><td>";
+$tab_end = "</td></tr>";
+
+$tab_menu_area_start = "<table id='tabs'><tr>";
+$tab_menu_area_end = "</tr></table>";
+
+$tab_button_start = "<td>";
+$tab_button_end = "</td>";
+
+$tab_body_start_element = "table"; 
+$tab_body_end_element = "table";		
 		}
 			break;
 		case "div":
@@ -2078,31 +2413,82 @@ $column_textdisplay_open = "<div class='right_column' style='clear:both;float:le
 $column_textdisplay_close = "</div>";
 $column_formdisplay_open = "<div class='right_column' style='float:left;width:50%;'>";
 $column_formdisplay_close = "</div>";
+
+
+
+
+$tab_start = "<div style='width:100%;'>";
+$tab_end = "</div>";
+
+$tab_menu_area_start = "<div id='tabs'>";
+$tab_menu_area_end = "</div>";
+
+$tab_button_start = "";
+$tab_button_end = "";
+
+$tab_body_start_element = "div"; 
+$tab_body_end_element = "div";
+
 		}
 			break;
-		case "costume_print":
+		case "custom":
 		{ 
-		////costume print
-		if(isset($display->costume_print_content))
-		{
-		$costume_print_content = $display->costume_print_content;
-		}
-		else 
-		{
-		$costume_print_content = "echo \'\';";	
-			
-		}
-		
-		eval($costume_print_content);
-		
-		////costume print
+		////custom print
+if(!empty($this->separator)){		
+$container_open	=	$this->separator['container_open'];
+$container_close = $this->separator['container_close'];
+$row_begin	=	$this->separator['row_begin'];
+$row_end	=	$this->separator['row_end'];
+$column_textdisplay_open	=	$this->separator['column_textdisplay_open'];
+$column_textdisplay_close	=	$this->separator['column_textdisplay_close'];
+$column_formdisplay_open	=	$this->separator['column_formdisplay_open'];
+$column_formdisplay_close	=	$this->separator['column_formdisplay_close'];
+}
+
+
+
+if(!empty($this->tab_separator)){
+
+$tab_start = $this->tab_separator['tab_start'];
+$tab_end = $this->tab_separator['tab_end'];
+
+$tab_menu_area_start = $this->tab_separator['tab_menu_area_start'];
+$tab_menu_area_end = $this->tab_separator['tab_menu_area_end'];
+
+$tab_button_start = $this->tab_separator['tab_button_start'];
+$tab_button_end = $this->tab_separator['tab_button_end'];
+
+$tab_body_start_element = $this->tab_separator['tab_body_start_element'];
+$tab_body_end_element = $this->tab_separator['tab_body_end_element'];	
+}
+	
+		////custom print
 		}
 			break;
-		case "hr":
-		{ echo "<hr />";}
-			break;
-		case "p":
-		{echo "<br />";}
+		case "blank":
+		{		
+		$container_open = "";
+		$container_close = "";
+		$row_begin = "";
+		$row_end = "";
+		$column_textdisplay_open = "";
+		$column_textdisplay_close = "";
+		$column_formdisplay_open = "";
+		$column_formdisplay_close = "";
+		
+						
+
+		$tab_start = "";
+		$tab_end = "";
+
+		$tab_menu_area_start = "";
+		$tab_menu_area_end = "";
+
+		$tab_button_start = "";
+		$tab_button_end = "";
+
+		$tab_body_start_element = ""; 
+		$tab_body_end_element = ""; }
 			break;
 		default:
 		{ 
@@ -2116,7 +2502,19 @@ $column_formdisplay_close = "</div>";
 		$column_formdisplay_open = "";
 		$column_formdisplay_close = "";
 		
-		
+						
+
+		$tab_start = "";
+		$tab_end = "";
+
+		$tab_menu_area_start = "";
+		$tab_menu_area_end = "";
+
+		$tab_button_start = "";
+		$tab_button_end = "";
+
+		$tab_body_start_element = ""; 
+		$tab_body_end_element = ""; 
 		
 		
 		}
@@ -2128,7 +2526,7 @@ $column_formdisplay_close = "</div>";
 
 }
 		
-		$this->separator['container_open'] = $container_open;	
+
 		$this->separator['container_open'] = $container_open;
 		$this->separator['container_close'] = $container_close;
 		$this->separator['row_begin'] = $row_begin;
@@ -2137,7 +2535,25 @@ $column_formdisplay_close = "</div>";
 		$this->separator['column_textdisplay_close'] = $column_textdisplay_close;
 		$this->separator['column_formdisplay_open'] = $column_formdisplay_open;
 		$this->separator['column_formdisplay_close'] = $column_formdisplay_close;
-		
+
+
+
+
+
+
+
+
+$this->tab_separator['$tab_start']	=	$tab_start;
+$this->tab_separator['tab_end']	=	$tab_end;
+
+$this->tab_separator['tab_menu_area_start']	=	$tab_menu_area_start;
+$this->tab_separator['tab_menu_area_end']	=	$tab_menu_area_end;
+
+$this->tab_separator['tab_button_start']	=	$tab_button_start;
+$this->tab_separator['tab_button_end']	=	$tab_button_end;
+
+$this->tab_separator['tab_body_start_element']	=	$tab_body_start_element;
+$this->tab_separator['tab_body_end_element']	=	$tab_body_end_element;			
 ////END FORM ELEMENT SEPAROTOR
 
 
@@ -2562,7 +2978,7 @@ $sorted_data = array_merge($while_sorted,$while_sort_interset);
 $this->renderer = array();
 //'tabs' => array("PERSONAL"=>'faculty_day_added,faculty_year_added,faculty_campus',"OFFICE"=>'Faculty_text,faculty_files,location'),
 /*
-$costume_print_content = "
+$custom_content = "
 		
 		\$container_open = \"<fieldset style='border:4px black double;'><legend>Testing the form</legend>\";
 		\$container_close = \"</fieldset>\";
@@ -2589,6 +3005,23 @@ $costume_print_content = "
 		$this->separator[$column_formdisplay_close] = $column_formdisplay_close;
 
 */
+
+
+
+
+$tab_start = $this->tab_separator['$tab_start'];
+$tab_end = $this->tab_separator['tab_end'];
+
+$tab_menu_area_start = $this->tab_separator['tab_menu_area_start'];
+$tab_menu_area_end = $this->tab_separator['tab_menu_area_end'];
+
+$tab_button_start = $this->tab_separator['tab_button_start'];
+$tab_button_end = $this->tab_separator['tab_button_end'];
+
+$tab_body_start_element = $this->tab_separator['tab_body_start_element'];
+$tab_body_end_element = $this->tab_separator['tab_body_end_element'];	
+
+
 echo "<pre>";
 //print_r($this->separator);
 echo "</pre>";
@@ -2596,16 +3029,49 @@ echo "</pre>";
 $tabed_array = array();
 $tabed_button = array();
 $tabed_style = array();
-
+$excute_current_tab = "";
 $tabed_style[] = "<script>";
-$tabed_style_key = 0;	
+$tabed_style_key = 0;
+$error_tab = "";
+$error_active_tab = "";
+$tab_layout_current = "";
+$request_tab = "";
+//active_tab_namex
+if(isset($_REQUEST["active_tabnamex"])){
+//	if($REQUEST['active_tabnamex'] != ""){
+		$request_tab = $_REQUEST['active_tabnamex'];
+//$this->alert("active tab xxx");		
+//	}	
+}	
+//$this->alert($request_tab);
 
 if(isset($display->tabs)){
 		$tabs = $display->tabs;
-		$tabed_array[] = "<tr>";
-		$tabed_array[] = "<td colspan='2'>";
-		$tabed_array[] = "<table id='tabs' cellspacing='0px' cellpadding='2px'><tr>";		
+		$tabed_array[] = $tab_start;
+		$tabed_array[] = $tab_menu_area_start;		
+$tab_count_button = 0;
+$error_key = key($this->validation_error);
+
+//$this->alert($error_key);
+	
+foreach($tabs as $tabname_index=>$tabarray_index){
+	//$this->alert($tabname_index);
+	$element_array = explode(",",$tabarray_index);
+	foreach($element_array as $element_array_key => $element_array_value){
+		if($element_array_value == $error_key){
+		$error_tab = $tabname_index;	
+		}	
+	}
+}
+
+//$this->alert($error_tab);
+$tabscript = "";
+$tabname_botton = "";
+$active_tab_button = 	"$tab_button_start<div onclick=\"$tabscript document.getElementById('active_tabnamex').value='$tabname_botton';return false;\" id=\"tab_button_id_$tabname_botton\" class='active_tab'><input type='submit' name='$tabname_botton"."_tab_button' value='$tabname_botton' /></div>$tab_button_end";
+$inactive_tab_button = 	"$tab_button_start<div onclick=\"$tabscript document.getElementById('active_tabnamex').value='$tabname_botton';return false;\" id=\"tab_button_id_$tabname_botton\" class='inactive_tab'><input type='submit' name='$tabname_botton"."_tab_button' value='$tabname_botton' /></div>$tab_button_end";
+
 foreach($tabs as $tabname_botton=>$tabarray_botton){
+	
 	///script writer
 	$tabscript = "";
 	$tabscript .= "document.getElementById('tab_$tabname_botton').style='display:;';";
@@ -2626,14 +3092,113 @@ foreach($tabs as $tabname_botton=>$tabarray_botton){
 	}
 $tabed_style_key =1;	
 	///End script writer
-					$tabed_array[] = "<td ><div onclick=\"$tabscript\" id=\"tab_button_id_$tabname_botton\">$tabname_botton</div></td>";
+	$tab_value = $tabname_botton . "_tab_button";
+	$tab_id = "tab_button_id_" . $tabname_botton;		
+if(!$_REQUEST){
+$tab_count_button += 1;	
+	if($tab_count_button ==1){
+	$tabed_array[] = "$tab_button_start<div onclick=\"$tabscript document.getElementById('active_tabnamex').value='$tabname_botton';return false;\" id=\"tab_button_id_$tabname_botton\" class='active_tab'><input type='submit' name='$tabname_botton"."_tab_button' value='$tabname_botton' /></div>$tab_button_end";	
+	//	$this->alert("$tabname_botton");
+	$excute_current_tab .= "<script>$tabscript</script>";
+	$excute_current_tab .= "<script>document.getElementById('tab_button_id_$tabname_botton').className='active_tab';</script>";
+		
+		}
+	else
+	{		
+	$tabed_array[] = "$tab_button_start<div onclick=\"$tabscript document.getElementById('active_tabnamex').value='$tabname_botton';return false;\" id=\"tab_button_id_$tabname_botton\" class='inactive_tab'><input type='submit' name='$tabname_botton"."_tab_button' value='$tabname_botton' /></div>$tab_button_end";		
+	}
 }
-$tabed_array[] = "</tr></table>";	
-				
-		foreach($tabs as $tabname=>$tabarray){
-	
-			$tabed_array[] = "<table cellspacing='0px' cellpadding='2px' class='each_tab' id='tab_$tabname' width='100%'>";
+else{
+	if(isset($_REQUEST["$tab_value"])){
+	$tabed_array[] = "$tab_button_start<div onclick=\"$tabscript document.getElementById('active_tabnamex').value='$tabname_botton';return false;\" id=\"tab_button_id_$tabname_botton\" class='active_tab'><input type='submit' name='$tabname_botton"."_tab_button' value='$tabname_botton' /></div>$tab_button_end";	
+	//	$this->alert("$tabname_botton");
+	$excute_current_tab .= "<script>$tabscript</script>";
+	$excute_current_tab .= "<script>document.getElementById('tab_button_id_$tabname_botton').className='active_tab';</script>";
+		
+		}
+	else
+	{
+///but if method of post is set here    ///check for current tab info
+
+	if(!empty($this->validation_error)){
+			if($error_tab == $tabname_botton){
+		$tabed_array[] = "$tab_button_start<div onclick=\"$tabscript document.getElementById('active_tabnamex').value='$tabname_botton';return false;\" id=\"tab_button_id_$tabname_botton\" class='active_tab'><input type='submit' name='$tabname_botton"."_tab_button' value='$tabname_botton' /></div>$tab_button_end";				
+		$error_active_tab .= "<script>document.getElementById('tab_button_id_$tabname_botton').className='active_tab';</script>";
+			}
+			else{
+		$tabed_array[] = "$tab_button_start<div onclick=\"$tabscript document.getElementById('active_tabnamex').value='$tabname_botton';return false;\" id=\"tab_button_id_$tabname_botton\" class='inactive_tab'><input type='submit' name='$tabname_botton"."_tab_button' value='$tabname_botton' /></div>$tab_button_end";		
+		$error_active_tab .= "<script>document.getElementById('tab_button_id_$tabname_botton').className='inactive_tab';</script>";	
+			}
 			
+		}
+		else{
+		///code for current tab	
+				if(($request_tab == $tabname_botton) && (isset($_REQUEST["$tabname_botton"."_tab_button"]) || isset($_REQUEST[$display->form_id]))){
+		$tabed_array[] = "$tab_button_start<div onclick=\"$tabscript document.getElementById('active_tabnamex').value='$tabname_botton';return false;\" id=\"tab_button_id_$tabname_botton\" class='active_tab'><input type='submit' name='$tabname_botton"."_tab_button' value='$tabname_botton' /></div>$tab_button_end";				
+		$error_active_tab .= "<script>document.getElementById('tab_button_id_$tabname_botton').className='active_tab';</script>";			
+				}
+		else
+		{
+		$tabed_array[] = "$tab_button_start<div onclick=\"$tabscript document.getElementById('active_tabnamex').value='$tabname_botton';return false;\" id=\"tab_button_id_$tabname_botton\" class='inactive_tab'><input type='submit' name='$tabname_botton"."_tab_button' value='$tabname_botton' /></div>$tab_button_end";		
+		$error_active_tab .= "<script>document.getElementById('tab_button_id_$tabname_botton').className='inactive_tab';</script>";	
+		}
+		}
+		
+	}	
+
+}	
+					}
+$tabed_array[] = $tab_menu_area_end;	
+$tab_count = 0;				
+		foreach($tabs as $tabname=>$tabarray){
+$tab_value = $tabname . "_tab_button";			
+if(!$_REQUEST){	
+$tab_count += 1;
+	if($tab_count == 1){
+			$tabed_array[] = "<$tab_body_start_element class='each_tab' id='tab_$tabname' width='100%'>";
+			$tab_layout_current = 	$tabname;
+	}
+	else
+	{
+			$tabed_array[] = "<$tab_body_end_element class='each_tab' style='display:none;' id='tab_$tabname' width='100%'>";		
+	}
+}
+else
+{
+	if(isset($_REQUEST["$tab_value"])){
+			$tabed_array[] = "<$tab_body_start_element class='each_tab' id='tab_$tabname' width='100%'>";
+			$tab_layout_current = 	$tabname;	
+	}
+	else
+	{
+		if(!empty($this->validation_error)){	
+		if($error_tab == $tabname){
+//		$this->alert($tabname);	
+			$tabed_array[] = "<$tab_body_start_element class='each_tab' id='tab_$tabname' width='100%'>";
+			$tab_layout_current = 	$tabname;
+			$error_active_tab .= "<script>document.getElementById('tab_$tabname').style.display='';</script>";
+		}
+		else{
+			$tabed_array[] = "<$tab_body_end_element class='each_tab' style='display:none;' id='tab_$tabname' width='100%'>";		
+			}
+	}
+	else{
+		///code for current tab
+		if(($request_tab == $tabname) && (isset($_REQUEST["$tab_value"]) || isset($_REQUEST[$display->form_id]))){
+			$tabed_array[] = "<$tab_body_start_element class='each_tab' id='tab_$tabname' width='100%'>";
+			$tab_layout_current = 	$tabname;
+			$error_active_tab .= "<script>document.getElementById('tab_$tabname').style.display='';</script>";
+			
+		}
+		else{
+			$tabed_array[] = "<$tab_body_end_element class='each_tab' style='display:none;' id='tab_$tabname' width='100%'>";
+			$error_active_tab .= "<script>document.getElementById('tab_$tabname').style.display='none';</script>";				
+		}
+	}
+	}
+
+	
+}	
 			
 			$tabfields= explode(",",$tabarray);
 			foreach($tabfields as $fieldindex=>$fieldname){
@@ -2646,12 +3211,14 @@ $tabed_array[] = "</tr></table>";
 			}
 			
 			
-			$tabed_array[] = "</table>";
+			$tabed_array[] = "</$tab_body_end_element>";
+			
+			
 		}
-		$tabed_array[] = "</td>";
-		$tabed_array[] = "</tr>";
+		$tabed_array[] = $tab_end; //////where tabbing end
 
-$tabed_style[] = "</script>";
+$current_tab = "<input type='text' name='active_tabnamex'  id='active_tabnamex' style='display:none;' value='$tab_layout_current' />";		
+$tabed_style[] = "</script>$excute_current_tab $error_active_tab $current_tab";
 		
 	$this->renderer = array_merge($this->pre_print,$tabed_button,$tabed_array,$tabed_style,$this->post_print);
 
@@ -2739,10 +3306,23 @@ if(($field_type != "multipleselect") || ($field_type != "checkbox"))
 
 $multipleselect_result = $this->run_query( "SELECT * FROM $other_tr_table WHERE $with_select_identifier = '$identifier_value'");
 
+if(($field_type != "multiplefile"))
+{
 $select_row = $this->fetch_assoc($multipleselect_result);
-
 $reprint_value = $select_row["$other_tr_this_column"];
 //$reprint->$dfield = $reprint_value;
+}
+else{
+//	sleep(1);
+		$reprint_value = "";
+			while($select_row = $this->fetch_assoc($multipleselect_result)){
+			$reprint_value .= $select_row["$other_tr_this_column"] . ",";					
+			}
+		$reprint_value = substr($reprint_value, 0, -1);
+//echo "<script>alert('$reprint_value');</script>";	
+}
+
+
 }	
 
 	
@@ -2776,6 +3356,7 @@ if(isset($reprint->$dfield))
 {
 if($this->update_success == 0){
 	$reprint_value = $reprint->$dfield; //////refresh from db add functionality to that...
+	
 }
 }	
 
@@ -2998,7 +3579,6 @@ $this->field_data["$dfield"] = "";
 
 		
 $this->input_label["$dfield"] = "<label for=\"$dfield\" accesskey=\"\" class=\"$server_error_label_class\" style=\"$server_error_label_style\">".  $print_lang . "</label> ";//LABEL
-
 
 
 
@@ -3434,7 +4014,7 @@ foreach($array_raw_select as $skey => $sdata)
 
 	}
         break;
-	case "costumeHTML":  	////// Replacing with customized html content 
+	case "customHTML":  	////// Replacing with customized html content 
 	{	
 
 	//echo "Your favourite HTML CODE";
@@ -3454,7 +4034,7 @@ foreach($array_raw_select as $skey => $sdata)
 
 	}
         break;
-	case "costumePHP":		////// Replacing with customized php content eval()
+	case "customPHP":		////// Replacing with customized php content eval()
 	{	
 
 	//echo "Your favourite PHP CODE";
@@ -3497,7 +4077,7 @@ foreach($array_raw_select as $skey => $sdata)
 	
 	case "file":
 	{	
-
+/*
 	if(isset($reprint->$dfield))
 {
 	$reprint_value = $reprint->$dfield;
@@ -3511,6 +4091,7 @@ if(isset($display->update))
 	}
 }
 }
+*/
 
 $this->input_element["$dfield"] .= "$reprint_value";   ///comment out to prevent showing
 	
@@ -3522,8 +4103,10 @@ $this->input_element["$dfield"] .= "$reprint_value";   ///comment out to prevent
 	case "multiplefile":
 	{	
 
+/*	
 	if(isset($reprint->$dfield))
 {
+
 	$reprint_value = $reprint->$dfield;
 	$reprint_value = "<span id='$dfield'  style='color:red;'><i>file:</i><b>$reprint_value</b> was not uploaded! choose file again </span><br />";
 
@@ -3536,6 +4119,8 @@ if(isset($display->update))
 }
 
 }
+
+*/
 
 $this->input_element["$dfield"] .= "$reprint_value";   ///comment out to prevent showing
 	
@@ -3740,7 +4325,8 @@ foreach($wrapper_array as $wrapper_key=>$wrapper){
 		$$wrapper = $this_wrapper;
 		}
 		else {		
-		$$wrapper = "";			
+		$$wrapper = "";	
+		
 		$$wrapper = call_user_func($this_wrapper,$reprint_value,$dfield,$updatedata,$lang);///refresh may pass other parameters
 		if(!$$wrapper){$$wrapper = "";}				
 		}
@@ -3805,7 +4391,7 @@ function formx ($table_name, //// database table name
 		$addtional_field,   //// extra fields not from db 
 		$add_free_field,   //// extra fields not from db free
 		$field_processor,   //// handles the customizes proccessors for field, verification checking to validate
-		$costume_to_db, /// add addional data to database 
+		$custom_to_db, /// add addional data to database 
 		$lang          /////name to display of form item HTML compatible 
 	 
 	 );   
@@ -3826,7 +4412,7 @@ function formx ($table_name, //// database table name
 // PARAMETERS: call_user_func_array([PARA 1 String $fuction_name], [PARA 2 array ([PARA_2_1 String $tablename], [PARA_2_2 array_of_fields_to_omit([$column1],$colum2,....) ))
 //call_user_func_array('table', array("faculty", array("faculty_id", "deleted")));
 ///DEFINATIONS////
-$costume_to_db = array();
+$custom_to_db = array();
 $display = (object) array();
 $lang = (object) array();
 $print_form = true;
@@ -3849,21 +4435,30 @@ $faculty_shortname = "";
 
 
 ///extra values 
-{////costume print
-$costume_print_content = "
-		
-		\$container_open = \"<fieldset style='border:4px black double;'><legend>Testing the form</legend>\";
-		\$container_close = \"</fieldset>\";
-		\$row_begin = \"\";
-		\$row_end = \"\";
-		\$column_textdisplay_open = \"\";
-		\$column_textdisplay_close = \": \";
-		\$column_formdisplay_open = \"\";
-		\$column_formdisplay_close = \"<hr width='50%' />\";
-				
-										";
+////custom print
+$custom_content = array(	"container_open" => "<table  id='form_table'  border='1'>",
+								"container_close" => "</table>",
+								"row_begin" => "<tr>",
+								"row_end" => "</tr>",
+								"column_textdisplay_open" => "<td>",
+								"column_textdisplay_close" => "</td>",
+								"column_formdisplay_open" => "<td>",
+								"column_formdisplay_close" => "</td>"
+								);	
 
-}
+
+
+
+$ctab = array(
+				"tab_start"=>"<tr><td colspan='2'>",
+				"tab_end"=>"</td></tr>",
+				"tab_menu_area_start"=>"<table id='tabs'><tr>",
+				"tab_menu_area_end"=>"</tr></table>",
+				"tab_button_start"=>"<td>",
+				"tab_button_end"=>"</td>",
+				"tab_body_start_element"=>"table",
+				"tab_body_end_element"=>"table"
+			);
 
 ////update database table
 $update = (object) array	(
@@ -3893,16 +4488,21 @@ array(	'foo' => 'bar',
 		'property' => 'value',
 		'filemust' => 0, //// check if file must be upload to allow form submission
 		'submit_button' => 'APPLY',
-		'insert_callback' => "\$this->alert(\"Data inserted Successfully\");",
-		'insert_failure' => "\$this->alert(\"Data insertion failed\");",
-		'update_callback' => "\$this->alert(\"Update Successfully\");",
-		'update_failure' => "\$this->alert(\"Update failed\" .  \$sql_error);",
+		//'insert_callback' => "\$this->alert(\"Data inserted Successfully\");",
+		'insert_callback' => "<script>alert('insert is good');</script>",
+		//'insert_failure' => "\$this->alert(\"Data insertion failed\");",
+		'insert_failure' => "<script>alert('insert is bad');</script>",
+		//'update_callback' => "\$this->alert(\"Update Successfully\");",
+		//'update_callback' => "<script>alert('update is good');</script>",
+		'update_callback' => "up_good",
+		//'update_failure' => "\$this->alert(\"Update failed\" .  \$sql_error);",
+		'update_failure' => "<script>alert('update is bad');</script>",
 		//'update_callback' => "alert(\"vvvvvvvvvvvvv\");",
 		///@@@@@@@@@@@@@@@@@@@@ Start Printing type @@@@@@@@@@@@@@@@///
 		//'separator' => 'div', //div, p, floated div add class values id's
-		//'separator' => 'table', //div, p, floated div add class values id's
-		'separator' => 'table', //div, p,costume_print, floated div add class values id's
-		'costume_print_content' => $costume_print_content, //div, p, floated div add class values id's
+		//'separator' => 'table', //div, p,table1c floated div add class values id's
+		'separator' => 'div', //div, p,custom, floated div add class values id's
+		'custom_content' => $custom_content, //div, p, floated div add class values id's
 		///@@@@@@@@@@@@@@@@@@@@ End Printing type @@@@@@@@@@@@@@@@///
 		'submit_attr' => "style=''",
 		'server_validate' => true,
@@ -3926,8 +4526,8 @@ array(	'foo' => 'bar',
 		'server_error_element_class' => "error_class",
 		'server_error_element_style' => "background:red;",
 		'server_error_separator' => "",
-		
-		'tabsx' => array("PERSONAL"=>'faculty_day_added,faculty_year_added,faculty_campus,faculty_shortname,faculty_id',
+		'custom_tab' => $ctab,
+		'tabs' => array("PERSONAL"=>'faculty_day_added,faculty_year_added,faculty_campus,faculty_shortname,faculty_id,faculty_note',
 						"OFFICE"=>'faculty_text,faculty_files,location,faculty_logo,faculty_fullname,institution_id',
 						"OTHERS"=>'house,free_no_display,joint,cvupload,2ndpasswprd,faculty_code,faculty_month_added'),
 		
@@ -3999,7 +4599,10 @@ array(	'foo' => 'bar',
 
 												///	'checked' => array('2','3')
 												),	
-		'free_no_display' => (object) array ( 	'type'=> 'text', //checkbox, multipleselect							
+		'free_no_display' => (object) array ( 	'type'=> 'text', //checkbox, multipleselect		
+												'ValidateAsInteger' => true,
+											//	'ValidateAsIntegerErrorMessage' => "@name @label @value is not an integer",
+												'ValidateAsIntegerErrorMessage' => "not an integer",		
 													'values_for_select' => array(	"January" => "1", ////The key is displayed & value = value
 																					"February" => "2",
 																					"March" => "3"
@@ -4066,18 +4669,19 @@ array(	'foo' => 'bar',
 																			),
 												//	'checked' => array('1'),
 													'ValidateAsInteger' => true,
-													'ValidateAsIntegerErrorMessage' => "@name @label @value is not an integer",
+												//	'ValidateAsIntegerErrorMessage' => "@name @label @value is not an integer",
+													'ValidateAsIntegerErrorMessage' => "not an integer",
 													'element_separator' => '<br />', ///HTML TAG
 												),
 		'faculty_fullname' => (object) array ( 	
 												'type'=> 'text', 									
-											//	'type'=> 'costumePHP', 
+											//	'type'=> 'customPHP', 
 												'content'=> " echo \" <h1>\$print_lang YEYOOO PHP</h1>\";",  ///use "" for string   data field: $dfield or $print_lang
 												//'custom_validation' => array()
 												'set_mod2' => "modify",////name of function
 												'preprocessor' => "preprocessor",////name of a function
 												'CustomValidate' => "cval",
-												'CustomValidateErrorMessage' => "input was not valid",
+												'CustomValidateErrorMessage' => "(CUSTOM)input was not valid",
 												'before_label' => 'blabel',
 												'after_label' => 'alabel',
 												'before_element' => 'belement',
@@ -4085,14 +4689,16 @@ array(	'foo' => 'bar',
 												
 												),	
 'faculty_logo' => (object) array ( 	
-												'type'=> 'file',
+												'type'=> 'multiplefile',
 												'max_size'=> '500000000', ///file size ib bytes
 												'folder'=>'downloads', ///folder to move file too
 												'file_type'=>'', //// comment if not an image or remove rule
 										 
-										//		'type'=> 'costumePHP', //'costumeHTML',customisizing
+										//		'type'=> 'customPHP', //'customHTML',customisizing
 										//		'rename_rule'=> $faculty_shortname, 
 										//		'rename_rule'=> time(). "falculty", 
+													'before_element' => 'preview_image',
+													'after_element' => 'after element',
 												
 												'phprequired'=> "",  /////if decleared block insert
 									//			'overwrite'=> "1", ////set one not to overwrite
@@ -4111,7 +4717,7 @@ array(	'foo' => 'bar',
 												'folder'=>'downloads', ///folder to move file too
 												'file_type'=>'', //// comment if not an image or remove rule
 										 
-										//		'type'=> 'costumePHP', //'costumeHTML',customisizing
+										//		'type'=> 'customPHP', //'customHTML',customisizing
 										//		'rename_rule'=> $faculty_shortname, 
 												'rename_rule'=> time(). "falculty", 
 												
@@ -4132,7 +4738,7 @@ array(	'foo' => 'bar',
 													'folder'=>'downloads', ///folder to move file too
 													'file_type'=>'', //// comment if not an image or remove rule
 											 
-												//	'type'=> 'costumePHP', 'costumeHTML',customisizing
+												//	'type'=> 'customPHP', 'customHTML',customisizing
 													'rename_rule'=> $faculty_shortname, 
 													'rename_rule'=> time(). "falculty" . "campus", 
 													
@@ -4144,13 +4750,13 @@ array(	'foo' => 'bar',
 
 'house' => (object) array ( 	
 												'type'=> 'number', 									
-											//	'type'=> 'costumePHP', 
+											//	'type'=> 'customPHP', 
 												'content'=> " echo \" <h1>\$print_lang YEYOOO PHP</h1>\";",  ///use "" for string   data field: $dfield or $print_lang
 												//'ValidateAsDate' => 1,	
 												),	
 'location' => (object) array ( 	
 												'type'=> 'color', 									
-											//	'type'=> 'costumePHP', 
+											//	'type'=> 'customPHP', 
 												'content'=> " echo \" <h1>\$print_lang YEYOOO PHP</h1>\";"  ///use "" for string   data field: $dfield or $print_lang
 													
 												),													
@@ -4165,7 +4771,7 @@ array(	'foo' => 'bar',
 												),	
 'joint' => (object) array ( 	
 												'type'=> 'textarea', 									
-											//	'type'=> 'costumePHP', 
+											//	'type'=> 'customPHP', 
 												'content'=> " echo \" <h1>\$print_lang YEYOOO PHP</h1>\";",  ///use "" for string   data field: $dfield or $print_lang
 												'set_mod2' => "modify"	
 												),													
@@ -4210,7 +4816,7 @@ array(	'foo' => 'bar',
 												'max_size'=> '500000000', ///file size ib bytes
 												'folder'=>'downloads', ///folder to move file too
 												'file_type'=>'', //// comment if not an image or remove rule										 
-											//	'type'=> 'costumePHP', 'costumeHTML',customisizing
+											//	'type'=> 'customPHP', 'customHTML',customisizing
 										//		'rename_rule'=> $faculty_shortname, 
 												'rename_rule'=> time(). "falculty", 
 												'phprequired'=> "",  /////if decleared block insert
@@ -4265,6 +4871,22 @@ array(	'foo' => 'bar',
 		return $before;
 		//return false;
 		
+	}		
+	///element wrapper
+	function preview_image($value,$name,$udata,$lang){
+//			$cons  = $udata->faculty_id;
+//			$lang  = $lang->$name;
+$img_name_array = explode(",",$value);
+$before = "";
+			foreach($img_name_array as $key=>$val){
+			$before .= "<img src='downloads/$val' width='100px' border='1' /> ";	
+			}
+
+//		$before = "<b>$value</b>";
+	
+		return $before;
+		//return false;
+		
 	}	
 	
 	/////for custom validation
@@ -4287,9 +4909,11 @@ array(	'foo' => 'bar',
 	}
 		////for field_processor
 		
+	function up_good(){
+		echo "<script>alert('update is working well');</script>";
+	}	
 		
-		
-	///costume data to add to db
+	///custom data to add to db
 //"" => "",
 
 //$print_form = true;
@@ -4301,11 +4925,11 @@ $faculty_id = rand(1000,9000);
 $time = time();
 ///
 
-{///costume sending the data to database
+{///custom sending the data to database
 
 
-$costume_to_db = array("faculty_time_todb" => "$time");
-//$costume_to_db = array("faculty_id" => "$faculty_id", "faculty_time_todb" => "$time");
+$custom_to_db = array("faculty_time_todb" => "$time");
+//$custom_to_db = array("faculty_id" => "$faculty_id", "faculty_time_todb" => "$time");
 
 }
 
@@ -4365,12 +4989,12 @@ $costume_to_db = array("faculty_time_todb" => "$time");
 
 $tablename = "faculty";
 $exception = array("deleted", "faculty_time_todb");
-$sort_array = array(/*'location',*/'faculty_description','faculty_campus','institution_id','faculty_code','faculty_day_added','faculty_year_added');
+$sort_array = array(/*'location',*/'faculty_logo','faculty_description','faculty_campus','institution_id','faculty_code','faculty_day_added','faculty_year_added');
 
 
 /*
 $form = new formgen();
-$form->formx($tablename, $print_form, $exception,$sort_array, $display, $addtional_field,$add_free_field,$field_processor, $costume_to_db, $lang);
+$form->formx($tablename, $print_form, $exception,$sort_array, $display, $addtional_field,$add_free_field,$field_processor, $custom_to_db, $lang);
 $renderer = $form->renderer;
 //form_render($caster);
 $form->form_render($renderer);
@@ -4383,8 +5007,12 @@ echo "<hr />";
 
 class formgen2 extends formgen {}
  $display->form_id = "zzzz";
- $display->separator = "table";
 $form2 = new formgen2();
+
+$form2->separator = $custom_content;
+$form2->tab_separator = $ctab;
+$display->separator = "custom";
+
 $form2->db_type = "mysqli";
 $form2->db_host = "localhost";
 $form2->db_port = "3306";
@@ -4392,7 +5020,7 @@ $form2->db_name = "sms";
 //$form2->db_name = "sqlite-database.db";
 $form2->db_username = "root";
 $form2->db_password = "";
-$form2->formx($tablename, $print_form, $exception,$sort_array, $display, $addtional_field,$add_free_field,$field_processor, $costume_to_db, $lang);
+$form2->formx($tablename, $print_form, $exception,$sort_array, $display, $addtional_field,$add_free_field,$field_processor, $custom_to_db, $lang);
 $renderer2 = $form2->renderer;
 //form_render($caster);
 
@@ -4455,7 +5083,7 @@ function describe_type() { ///field name
 $form3 = new formgen3();
 $form3->db_type = "mysqli";
 $form3->db_name = "sms";
-$form3->formx($tablename, $print_form, $exception,$sort_array, $display, $addtional_field,$add_free_field,$field_processor, $costume_to_db, $lang);
+$form3->formx($tablename, $print_form, $exception,$sort_array, $display, $addtional_field,$add_free_field,$field_processor, $custom_to_db, $lang);
 $renderer3 = $form3->renderer;
 //form_render($caster);
 $form3->form_render($renderer3);
@@ -4517,7 +5145,7 @@ $form3->db_type = "mysqli";
 $form3->db_name = "sms";
 $display->update->where = "faculty_id = 1";
 
-$form3->formx($tablename, $print_form, $exception,$sort_array, $display, $addtional_field,$add_free_field,$field_processor, $costume_to_db, $lang);
+$form3->formx($tablename, $print_form, $exception,$sort_array, $display, $addtional_field,$add_free_field,$field_processor, $custom_to_db, $lang);
 $renderer3 = $form3->renderer;
 //form_render($caster);
 $form3->form_render($renderer3);
@@ -4570,7 +5198,7 @@ public $db_password = "";
  ///post input, pre input post, form pre, form form
  ///Display or not to display entire form 
  /////SET SEPERATOR TYPE hr , br , table, div
- /////check costume_to_db check in array ***** remove if invalid 
+ /////check custom_to_db check in array ***** remove if invalid 
  //////erro massage per input
  ////redisplay form
  
