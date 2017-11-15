@@ -4927,7 +4927,7 @@ array(	'foo' => 'bar',
 																					"four" => "4"
 																				),
 													'to_update' => 'faculty_sel2,2ndpasswprd',
-													'to_update_event' => 'onchange',
+													'to_update_event' => 'onclick',
 													'to_update_button' => '&gt;&gt;'
 												),
 'faculty_sel2' => (object) array ( 	
