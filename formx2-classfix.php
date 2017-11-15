@@ -263,6 +263,7 @@ public $update_success = false;
 public $update_fields = array();
 public $update_fields_where = array();
 public $update_fields_ajax = array();
+public $update_current_field = array();
 ////END RENDER FORM ITEMS	
 public $separator = array();
 
@@ -2149,23 +2150,52 @@ if(isset($_REQUEST['update_submit_button']) || isset($_REQUEST["active_tabnamex"
 			$this_name = $namex;
 			$this_value = $$namex;
 	if(isset($display->fields->$this_name->to_update)){
-	$to_update = $display->fields->$this_name->to_update;	
-		//$this->alert("$to_update");
-		
-		if(isset($display->fields->$to_update->update_values)){
-		//$this->alert("$this_value");
+	$to_update_array = explode(",",$display->fields->$this_name->to_update);	
+	foreach($to_update_array as $to_update_key=>$to_update){	
+//	$to_update = $display->fields->$this_name->to_update;
+
+$additional_found = false;	
+$additional_found_values = array();	
+$additional_found_from = array();	
+	////////	PARSE ADDTIONAL FIELDS
+		foreach($addtional_field as $a_field=>$a_data){
+			foreach($a_data as $a_fieldfname=>$a_sub_data){
+				if(isset($a_sub_data->newfield)){
+					if($a_sub_data->newfield == $to_update){
+						if(isset($a_sub_data->update_values)){
+							//$this->alert("values set");
+							$additional_found = true;	
+							$additional_found_values = $a_sub_data->update_values;
+						} 										
+					}			
+				}				
+			}		
+		}
+	////////	PARSE ADDTIONAL FIELDS		
+		if(isset($display->fields->$to_update->update_values) || $additional_found==true){
+		if($additional_found==true){
+		$update_values = $additional_found_values;	
+		}
+		else{
 		$update_values = $display->fields->$to_update->update_values;
+		}
+		
+		$this->alert("$to_update -- found");			
+		//$this->alert("$this_value");
+		//print_r($update_values);		
 			if(array_key_exists($this_value,$update_values)){
+			
 		//	$this->alert("key exists");
 if (isset($_REQUEST['update_ajax_request'])){			
 $this->update_fields[$to_update] = $update_values[$this_value];	
 $this->update_fields_ajax[$to_update] = $to_update;
-			
+//update_current_field
+$this->update_current_field[$to_update] = $_REQUEST['update_current_field'];			
 }
 else{
 	$this->update_fields[$to_update] = $update_values[$this_value];
-}				
-///co			
+}
+			
 			}
 	
 		} ////end from update_values
@@ -2174,12 +2204,12 @@ else{
 	if(isset($display->fields->$to_update->update_from_dbtable)){
 	//	$this->alert("from table is set");
 	$this->update_fields_where[$to_update] = $this_value;
-		
+
 	}	
 
 
 
-
+	}
 	
 	}
 	
@@ -3643,6 +3673,7 @@ switch ($input_type)  ////////@@@@@@@@    SWITCH FOR FORM INPUT TYPES
 	
 	$ajax_update = "";
 	if(isset($display->fields->$dfield->to_update)){
+	
 	$to_update = $display->fields->$dfield->to_update;
 			if(isset($display->fields->$dfield->to_update_event)){
 				$to_update_event = $display->fields->$dfield->to_update_event;
@@ -3659,17 +3690,18 @@ switch ($input_type)  ////////@@@@@@@@    SWITCH FOR FORM INPUT TYPES
 	
 	$options_array = array();
 	//$this->update_fields_where[$to_update]
-				if(isset($display->fields->$dfieldx->from_dbtable) || isset($this->update_fields_where[$dfieldx]))///checking for selection from db else selection from values
+				if(isset($display->fields->$dfield->from_dbtable) || isset($this->update_fields_where[$dfield]))///checking for selection from db else selection from values
 	{
 			////{{{ COUNTINUE FROM HERE SELECT FROM DATABASE FROM DATABASE  }}}/////////
 			
 									
-			if(isset($this->update_fields_where[$dfieldx])){
-			$selection_dbt =$display->fields->$dfieldx->update_from_dbtable;	
+			if(isset($this->update_fields_where[$dfield])){
+			$selection_dbt =$display->fields->$dfield->update_from_dbtable;
+		
 			}
 			else
 			{
-			$selection_dbt = $display->fields->$dfieldx->from_dbtable;	
+			$selection_dbt = $display->fields->$dfield->from_dbtable;	
 			}	
 			
 
@@ -3677,8 +3709,8 @@ switch ($input_type)  ////////@@@@@@@@    SWITCH FOR FORM INPUT TYPES
 
 			if(isset($selection_dbt->where))
 			{
-				if(isset($this->update_fields_where[$dfieldx])){
-				$selection_dbt->where = str_replace("%v",$this->update_fields_where[$dfieldx],$selection_dbt->where);
+				if(isset($this->update_fields_where[$dfield])){
+				$selection_dbt->where = str_replace("%v",$this->update_fields_where[$dfield],$selection_dbt->where);
 				}	
 				
 				$select_where = "WHERE " . $selection_dbt->where;
@@ -3692,7 +3724,7 @@ switch ($input_type)  ////////@@@@@@@@    SWITCH FOR FORM INPUT TYPES
 //$con = $GLOBALS["con"];
 if(isset($selection_dbt->custom_query)){
 	$sqlxx = $selection_dbt->custom_query;
-	$sqlxx = str_replace("%v",$this->update_fields_where[$dfieldx],$sqlxx);
+	$sqlxx = str_replace("%v",$this->update_fields_where[$dfield],$sqlxx);
 }
 else{
 	$sqlxx = "SELECT * FROM $select_tablename $select_where;";
@@ -3721,8 +3753,8 @@ $options_array[$option_display] = $option_value;
 		
 	}
 else{ /// execution if database selection is not set
-			if(isset($display->fields->$dfieldx->values_for_select)){
-				$options_array =	$display->fields->$dfieldx->values_for_select; ///array of select values	
+			if(isset($display->fields->$dfield->values_for_select)){
+				$options_array =	$display->fields->$dfield->values_for_select; ///array of select values	
 			}
 	}
 	
@@ -3730,9 +3762,9 @@ else{ /// execution if database selection is not set
 	//	print_r($options_array);
 		////Display selection option
 			$optgroup = array();
-			if(isset($display->fields->$dfieldx->optgroup)){
+			if(isset($display->fields->$dfield->optgroup)){
 				
-			$optgroup = $display->fields->$dfieldx->optgroup;
+			$optgroup = $display->fields->$dfield->optgroup;
 			}
 				
 				$ingroup_option = array();
@@ -3753,9 +3785,9 @@ else{ /// execution if database selection is not set
 					$selected = "";
 					if($reprint_value==$optiongroup_value)
 					{$selected = "selected=\"selected\"";}
-					if(isset($display->fields->$dfieldx->selected))
+					if(isset($display->fields->$dfield->selected))
 					{
-						if(in_array($optiongroup_value, $display->fields->$dfieldx->selected))
+						if(in_array($optiongroup_value, $display->fields->$dfield->selected))
 						{$selected = "selected=\"selected\"";}	
 					}
 					
@@ -3767,9 +3799,10 @@ else{ /// execution if database selection is not set
 				
 				}
 
-if(!isset($this->update_fields_where[$dfieldx])){				
+if(!isset($this->update_fields_where[$dfield])){				
 	if(isset($this->update_fields[$dfield])){
 		$options_array = $this->update_fields[$dfield];
+			$this->alert("$dfield". "--xgood");	
 	}	
 }
 
@@ -3779,9 +3812,9 @@ $not_ingroup  = "";
 					$selected = "";
 					if($reprint_value==$value)
 					{$selected = "selected=\"selected\"";}
-					if(isset($display->fields->$dfieldx->selected))
+					if(isset($display->fields->$dfield->selected))
 					{
-						if(in_array($value, $display->fields->$dfieldx->selected))
+						if(in_array($value, $display->fields->$dfield->selected))
 						{$selected = "selected=\"selected\"";}	
 					}
 						
@@ -3795,9 +3828,12 @@ $not_ingroup  = "";
 				$this->input_element["$dfield"] .=	$ingroup_print;
 if(isset($this->update_fields_ajax["$dfield"]))
 {
+	//update_current_field
+	if($this->update_current_field["$dfield"] == $dfield){
 	  $return_ajax	=  "<xx--xx--xx>9" . $not_ingroup . "<xx--xx--xx>9"; /// 9 (nine) for print 9 function in javascript without repitation
 	echo "$return_ajax";
 	die;
+	}
 }	
 				
 
@@ -3808,11 +3844,11 @@ if(isset($this->update_fields_ajax["$dfield"]))
 		$this->input_element["$dfield"] .= "</select>";
 
 /////SETTING UPDATE BUTTON		
-		if(isset($display->fields->$dfieldx->to_update)){
+		if(isset($display->fields->$dfield->to_update)){  ////come set for addtional fields
 		
 		$to_update_button = "&gt;";	
-		if(isset($display->fields->$dfieldx->to_update_button)){
-			$to_update_button = $display->fields->$dfieldx->to_update_button;
+		if(isset($display->fields->$dfield->to_update_button)){
+			$to_update_button = $display->fields->$dfield->to_update_button;
 		}	
 			
 		$this->input_element["$dfield"] .= "<input type='submit' name='update_submit_button'  value='$to_update_button' />";	
@@ -3828,16 +3864,16 @@ if(isset($this->update_fields_ajax["$dfield"]))
 	
 	$options_array = array();
 	
-	if(isset($display->fields->$dfieldx->from_dbtable))///checking for selection from db else selection from values
+	if(isset($display->fields->$dfield->from_dbtable))///checking for selection from db else selection from values
 	{
 ////{{{ COUNTINUE FROM HERE SELECT FROM DATABASE FROM DATABASE  }}}/////////
-$selection_dbt = $display->fields->$dfieldx->from_dbtable;
+$selection_dbt = $display->fields->$dfield->from_dbtable;
 
-$select_tablename = $display->fields->$dfieldx->from_dbtable->tablename;
+$select_tablename = $display->fields->$dfield->from_dbtable->tablename;
 
-if(isset($display->fields->$dfieldx->from_dbtable->where))
+if(isset($display->fields->$dfield->from_dbtable->where))
 {
-	$select_where = "WHERE " . $display->fields->$dfieldx->from_dbtable->where;
+	$select_where = "WHERE " . $display->fields->$dfield->from_dbtable->where;
 } else 
 {
 	$select_where = "";
@@ -3868,7 +3904,7 @@ $options_array[$option_display] = $option_value;
 	
 	
 else{ /// execution if database selection is not set
-	$options_array =	$display->fields->$dfieldx->values_for_select; ///array of select values		
+	$options_array =	$display->fields->$dfield->values_for_select; ///array of select values		
 }
 	//	print_r($options_array);
 		////Display selection option
@@ -3955,9 +3991,9 @@ foreach($array_raw_select as $skey => $sdata)
 		
 			}
 	////End setting for other table		
-							if(isset($display->fields->$dfieldx->selected))
+							if(isset($display->fields->$dfield->selected))
 			{
-				if(in_array($value, $display->fields->$dfieldx->selected))
+				if(in_array($value, $display->fields->$dfield->selected))
 				{
 					$selected = "selected=\"selected\"";
 				}
@@ -3969,9 +4005,9 @@ foreach($array_raw_select as $skey => $sdata)
 				
 				
 			$optgroup = array();
-			if(isset($display->fields->$dfieldx->optgroup)){
+			if(isset($display->fields->$dfield->optgroup)){
 				
-			$optgroup = $display->fields->$dfieldx->optgroup;
+			$optgroup = $display->fields->$dfield->optgroup;
 			}			
 				$ingroup_option = array();
 				$ingroup_print = "";
@@ -4018,21 +4054,21 @@ foreach($array_raw_select as $skey => $sdata)
 
 	
 		$element_separator = "";
-		if(isset($display->fields->$dfieldx->element_separator)){
-		$element_separator = $display->fields->$dfieldx->element_separator;
+		if(isset($display->fields->$dfield->element_separator)){
+		$element_separator = $display->fields->$dfield->element_separator;
 		}
 		
         $options_array =	array(); ///array of select values
 			
-	if(isset($display->fields->$dfieldx->from_dbtable)){
+	if(isset($display->fields->$dfield->from_dbtable)){
 ///////db options
-			$selection_dbt = $display->fields->$dfieldx->from_dbtable;
+			$selection_dbt = $display->fields->$dfield->from_dbtable;
 
-	$select_tablename = $display->fields->$dfieldx->from_dbtable->tablename;
+	$select_tablename = $display->fields->$dfield->from_dbtable->tablename;
 
-	if(isset($display->fields->$dfieldx->from_dbtable->where))
+	if(isset($display->fields->$dfield->from_dbtable->where))
 	{
-		$select_where = "WHERE " . $display->fields->$dfieldx->from_dbtable->where;
+		$select_where = "WHERE " . $display->fields->$dfield->from_dbtable->where;
 	} else 
 	{
 		$select_where = "";
@@ -4063,8 +4099,8 @@ foreach($array_raw_select as $skey => $sdata)
 	}
 			
 		else	{
-	if(isset($display->fields->$dfieldx->values_for_select)){		
-		 $options_array =	$display->fields->$dfieldx->values_for_select;
+	if(isset($display->fields->$dfield->values_for_select)){		
+		 $options_array =	$display->fields->$dfield->values_for_select;
 	}
 		}	 
 		foreach ($options_array as $option_display => $option_value ) 
@@ -4075,9 +4111,9 @@ foreach($array_raw_select as $skey => $sdata)
 				{
 					$selected = "checked=\"checked\"";
 				}
-			if(isset($display->fields->$dfieldx->checked))
+			if(isset($display->fields->$dfield->checked))
 			{
-				if(in_array($option_value, $display->fields->$dfieldx->checked))
+				if(in_array($option_value, $display->fields->$dfield->checked))
 				{
 						$selected = "checked=\"checked\"";
 				}
@@ -4247,20 +4283,20 @@ $this->input_element["$dfield"] .= "$reprint_value";   ///comment out to prevent
 	{
 		$element_separator = "";
 		$options_array = array();
-		if(isset($display->fields->$dfieldx->element_separator)){
-		$element_separator = $display->fields->$dfieldx->element_separator;
+		if(isset($display->fields->$dfield->element_separator)){
+		$element_separator = $display->fields->$dfield->element_separator;
 		}
 	
-	if(isset($display->fields->$dfieldx->from_dbtable))///checking for selection from db else selection from values
+	if(isset($display->fields->$dfield->from_dbtable))///checking for selection from db else selection from values
 	{
 ////{{{ COUNTINUE FROM HERE SELECT FROM DATABASE FROM DATABASE  }}}/////////
-$selection_dbt = $display->fields->$dfieldx->from_dbtable;
+$selection_dbt = $display->fields->$dfield->from_dbtable;
 
-$select_tablename = $display->fields->$dfieldx->from_dbtable->tablename;
+$select_tablename = $display->fields->$dfield->from_dbtable->tablename;
 
-if(isset($display->fields->$dfieldx->from_dbtable->where))
+if(isset($display->fields->$dfield->from_dbtable->where))
 {
-	$select_where = "WHERE " . $display->fields->$dfieldx->from_dbtable->where;
+	$select_where = "WHERE " . $display->fields->$dfield->from_dbtable->where;
 } else 
 {
 	$select_where = "";
@@ -4283,8 +4319,8 @@ $options_array[$option_display] = $option_value;
 		
 	}
 else{ /// execution if database selection is not set
-if((isset($display->fields->$dfieldx->values_for_select))){
-	$options_array =	$display->fields->$dfieldx->values_for_select; ///array of select values	
+if((isset($display->fields->$dfield->values_for_select))){
+	$options_array =	$display->fields->$dfield->values_for_select; ///array of select values	
 }
 
 }	
@@ -4375,9 +4411,9 @@ foreach($array_raw_select as $skey => $sdata)
 			}
 	////End setting for other table	
 	
-							if(isset($display->fields->$dfieldx->checked))
+							if(isset($display->fields->$dfield->checked))
 			{
-				if(in_array($value, $display->fields->$dfieldx->checked))
+				if(in_array($value, $display->fields->$dfield->checked))
 				{
 						$selected = "checked=\"checked\"";
 				}
@@ -4640,7 +4676,7 @@ array(	'foo' => 'bar',
 		'server_error_element_style' => "background:red;",
 		'server_error_separator' => "",
 		'custom_tab' => $ctab,
-		'tabs' => array("PERSONAL"=>'faculty_sel,faculty_sel2,faculty_day_added,faculty_year_added,faculty_campus,faculty_shortname,faculty_id,faculty_note',
+		'tabsX' => array("PERSONAL"=>'faculty_sel,faculty_sel2,faculty_day_added,faculty_year_added,faculty_campus,faculty_shortname,faculty_id,faculty_note',
 						"OFFICE"=>'faculty_text,faculty_files,location,faculty_logo,faculty_fullname,institution_id',
 						"OTHERS"=>'house,free_no_display,joint,cvupload,2ndpasswprd,faculty_code,faculty_month_added'),
 		
@@ -4890,7 +4926,7 @@ array(	'foo' => 'bar',
 																					"three" => "3",
 																					"four" => "4"
 																				),
-													'to_update' => 'faculty_sel2',
+													'to_update' => 'faculty_sel2,2ndpasswprd',
 													'to_update_event' => 'onchange',
 													'to_update_button' => '&gt;&gt;'
 												),
@@ -4924,7 +4960,7 @@ array(	'foo' => 'bar',
 																					'where'=>"institution_id>=%v",//selection to return add double slashes
 																					'option_display'=>'institution_fullname',
 																					'option_value'=>'institution_id',																					
-																					'custom_query'=>'select * from institution where institution_id=%v',																					
+																					'custom_query'=>'select * from institution where institution_id>=%v',																					
 														
 																					) 													
 													
@@ -4967,6 +5003,27 @@ array(	'foo' => 'bar',
 														"February" => "2",
 														"March" => "3"
 													),
+						'update_values' => 	array(	"1" => array(	"x1one" => "11",
+																		"x1two" => "21",
+																		"x1three" => "31",
+																		"x1four" => "41"
+																	),
+														"2" => array(	"x2one" => "12",
+																		"x2two" => "22",
+																		"x2three" => "32",
+																		"x2four" => "42"
+																	),
+														"3" => array(	"x3one" => "13",
+																		"x3two" => "23",
+																		"x3three" => "33",
+																		"x3four" => "43"
+																	),
+														"4" => array(	"x4one" => "14",
+																		"x4two" => "24",
+																		"x4three" => "34",
+																		"x4four" => "44"
+																	)																				
+												),													
 					//	'selected' => array('3')
 													
 							),
@@ -5188,54 +5245,72 @@ $form2->form_render($renderer2);
 ?>
 <script>
 //,stag
-function loadFieldUpdate(sname,svalue,stag)
+function loadFieldUpdate(sname,svalue,stag_data)
 {
-//alert("working ajax");	
-if(svalue != ""){
-var xmlhttp;
-if (window.XMLHttpRequest)
-  {// code for IE7+, Firefox, Chrome, Opera, Safari
-  xmlhttp=new XMLHttpRequest();
-  }
-else
-  {// code for IE6, IE5
-  xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
-  }
-  
+	stag_array = stag_data.split(",");
+//	alert("working ajax");
+	for(xvalueKey in stag_array){
+	
+stag = stag_array[xvalueKey];
+//	alert(stag);
+	
+	if(svalue != ""){
+	var xmlhttp;
+	if (window.XMLHttpRequest)
+	  {// code for IE7+, Firefox, Chrome, Opera, Safari
+	  xmlhttp=new XMLHttpRequest();
+	  }
+	else
+	  {// code for IE6, IE5
+	  xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+	  }
+	  
 
-  
-  
-xmlhttp.onreadystatechange=function()
-  {
-     if (xmlhttp.readyState==1)
-  {
-// document.getElementById("myDiv").innerHTML="Loading.....";
- // alert(7777);
-  } 
-  
-  
-  if (xmlhttp.readyState==4 && xmlhttp.status==200)
-    {
-  deli = 4+5;  
-    response_text_array = xmlhttp.responseText.split("<xx--xx--xx>" + deli);
-//	alert(response_text_array.length);
-	document.getElementById(stag).innerHTML=response_text_array[1];
+	  
+	  
+	xmlhttp.onreadystatechange=function()
+	  {
+		 if (xmlhttp.readyState==1)
+	  {
+	// document.getElementById("myDiv").innerHTML="Loading.....";
+	 // alert(7777);
+	  } 
+	  
+	  
+	  if (xmlhttp.readyState==4 && xmlhttp.status==200)
+		{
+	  deli = 4+5;  
+		response_text_array = xmlhttp.responseText.split("<xx--xx--xx>" + deli);
+	//	alert(response_text_array.length);
 
-    }
-  }
+		document.getElementById(stag).innerHTML=response_text_array[1];
+		document.getElementById('seeresult').value=response_text_array[1];
+		//	sleep(1000);
+//	alert(stag);
+		}
+	  }
 
-//////change this url to same script
-xmlhttp.open("POST","",true);
-xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-req = "update_submit_button=" + sname + "&update_ajax_request=" + sname + "&" + sname + "=" + svalue;
+	//////change this url to same script
+	xmlhttp.open("POST","",false);
+	xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+	req = "update_submit_button=" + sname + "&update_ajax_request=" + sname + "&update_current_field=" + stag + "&" + sname + "=" + svalue;
 
+//alert(stag);
+	xmlhttp.send(req);
 
-xmlhttp.send(req);
+	}
+
+}
 }
 
-}
 </script>
-
+<script>
+	function sleep(milliSeconds){
+		var startTime = new Date().getTime(); // get the current time
+		while (new Date().getTime() < startTime + milliSeconds); // hog cpu
+	}
+</script>
+<input id='seeresult' name='see' />
 <?
 
 
