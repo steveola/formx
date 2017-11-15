@@ -260,6 +260,9 @@ public $pre_print = array("");
 public $post_print = array("");
 public $printer = array();
 public $update_success = false;
+public $update_fields = array();
+public $update_fields_where = array();
+public $update_fields_ajax = array();
 ////END RENDER FORM ITEMS	
 public $separator = array();
 
@@ -2132,6 +2135,57 @@ else
 //			$this->alert("value--" . $this_value);
 			$reprint->$this_name = $this_value;
 	}	
+
+////put code to check for update
+if(isset($_REQUEST['update_submit_button']) || isset($_REQUEST["active_tabnamex"])){
+//	$this->alert("update is set!!!");
+	
+	////update stuffs is here
+	foreach ($postsx as $valuex) 
+	{	
+			$namex = $valuex;	
+			$$valuex = $typex[$namex];
+			$$namex = $typex[$valuex]; 
+			$this_name = $namex;
+			$this_value = $$namex;
+	if(isset($display->fields->$this_name->to_update)){
+	$to_update = $display->fields->$this_name->to_update;	
+		//$this->alert("$to_update");
+		
+		if(isset($display->fields->$to_update->update_values)){
+		//$this->alert("$this_value");
+		$update_values = $display->fields->$to_update->update_values;
+			if(array_key_exists($this_value,$update_values)){
+		//	$this->alert("key exists");
+if (isset($_REQUEST['update_ajax_request'])){			
+$this->update_fields[$to_update] = $update_values[$this_value];	
+$this->update_fields_ajax[$to_update] = $to_update;
+			
+}
+else{
+	$this->update_fields[$to_update] = $update_values[$this_value];
+}				
+///co			
+			}
+	
+		} ////end from update_values
+
+		
+	if(isset($display->fields->$to_update->update_from_dbtable)){
+	//	$this->alert("from table is set");
+	$this->update_fields_where[$to_update] = $this_value;
+		
+	}	
+
+
+
+
+	
+	}
+	
+	}	
+}
+
 	
 	}
 	
@@ -3133,7 +3187,7 @@ else{
 		}
 		else{
 		///code for current tab	
-				if(($request_tab == $tabname_botton) && (isset($_REQUEST["$tabname_botton"."_tab_button"]) || isset($_REQUEST[$display->form_id]))){
+				if(($request_tab == $tabname_botton) && (isset($_REQUEST["$tabname_botton"."_tab_button"]) || isset($_REQUEST[$display->form_id])  || isset($_REQUEST['update_submit_button']))){
 		$tabed_array[] = "$tab_button_start<div onclick=\"$tabscript document.getElementById('active_tabnamex').value='$tabname_botton';return false;\" id=\"tab_button_id_$tabname_botton\" class='active_tab'><input type='submit' name='$tabname_botton"."_tab_button' value='$tabname_botton' /></div>$tab_button_end";				
 		$error_active_tab .= "<script>document.getElementById('tab_button_id_$tabname_botton').className='active_tab';</script>";			
 				}
@@ -3165,7 +3219,7 @@ $tab_count += 1;
 }
 else
 {
-	if(isset($_REQUEST["$tab_value"])){
+	if(isset($_REQUEST["$tab_value"]) || isset($_REQUEST['update_ajax_request'])){
 			$tabed_array[] = "<$tab_body_start_element class='each_tab' id='tab_$tabname' width='100%'>";
 			$tab_layout_current = 	$tabname;	
 	}
@@ -3184,7 +3238,7 @@ else
 	}
 	else{
 		///code for current tab
-		if(($request_tab == $tabname) && (isset($_REQUEST["$tab_value"]) || isset($_REQUEST[$display->form_id]))){
+		if(($request_tab == $tabname) && (isset($_REQUEST["$tab_value"]) || isset($_REQUEST[$display->form_id]) || isset($_REQUEST['update_submit_button']))){
 			$tabed_array[] = "<$tab_body_start_element class='each_tab' id='tab_$tabname' width='100%'>";
 			$tab_layout_current = 	$tabname;
 			$error_active_tab .= "<script>document.getElementById('tab_$tabname').style.display='';</script>";
@@ -3586,21 +3640,48 @@ switch ($input_type)  ////////@@@@@@@@    SWITCH FOR FORM INPUT TYPES
 {
 	case "select": //selection type data
 	{
-
-	$this->input_element["$dfield"] .= "<select name='$dfield' $attr style=\"$server_error_element_style\" class=\"$server_error_element_class\"  id='$id' >";
+	
+	$ajax_update = "";
+	if(isset($display->fields->$dfield->to_update)){
+	$to_update = $display->fields->$dfield->to_update;
+			if(isset($display->fields->$dfield->to_update_event)){
+				$to_update_event = $display->fields->$dfield->to_update_event;
+			}
+			else{
+			$to_update_event = "onchange";	
+			}
+	//onchange="loadFieldUpdate(this.name,this.value,'myDiv')"		
+	$ajax_update = "$to_update_event=\"loadFieldUpdate(this.name,this.value,'$to_update')\"";					
+	}	
+	
+	
+	$this->input_element["$dfield"] .= "<select name='$dfield' $attr style=\"$server_error_element_style\" class=\"$server_error_element_class\"  id='$id' $ajax_update >";
 	
 	$options_array = array();
-	
-				if(isset($display->fields->$dfieldx->from_dbtable))///checking for selection from db else selection from values
+	//$this->update_fields_where[$to_update]
+				if(isset($display->fields->$dfieldx->from_dbtable) || isset($this->update_fields_where[$dfieldx]))///checking for selection from db else selection from values
 	{
 			////{{{ COUNTINUE FROM HERE SELECT FROM DATABASE FROM DATABASE  }}}/////////
-			$selection_dbt = $display->fields->$dfieldx->from_dbtable;
-
-			$select_tablename = $display->fields->$dfieldx->from_dbtable->tablename;
-
-			if(isset($display->fields->$dfieldx->from_dbtable->where))
+			
+									
+			if(isset($this->update_fields_where[$dfieldx])){
+			$selection_dbt =$display->fields->$dfieldx->update_from_dbtable;	
+			}
+			else
 			{
-				$select_where = "WHERE " . $display->fields->$dfieldx->from_dbtable->where;
+			$selection_dbt = $display->fields->$dfieldx->from_dbtable;	
+			}	
+			
+
+			$select_tablename = $selection_dbt->tablename;
+
+			if(isset($selection_dbt->where))
+			{
+				if(isset($this->update_fields_where[$dfieldx])){
+				$selection_dbt->where = str_replace("%v",$this->update_fields_where[$dfieldx],$selection_dbt->where);
+				}	
+				
+				$select_where = "WHERE " . $selection_dbt->where;
 			} else 
 			{
 				$select_where = "";
@@ -3609,10 +3690,15 @@ switch ($input_type)  ////////@@@@@@@@    SWITCH FOR FORM INPUT TYPES
 
 //include("connectdb.php");
 //$con = $GLOBALS["con"];
+if(isset($selection_dbt->custom_query)){
+	$sqlxx = $selection_dbt->custom_query;
+	$sqlxx = str_replace("%v",$this->update_fields_where[$dfieldx],$sqlxx);
+}
+else{
+	$sqlxx = "SELECT * FROM $select_tablename $select_where;";
+}
 
-$sqlxx = "SELECT * FROM $select_tablename $select_where;";
-
-$select_result22 = $this->run_query("SELECT * FROM $select_tablename $select_where");
+$select_result22 = $this->run_query("$sqlxx");
 if($select_result22)
 {
 //alert($sqlxx);
@@ -3630,7 +3716,7 @@ $options_array[$option_display] = $option_value;
 				}
 				else{ 
 				alert('erro occured');   //////check and remove return sql error
-				$this->alert($sqlxx);
+				//$this->alert($sqlxx);
 				}
 		
 	}
@@ -3680,7 +3766,14 @@ else{ /// execution if database selection is not set
 					}
 				
 				}
-				
+
+if(!isset($this->update_fields_where[$dfieldx])){				
+	if(isset($this->update_fields[$dfield])){
+		$options_array = $this->update_fields[$dfield];
+	}	
+}
+
+$not_ingroup  = "";	
 				foreach ($options_array as $option => $value ) { 
 					if(!in_array($value,$ingroup_option)){
 					$selected = "";
@@ -3692,19 +3785,39 @@ else{ /// execution if database selection is not set
 						{$selected = "selected=\"selected\"";}	
 					}
 						
-						$this->input_element["$dfield"] .= "<option value='$value'  $selected>$option</option>";
+						//$this->input_element["$dfield"] .= "<option value='$value'  $selected>$option</option>";
+						$not_ingroup .= "<option value='$value'  $selected>$option</option>";
+						
 					}
 				}
 				
+				$this->input_element["$dfield"] .=	$not_ingroup;
 				$this->input_element["$dfield"] .=	$ingroup_print;
-				
+if(isset($this->update_fields_ajax["$dfield"]))
+{
+	  $return_ajax	=  "<xx--xx--xx>9" . $not_ingroup . "<xx--xx--xx>9"; /// 9 (nine) for print 9 function in javascript without repitation
+	echo "$return_ajax";
+	die;
+}	
 				
 
 				
-//	}
-	
+
+
 
 		$this->input_element["$dfield"] .= "</select>";
+
+/////SETTING UPDATE BUTTON		
+		if(isset($display->fields->$dfieldx->to_update)){
+		
+		$to_update_button = "&gt;";	
+		if(isset($display->fields->$dfieldx->to_update_button)){
+			$to_update_button = $display->fields->$dfieldx->to_update_button;
+		}	
+			
+		$this->input_element["$dfield"] .= "<input type='submit' name='update_submit_button'  value='$to_update_button' />";	
+		}
+/////END SETTING UPDATE BUTTON	
 	
 		////End selection each option
 	} 	///END SELECTION TYPE
@@ -4527,7 +4640,7 @@ array(	'foo' => 'bar',
 		'server_error_element_style' => "background:red;",
 		'server_error_separator' => "",
 		'custom_tab' => $ctab,
-		'tabs' => array("PERSONAL"=>'faculty_day_added,faculty_year_added,faculty_campus,faculty_shortname,faculty_id,faculty_note',
+		'tabs' => array("PERSONAL"=>'faculty_sel,faculty_sel2,faculty_day_added,faculty_year_added,faculty_campus,faculty_shortname,faculty_id,faculty_note',
 						"OFFICE"=>'faculty_text,faculty_files,location,faculty_logo,faculty_fullname,institution_id',
 						"OTHERS"=>'house,free_no_display,joint,cvupload,2ndpasswprd,faculty_code,faculty_month_added'),
 		
@@ -4768,7 +4881,54 @@ array(	'foo' => 'bar',
 																					"3" => "3",
 																					"4" => "4"
 																				),
-												),	
+												),
+'faculty_sel' => (object) array ( 	
+													'type'=> 'select', 
+								
+													'values_for_select' => array(	"one" => "1",
+																					"two" => "2",
+																					"three" => "3",
+																					"four" => "4"
+																				),
+													'to_update' => 'faculty_sel2',
+													'to_update_event' => 'onchange',
+													'to_update_button' => '&gt;&gt;'
+												),
+'faculty_sel2' => (object) array ( 	
+													'type'=> 'select', 
+								
+													'values_for_select' => array("Select"=>""),
+													'update_values' => 	array(	"1" => array(	"1one" => "11",
+																									"1two" => "21",
+																									"1three" => "31",
+																									"1four" => "41"
+																								),
+																					"2" => array(	"2one" => "12",
+																									"2two" => "22",
+																									"2three" => "32",
+																									"2four" => "42"
+																								),
+																					"3" => array(	"3one" => "13",
+																									"3two" => "23",
+																									"3three" => "33",
+																									"3four" => "43"
+																								),
+																					"4" => array(	"4one" => "14",
+																									"4two" => "24",
+																									"4three" => "34",
+																									"4four" => "44"
+																								)																				
+																			),
+													'update_from_dbtable' => (object) array('tablename'=>'institution',//to select from database
+																					//'column'=>'department_id',//fom
+																					'where'=>"institution_id>=%v",//selection to return add double slashes
+																					'option_display'=>'institution_fullname',
+																					'option_value'=>'institution_id',																					
+																					'custom_query'=>'select * from institution where institution_id=%v',																					
+														
+																					) 													
+													
+												),													
 'joint' => (object) array ( 	
 												'type'=> 'textarea', 									
 											//	'type'=> 'customPHP', 
@@ -4989,7 +5149,7 @@ $custom_to_db = array("faculty_time_todb" => "$time");
 
 $tablename = "faculty";
 $exception = array("deleted", "faculty_time_todb");
-$sort_array = array(/*'location',*/'faculty_logo','faculty_description','faculty_campus','institution_id','faculty_code','faculty_day_added','faculty_year_added');
+$sort_array = array(/*'location',*/'faculty_sel','faculty_sel2','faculty_logo','faculty_description','faculty_campus','institution_id','faculty_code','faculty_day_added','faculty_year_added');
 
 
 /*
@@ -5002,7 +5162,7 @@ $form->form_render($renderer);
 
 
 
-echo "<hr />";
+//echo "<hr />";
  //rename_function('run_query', 'new_name');
 
 class formgen2 extends formgen {}
@@ -5023,10 +5183,61 @@ $form2->db_password = "";
 $form2->formx($tablename, $print_form, $exception,$sort_array, $display, $addtional_field,$add_free_field,$field_processor, $custom_to_db, $lang);
 $renderer2 = $form2->renderer;
 //form_render($caster);
-
-
-
 $form2->form_render($renderer2);
+
+?>
+<script>
+//,stag
+function loadFieldUpdate(sname,svalue,stag)
+{
+//alert("working ajax");	
+if(svalue != ""){
+var xmlhttp;
+if (window.XMLHttpRequest)
+  {// code for IE7+, Firefox, Chrome, Opera, Safari
+  xmlhttp=new XMLHttpRequest();
+  }
+else
+  {// code for IE6, IE5
+  xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+  }
+  
+
+  
+  
+xmlhttp.onreadystatechange=function()
+  {
+     if (xmlhttp.readyState==1)
+  {
+// document.getElementById("myDiv").innerHTML="Loading.....";
+ // alert(7777);
+  } 
+  
+  
+  if (xmlhttp.readyState==4 && xmlhttp.status==200)
+    {
+  deli = 4+5;  
+    response_text_array = xmlhttp.responseText.split("<xx--xx--xx>" + deli);
+//	alert(response_text_array.length);
+	document.getElementById(stag).innerHTML=response_text_array[1];
+
+    }
+  }
+
+//////change this url to same script
+xmlhttp.open("POST","",true);
+xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+req = "update_submit_button=" + sname + "&update_ajax_request=" + sname + "&" + sname + "=" + svalue;
+
+
+xmlhttp.send(req);
+}
+
+}
+</script>
+
+<?
+
 
 echo "</body></html>";
 
