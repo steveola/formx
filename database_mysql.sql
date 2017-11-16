@@ -138,6 +138,8 @@ CREATE TABLE `faculty` (
   `faculty_files` varchar(400) NOT NULL,
   `faculty_code` varchar(400) DEFAULT NULL,
   `faculty_note` varchar(400) DEFAULT NULL,
+  `faculty_sel` varchar(400) DEFAULT NULL,
+  `faculty_sel2` varchar(400) DEFAULT NULL,
   `deleted` varchar(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`faculty_id`),
   UNIQUE KEY `faculty_shortname` (`faculty_shortname`),
@@ -145,14 +147,14 @@ CREATE TABLE `faculty` (
   CONSTRAINT `faculty_ibfk_1` FOREIGN KEY (`institution_id`) REFERENCES `institution` (`institution_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-INSERT INTO `faculty` (`faculty_logo`, `faculty_id`, `faculty_fullname`, `faculty_shortname`, `faculty_description`, `faculty_year_added`, `faculty_month_added`, `faculty_day_added`, `institution_id`, `faculty_time_todb`, `faculty_text`, `faculty_campus`, `faculty_files`, `faculty_code`, `faculty_note`, `deleted`) VALUES
-('',	1,	'ajjbjs',	'adasd',	'asdasd',	2,	'2',	2,	2,	'0',	'',	'',	'',	'',	NULL,	'0'),
-('',	4,	'ggaa',	'asf',	'asfa',	3,	'2',	2,	2,	'1477164504',	'',	'',	'',	'',	NULL,	'0'),
-('',	10,	'111',	'222',	'asdnl',	444,	'2',	3,	1,	'78792',	'',	'',	'',	'',	NULL,	'0'),
-('1503506177falculty.jpg',	60,	'#000000',	'372',	'all',	2,	'3',	2,	2,	'1503506177',	'11-12-8432',	'1503506177falcultycampus.JPG',	'1503506177falculty_1.jpg',	NULL,	NULL,	'0'),
-('1503506874falculty.gif',	70,	'#c0c0c0',	'2',	'sdafssa',	3,	'1',	2,	2,	'1503506874',	'11-12-8432',	'',	'1503506874falculty_1.jpg',	NULL,	NULL,	'0'),
-('1502808512falculty.jpg',	1222,	'#000000',	'43',	'lions',	2,	'3',	3,	2,	'1502808512',	'1-3-4',	'1502808512falcultycampus.jpg',	'',	NULL,	NULL,	'0'),
-('',	12334,	'15',	'379',	'0\'\';0\'09\r\n',	3,	'1@2@3',	4,	2,	'1510068190',	'4-87-3920',	'1509815759falcultycampus.jpg',	'1509818485falculty_1.jpg,1509818485falculty_2.jpg',	'',	'try this',	'0');
+INSERT INTO `faculty` (`faculty_logo`, `faculty_id`, `faculty_fullname`, `faculty_shortname`, `faculty_description`, `faculty_year_added`, `faculty_month_added`, `faculty_day_added`, `institution_id`, `faculty_time_todb`, `faculty_text`, `faculty_campus`, `faculty_files`, `faculty_code`, `faculty_note`, `faculty_sel`, `faculty_sel2`, `deleted`) VALUES
+('',	1,	'ajjbjs',	'adasd',	'asdasd',	2,	'2',	2,	2,	'0',	'',	'',	'',	'',	NULL,	NULL,	NULL,	'0'),
+('',	4,	'ggaa',	'asf',	'asfa',	3,	'2',	2,	2,	'1477164504',	'',	'',	'',	'',	NULL,	NULL,	NULL,	'0'),
+('',	10,	'111',	'222',	'asdnl',	444,	'2',	3,	1,	'78792',	'',	'',	'',	'',	NULL,	NULL,	NULL,	'0'),
+('1503506177falculty.jpg',	60,	'#000000',	'372',	'all',	2,	'3',	2,	2,	'1503506177',	'11-12-8432',	'1503506177falcultycampus.JPG',	'1503506177falculty_1.jpg',	NULL,	NULL,	NULL,	NULL,	'0'),
+('1503506874falculty.gif',	70,	'#c0c0c0',	'2',	'sdafssa',	3,	'1',	2,	2,	'1503506874',	'11-12-8432',	'',	'1503506874falculty_1.jpg',	NULL,	NULL,	NULL,	NULL,	'0'),
+('1502808512falculty.jpg',	1222,	'#000000',	'43',	'lions',	2,	'3',	3,	2,	'1502808512',	'1-3-4',	'1502808512falcultycampus.jpg',	'',	NULL,	NULL,	NULL,	NULL,	'0'),
+('',	12334,	'15',	'379',	'0\'\';0\'09\r\n',	3,	'1@3',	8,	2,	'1510845867',	'4-87-3920',	'1509815759falcultycampus.jpg',	'1509818485falculty_1.jpg,1509818485falculty_2.jpg',	'',	'try this',	'1',	'x',	'0');
 
 DROP TABLE IF EXISTS `institution`;
 CREATE TABLE `institution` (
@@ -198,9 +200,8 @@ CREATE TABLE `othertr` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 INSERT INTO `othertr` (`id`, `ffn`, `insid`, `time`) VALUES
-(704,	'12334',	'1',	'1510068190'),
-(705,	'12334',	'2',	'1510068190'),
-(706,	'12334',	'3',	'1510068190');
+(748,	'12334',	'1',	'1510845867'),
+(749,	'12334',	'3',	'1510845867');
 
 DROP TABLE IF EXISTS `othertr2`;
 CREATE TABLE `othertr2` (
@@ -212,8 +213,8 @@ CREATE TABLE `othertr2` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 INSERT INTO `othertr2` (`id`, `ffn`, `insid`, `time`) VALUES
-(14,	'12334',	'2',	'1510068190'),
-(15,	'12334',	'3',	'1510068190');
+(54,	'12334',	'2',	'1510845867'),
+(55,	'12334',	'3',	'1510845867');
 
 DROP TABLE IF EXISTS `othertr3`;
 CREATE TABLE `othertr3` (
@@ -225,7 +226,7 @@ CREATE TABLE `othertr3` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 INSERT INTO `othertr3` (`id`, `ffn`, `insid`, `time`) VALUES
-(162,	'12334',	'7997',	'1510068190');
+(182,	'12334',	'7997',	'1510845867');
 
 DROP TABLE IF EXISTS `othertr4`;
 CREATE TABLE `othertr4` (
@@ -455,4 +456,4 @@ INSERT INTO `test_users` (`ID`, `username`, `email`, `firstname`, `lastname`, `g
 (9,	'634',	'sdfsd@gmail.com',	'dada',	'dfdda',	'F',	'f7177163c833dff4b38fc8d2872f1ec6'),
 (10,	'634',	'sdfsd@gmail.com',	'dada',	'dfdda',	'F',	'f7177163c833dff4b38fc8d2872f1ec6');
 
--- 2017-11-07 23:32:57
+-- 2017-11-16 17:05:03
