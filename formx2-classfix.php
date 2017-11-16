@@ -2180,7 +2180,7 @@ $additional_found_from = array();
 		$update_values = $display->fields->$to_update->update_values;
 		}
 		
-		$this->alert("$to_update -- found");			
+//		$this->alert("$to_update -- found");			
 		//$this->alert("$this_value");
 		//print_r($update_values);		
 			if(array_key_exists($this_value,$update_values)){
@@ -3664,7 +3664,11 @@ $this->field_data["$dfield"] = "";
 		
 $this->input_label["$dfield"] = "<label for=\"$dfield\" accesskey=\"\" class=\"$server_error_label_class\" style=\"$server_error_label_style\">".  $print_lang . "</label> ";//LABEL
 
+////NOTE
+/*
+use $dfield for field name if not accessing $display use $dfieldx
 
+*/
 
 switch ($input_type)  ////////@@@@@@@@    SWITCH FOR FORM INPUT TYPES
 {
@@ -3672,11 +3676,11 @@ switch ($input_type)  ////////@@@@@@@@    SWITCH FOR FORM INPUT TYPES
 	{
 	
 	$ajax_update = "";
-	if(isset($display->fields->$dfield->to_update)){
+	if(isset($display->fields->$dfieldx->to_update)){
 	
-	$to_update = $display->fields->$dfield->to_update;
-			if(isset($display->fields->$dfield->to_update_event)){
-				$to_update_event = $display->fields->$dfield->to_update_event;
+	$to_update = $display->fields->$dfieldx->to_update;
+			if(isset($display->fields->$dfieldx->to_update_event)){
+				$to_update_event = $display->fields->$dfieldx->to_update_event;
 			}
 			else{
 			$to_update_event = "onchange";	
@@ -3690,18 +3694,18 @@ switch ($input_type)  ////////@@@@@@@@    SWITCH FOR FORM INPUT TYPES
 	
 	$options_array = array();
 	//$this->update_fields_where[$to_update]
-				if(isset($display->fields->$dfield->from_dbtable) || isset($this->update_fields_where[$dfield]))///checking for selection from db else selection from values
+				if(isset($display->fields->$dfieldx->from_dbtable) || isset($this->update_fields_where[$dfield]))///checking for selection from db else selection from values
 	{
 			////{{{ COUNTINUE FROM HERE SELECT FROM DATABASE FROM DATABASE  }}}/////////
 			
 									
 			if(isset($this->update_fields_where[$dfield])){
-			$selection_dbt =$display->fields->$dfield->update_from_dbtable;
+			$selection_dbt =$display->fields->$dfieldx->update_from_dbtable;
 		
 			}
 			else
 			{
-			$selection_dbt = $display->fields->$dfield->from_dbtable;	
+			$selection_dbt = $display->fields->$dfieldx->from_dbtable;	
 			}	
 			
 
@@ -3747,14 +3751,14 @@ $options_array[$option_display] = $option_value;
   
 				}
 				else{ 
-				alert('erro occured');   //////check and remove return sql error
+//				alert('erro occured');   //////check and remove return sql error
 				//$this->alert($sqlxx);
 				}
 		
 	}
 else{ /// execution if database selection is not set
-			if(isset($display->fields->$dfield->values_for_select)){
-				$options_array =	$display->fields->$dfield->values_for_select; ///array of select values	
+			if(isset($display->fields->$dfieldx->values_for_select)){
+				$options_array =	$display->fields->$dfieldx->values_for_select; ///array of select values	
 			}
 	}
 	
@@ -3762,9 +3766,9 @@ else{ /// execution if database selection is not set
 	//	print_r($options_array);
 		////Display selection option
 			$optgroup = array();
-			if(isset($display->fields->$dfield->optgroup)){
+			if(isset($display->fields->$dfieldx->optgroup)){
 				
-			$optgroup = $display->fields->$dfield->optgroup;
+			$optgroup = $display->fields->$dfieldx->optgroup;
 			}
 				
 				$ingroup_option = array();
@@ -3785,9 +3789,9 @@ else{ /// execution if database selection is not set
 					$selected = "";
 					if($reprint_value==$optiongroup_value)
 					{$selected = "selected=\"selected\"";}
-					if(isset($display->fields->$dfield->selected))
+					if(isset($display->fields->$dfieldx->selected))
 					{
-						if(in_array($optiongroup_value, $display->fields->$dfield->selected))
+						if(in_array($optiongroup_value, $display->fields->$dfieldx->selected))
 						{$selected = "selected=\"selected\"";}	
 					}
 					
@@ -3802,7 +3806,7 @@ else{ /// execution if database selection is not set
 if(!isset($this->update_fields_where[$dfield])){				
 	if(isset($this->update_fields[$dfield])){
 		$options_array = $this->update_fields[$dfield];
-			$this->alert("$dfield". "--xgood");	
+//			$this->alert("$dfield". "--xgood");	
 	}	
 }
 
@@ -3812,9 +3816,9 @@ $not_ingroup  = "";
 					$selected = "";
 					if($reprint_value==$value)
 					{$selected = "selected=\"selected\"";}
-					if(isset($display->fields->$dfield->selected))
+					if(isset($display->fields->$dfieldx->selected))
 					{
-						if(in_array($value, $display->fields->$dfield->selected))
+						if(in_array($value, $display->fields->$dfieldx->selected))
 						{$selected = "selected=\"selected\"";}	
 					}
 						
@@ -3844,17 +3848,17 @@ if(isset($this->update_fields_ajax["$dfield"]))
 		$this->input_element["$dfield"] .= "</select>";
 
 /////SETTING UPDATE BUTTON		
-		if(isset($display->fields->$dfield->to_update)){  ////come set for addtional fields
-		
+		if(isset($display->fields->$dfieldx->to_update)){  ////come set		fields
+//$this->alert('found');		
 		$to_update_button = "&gt;";	
-		if(isset($display->fields->$dfield->to_update_button)){
-			$to_update_button = $display->fields->$dfield->to_update_button;
+		if(isset($display->fields->$dfieldx->to_update_button)){
+			$to_update_button = $display->fields->$dfieldx->to_update_button;
 		}	
 			
 		$this->input_element["$dfield"] .= "<input type='submit' name='update_submit_button'  value='$to_update_button' />";	
 		}
 /////END SETTING UPDATE BUTTON	
-	
+		
 		////End selection each option
 	} 	///END SELECTION TYPE
         break;
@@ -3864,16 +3868,16 @@ if(isset($this->update_fields_ajax["$dfield"]))
 	
 	$options_array = array();
 	
-	if(isset($display->fields->$dfield->from_dbtable))///checking for selection from db else selection from values
+	if(isset($display->fields->$dfieldx->from_dbtable))///checking for selection from db else selection from values
 	{
 ////{{{ COUNTINUE FROM HERE SELECT FROM DATABASE FROM DATABASE  }}}/////////
-$selection_dbt = $display->fields->$dfield->from_dbtable;
+$selection_dbt = $display->fields->$dfieldx->from_dbtable;
 
-$select_tablename = $display->fields->$dfield->from_dbtable->tablename;
+$select_tablename = $display->fields->$dfieldx->from_dbtable->tablename;
 
-if(isset($display->fields->$dfield->from_dbtable->where))
+if(isset($display->fields->$dfieldx->from_dbtable->where))
 {
-	$select_where = "WHERE " . $display->fields->$dfield->from_dbtable->where;
+	$select_where = "WHERE " . $display->fields->$dfieldx->from_dbtable->where;
 } else 
 {
 	$select_where = "";
@@ -3904,7 +3908,7 @@ $options_array[$option_display] = $option_value;
 	
 	
 else{ /// execution if database selection is not set
-	$options_array =	$display->fields->$dfield->values_for_select; ///array of select values		
+	$options_array =	$display->fields->$dfieldx->values_for_select; ///array of select values		
 }
 	//	print_r($options_array);
 		////Display selection option
@@ -3924,10 +3928,10 @@ else{ /// execution if database selection is not set
 	
 	////setting for other table	
 	else{			
-if (isset($display->fields->$dfield->to_other_tr))
+if (isset($display->fields->$dfieldx->to_other_tr))
 {
 	{//otyher tr values
-	$other_tr_details = $display->fields->$dfield->to_other_tr;
+	$other_tr_details = $display->fields->$dfieldx->to_other_tr;
 	$other_tr_table = $other_tr_details->tablename;
 	$other_tr_this_column = $other_tr_details->this_column;
 	$other_tr_identifier = $other_tr_details->identifier;
@@ -3960,9 +3964,9 @@ $identifier_row = $select_row["$with_select_identifier"];
 	$raw_select =  $updatedata->$dfield;
 	}
 	
-if(isset($display->fields->$dfield->field_separator))
+if(isset($display->fields->$dfieldx->field_separator))
 				{
-					$field_separator = $display->fields->$dfield->field_separator;
+					$field_separator = $display->fields->$dfieldx->field_separator;
 					
 				}
 				else
@@ -3991,9 +3995,9 @@ foreach($array_raw_select as $skey => $sdata)
 		
 			}
 	////End setting for other table		
-							if(isset($display->fields->$dfield->selected))
+							if(isset($display->fields->$dfieldx->selected))
 			{
-				if(in_array($value, $display->fields->$dfield->selected))
+				if(in_array($value, $display->fields->$dfieldx->selected))
 				{
 					$selected = "selected=\"selected\"";
 				}
@@ -4005,9 +4009,9 @@ foreach($array_raw_select as $skey => $sdata)
 				
 				
 			$optgroup = array();
-			if(isset($display->fields->$dfield->optgroup)){
+			if(isset($display->fields->$dfieldx->optgroup)){
 				
-			$optgroup = $display->fields->$dfield->optgroup;
+			$optgroup = $display->fields->$dfieldx->optgroup;
 			}			
 				$ingroup_option = array();
 				$ingroup_print = "";
@@ -4054,21 +4058,21 @@ foreach($array_raw_select as $skey => $sdata)
 
 	
 		$element_separator = "";
-		if(isset($display->fields->$dfield->element_separator)){
-		$element_separator = $display->fields->$dfield->element_separator;
+		if(isset($display->fields->$dfieldx->element_separator)){
+		$element_separator = $display->fields->$dfieldx->element_separator;
 		}
 		
         $options_array =	array(); ///array of select values
 			
-	if(isset($display->fields->$dfield->from_dbtable)){
+	if(isset($display->fields->$dfieldx->from_dbtable)){
 ///////db options
-			$selection_dbt = $display->fields->$dfield->from_dbtable;
+			$selection_dbt = $display->fields->$dfieldx->from_dbtable;
 
-	$select_tablename = $display->fields->$dfield->from_dbtable->tablename;
+	$select_tablename = $display->fields->$dfieldx->from_dbtable->tablename;
 
-	if(isset($display->fields->$dfield->from_dbtable->where))
+	if(isset($display->fields->$dfieldx->from_dbtable->where))
 	{
-		$select_where = "WHERE " . $display->fields->$dfield->from_dbtable->where;
+		$select_where = "WHERE " . $display->fields->$dfieldx->from_dbtable->where;
 	} else 
 	{
 		$select_where = "";
@@ -4099,8 +4103,8 @@ foreach($array_raw_select as $skey => $sdata)
 	}
 			
 		else	{
-	if(isset($display->fields->$dfield->values_for_select)){		
-		 $options_array =	$display->fields->$dfield->values_for_select;
+	if(isset($display->fields->$dfieldx->values_for_select)){		
+		 $options_array =	$display->fields->$dfieldx->values_for_select;
 	}
 		}	 
 		foreach ($options_array as $option_display => $option_value ) 
@@ -4111,9 +4115,9 @@ foreach($array_raw_select as $skey => $sdata)
 				{
 					$selected = "checked=\"checked\"";
 				}
-			if(isset($display->fields->$dfield->checked))
+			if(isset($display->fields->$dfieldx->checked))
 			{
-				if(in_array($option_value, $display->fields->$dfield->checked))
+				if(in_array($option_value, $display->fields->$dfieldx->checked))
 				{
 						$selected = "checked=\"checked\"";
 				}
@@ -4168,9 +4172,9 @@ foreach($array_raw_select as $skey => $sdata)
 
 	//echo "Your favourite HTML CODE";
 	///////////check set content////////////
-	if (isset($display->fields->$dfield->content))
+	if (isset($display->fields->$dfieldx->content))
 	{
-	$htm_content = $display->fields->$dfield->content;
+	$htm_content = $display->fields->$dfieldx->content;
 	}
 	else
 	{
@@ -4188,9 +4192,9 @@ foreach($array_raw_select as $skey => $sdata)
 
 	//echo "Your favourite PHP CODE";
 	///////////check set////////////
-	if (isset($display->fields->$dfield->content))
+	if (isset($display->fields->$dfieldx->content))
 	{
-	$php_content =$display->fields->$dfield->content;
+	$php_content =$display->fields->$dfieldx->content;
 	}
 	else
 	{
@@ -4283,20 +4287,20 @@ $this->input_element["$dfield"] .= "$reprint_value";   ///comment out to prevent
 	{
 		$element_separator = "";
 		$options_array = array();
-		if(isset($display->fields->$dfield->element_separator)){
-		$element_separator = $display->fields->$dfield->element_separator;
+		if(isset($display->fields->$dfieldx->element_separator)){
+		$element_separator = $display->fields->$dfieldx->element_separator;
 		}
 	
-	if(isset($display->fields->$dfield->from_dbtable))///checking for selection from db else selection from values
+	if(isset($display->fields->$dfieldx->from_dbtable))///checking for selection from db else selection from values
 	{
 ////{{{ COUNTINUE FROM HERE SELECT FROM DATABASE FROM DATABASE  }}}/////////
-$selection_dbt = $display->fields->$dfield->from_dbtable;
+$selection_dbt = $display->fields->$dfieldx->from_dbtable;
 
-$select_tablename = $display->fields->$dfield->from_dbtable->tablename;
+$select_tablename = $display->fields->$dfieldx->from_dbtable->tablename;
 
-if(isset($display->fields->$dfield->from_dbtable->where))
+if(isset($display->fields->$dfieldx->from_dbtable->where))
 {
-	$select_where = "WHERE " . $display->fields->$dfield->from_dbtable->where;
+	$select_where = "WHERE " . $display->fields->$dfieldx->from_dbtable->where;
 } else 
 {
 	$select_where = "";
@@ -4319,8 +4323,8 @@ $options_array[$option_display] = $option_value;
 		
 	}
 else{ /// execution if database selection is not set
-if((isset($display->fields->$dfield->values_for_select))){
-	$options_array =	$display->fields->$dfield->values_for_select; ///array of select values	
+if((isset($display->fields->$dfieldx->values_for_select))){
+	$options_array =	$display->fields->$dfieldx->values_for_select; ///array of select values	
 }
 
 }	
@@ -4338,10 +4342,10 @@ if((isset($display->fields->$dfield->values_for_select))){
 				}	
 					////setting for other table	
 	else{			
-if (isset($display->fields->$dfield->to_other_tr))
+if (isset($display->fields->$dfieldx->to_other_tr))
 {
 	{//otyher tr values
-	$other_tr_details = $display->fields->$dfield->to_other_tr;
+	$other_tr_details = $display->fields->$dfieldx->to_other_tr;
 	$other_tr_table = $other_tr_details->tablename;
 	$other_tr_this_column = $other_tr_details->this_column;
 	$other_tr_identifier = $other_tr_details->identifier;
@@ -4379,9 +4383,9 @@ $identifier_row = $select_row["$with_select_identifier"];
 	$raw_select =  $updatedata->$dfield;
 	
 	
-if(isset($display->fields->$dfield->field_separator))
+if(isset($display->fields->$dfieldx->field_separator))
 				{
-					$field_separator = $display->fields->$dfield->field_separator;
+					$field_separator = $display->fields->$dfieldx->field_separator;
 					
 				}
 				else
@@ -4411,9 +4415,9 @@ foreach($array_raw_select as $skey => $sdata)
 			}
 	////End setting for other table	
 	
-							if(isset($display->fields->$dfield->checked))
+							if(isset($display->fields->$dfieldx->checked))
 			{
-				if(in_array($value, $display->fields->$dfield->checked))
+				if(in_array($value, $display->fields->$dfieldx->checked))
 				{
 						$selected = "checked=\"checked\"";
 				}
@@ -4927,12 +4931,15 @@ array(	'foo' => 'bar',
 																					"four" => "4"
 																				),
 													'to_update' => 'faculty_sel2,2ndpasswprd',
-													'to_update_event' => 'onclick',
+													'to_update_event' => 'onchange',
 													'to_update_button' => '&gt;&gt;'
 												),
 'faculty_sel2' => (object) array ( 	
 													'type'=> 'select', 
-								
+											//		'to_update' => 'faculty_sel2,2ndpasswprd',
+													'to_update' => '',
+													'to_update_event' => 'onclick',
+													'to_update_button' => '&gt;&gt;',	
 													'values_for_select' => array("Select"=>""),
 													'update_values' => 	array(	"1" => array(	"1one" => "11",
 																									"1two" => "21",
@@ -5003,6 +5010,10 @@ array(	'foo' => 'bar',
 														"February" => "2",
 														"March" => "3"
 													),
+					//	'to_update' => 'faculty_sel2,2ndpasswprd',
+						'to_update' => '',
+						'to_update_event' => 'onclick',
+						'to_update_button' => '&gt;&gt;',							
 						'update_values' => 	array(	"1" => array(	"x1one" => "11",
 																		"x1two" => "21",
 																		"x1three" => "31",
@@ -5023,7 +5034,7 @@ array(	'foo' => 'bar',
 																		"x4three" => "34",
 																		"x4four" => "44"
 																	)																				
-												),													
+												),												
 					//	'selected' => array('3')
 													
 							),
