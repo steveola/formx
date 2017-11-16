@@ -2157,6 +2157,7 @@ if(isset($_REQUEST['update_submit_button']) || isset($_REQUEST["active_tabnamex"
 $additional_found = false;	
 $additional_found_values = array();	
 $additional_found_from = array();	
+$additional_found_from_where = array();	
 	////////	PARSE ADDTIONAL FIELDS
 		foreach($addtional_field as $a_field=>$a_data){
 			foreach($a_data as $a_fieldfname=>$a_sub_data){
@@ -2166,6 +2167,12 @@ $additional_found_from = array();
 							//$this->alert("values set");
 							$additional_found = true;	
 							$additional_found_values = $a_sub_data->update_values;
+						}
+						if(isset($a_sub_data->update_from_dbtable)){
+							//$this->alert("values set");
+							$additional_found = true;	
+							$additional_found_from = $a_sub_data->update_from_dbtable;
+							$additional_found_from_where = $a_sub_data->update_from_dbtable->where;
 						} 										
 					}			
 				}				
@@ -2201,10 +2208,15 @@ else{
 		} ////end from update_values
 
 		
-	if(isset($display->fields->$to_update->update_from_dbtable)){
+	if(isset($display->fields->$to_update->update_from_dbtable) || $additional_found==true){
 	//	$this->alert("from table is set");
+	if($additional_found==true){
 	$this->update_fields_where[$to_update] = $this_value;
-
+	}
+	else{	
+	$this->update_fields_where[$to_update] = $this_value;
+	}
+	
 	}	
 
 
@@ -5033,8 +5045,16 @@ array(	'foo' => 'bar',
 																		"x4two" => "24",
 																		"x4three" => "34",
 																		"x4four" => "44"
-																	)																				
-												),												
+																	)
+																	
+												),
+						'update_from_dbtable' => (object) array('tablename'=>'institution',//to select from database
+														//'column'=>'department_id',//fom
+														'where'=>"institution_id>=%v",//selection to return add double slashes
+														'option_display'=>'institution_fullname',
+														'option_value'=>'institution_id',																					
+														'custom_query'=>'select * from institution where institution_id>=%v',																												
+														) 												
 					//	'selected' => array('3')
 													
 							),
