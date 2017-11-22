@@ -3839,7 +3839,11 @@ document.getElementById(\"$dfield\").addEventListener(\"keyup\", function (event
 
 document.getElementById(\"$dfield\").addEventListener(\"change\", function (event) {
 		autoCompleteField(this.name,this.value,'$suggestion_box_id','$not_found_message');
-
+	if(this.value==\"\"){
+	int_key_$suggestion_box_id = -1;
+	}
+	int_key_$suggestion_box_id = -1;	
+	
 }, true);
 
 document.getElementById(\"$dfield\").addEventListener(\"dblclick\", function (event) {
@@ -3856,7 +3860,9 @@ if(document.getElementById(\"$suggestion_box_id\").children.length > 0){
 
 if(event.keyCode == 38){
 	if(int_key_$suggestion_box_id >= -1){
+	if(int_key_$suggestion_box_id >	0){	
 	int_key_$suggestion_box_id -= 1;
+	}
 	current_suggestion = document.getElementById(\"$suggestion_box_id\").children[int_key_$suggestion_box_id];
 	current_suggestion_id = document.getElementById(\"$suggestion_box_id\").children[int_key_$suggestion_box_id].id;
 	activeAutoFill_$dfield(current_suggestion,current_suggestion_id);
@@ -3874,7 +3880,7 @@ if(event.keyCode == 40){
 	}	
 }
 
-if(event.keyCode == 13 || event.keyCode == 39){
+if(event.keyCode == 13 || event.keyCode == 39 || event.keyCode == 37){
 	
 	if(int_key_$suggestion_box_id > -1){	
 document.getElementById(\"$dfield\").value = document.getElementById(\"$suggestion_box_id\").children[int_key_$suggestion_box_id].innerHTML;;
@@ -3929,7 +3935,7 @@ autoCompleteField(document.getElementById(\"$dfield\").name,document.getElementB
 window.addEventListener(\"click\", function (event) {
 
 document.getElementById(\"$suggestion_box_id\").innerHTML = \"\";
-
+int_key_$suggestion_box_id = -1;
   if (event.defaultPrevented) {
     return; // Should do nothing if the default action has been cancelled
   }
