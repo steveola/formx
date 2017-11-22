@@ -3787,6 +3787,7 @@ $auto_complete_attr = "";
 			}
 				
 			$auto_complete_button = "<input type='submit' name='update_submit_button' value='$button_text' />";
+			$auto_complete_button = ""; ////overwrite above
 	
 			$auto_complete_display = "<div id='$suggestion_box_id'  onclick=\"this.innerHTML ='';int_key_$suggestion_box_id = -1;\" style='position:absolute;background:red;'></div> $auto_complete_button";
 			/////END SET AUTO COMPLETE FUNCTIONALITY
@@ -3807,7 +3808,7 @@ x[i].style.backgroundColor = '';
 };
 
 
-//document.getElementById(\"$dfield\").value = fill_value_id.innerHTML;
+document.getElementById(\"$dfield\").value = fill_value_id.innerHTML;
 
 int_key_$suggestion_box_id = parseInt(fill_value_id.id);
 
@@ -3833,6 +3834,7 @@ document.getElementById(\"$dfield\").addEventListener(\"keyup\", function (event
 	}
 	else
 	{
+		int_key_$suggestion_box_id = -1;
 		autoCompleteField(this.name,this.value,'$suggestion_box_id','$not_found_message');
 	}	
 }, true);
@@ -3856,13 +3858,16 @@ window.addEventListener(\"keydown\", function (event) {
 
 
 if(document.getElementById(\"$suggestion_box_id\").children.length > 0){
-//alert(int_key_$suggestion_box_id);
+
 
 if(event.keyCode == 38){
 	if(int_key_$suggestion_box_id >= -1){
 	if(int_key_$suggestion_box_id >	0){	
 	int_key_$suggestion_box_id -= 1;
 	}
+	if(int_key_$suggestion_box_id <0){
+	int_key_$suggestion_box_id = document.getElementById(\"$suggestion_box_id\").children.length;	
+	}		
 	current_suggestion = document.getElementById(\"$suggestion_box_id\").children[int_key_$suggestion_box_id];
 	current_suggestion_id = document.getElementById(\"$suggestion_box_id\").children[int_key_$suggestion_box_id].id;
 	activeAutoFill_$dfield(current_suggestion,current_suggestion_id);
@@ -3872,7 +3877,9 @@ if(event.keyCode == 38){
 if(event.keyCode == 40){
 	
 	if(int_key_$suggestion_box_id <= document.getElementById(\"$suggestion_box_id\").children.length - 1){
+	if(int_key_$suggestion_box_id < document.getElementById(\"$suggestion_box_id\").children.length - 1){	
 	int_key_$suggestion_box_id += 1;
+	}
 //alert(int_key_$suggestion_box_id);	
 	current_suggestion = document.getElementById(\"$suggestion_box_id\").children[int_key_$suggestion_box_id];
 	current_suggestion_id = document.getElementById(\"$suggestion_box_id\").children[int_key_$suggestion_box_id].id;
