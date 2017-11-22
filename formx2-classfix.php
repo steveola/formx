@@ -3769,14 +3769,7 @@ $auto_complete_attr = "";
 				if(isset($display->fields->$dfieldx->button_text)){
 					$button_text = $display->fields->$dfieldx->button_text;
 				}
-			
-			if(isset($display->fields->$dfieldx->auto_complete_event)){
-				$auto_complete_event = $display->fields->$dfieldx->auto_complete_event;
-			}
-			else{
-			$auto_complete_event = "onchange";	
-			}
-			
+						
 			if(isset($display->fields->$dfieldx->not_found_message)){
 				$not_found_message = $display->fields->$dfieldx->not_found_message;
 			}
@@ -3792,9 +3785,6 @@ $auto_complete_attr = "";
 			else{
 				$suggestion_box_id = $dfieldx . "_autocomplete";	
 			}
-			
-
-			$auto_complete_attr = 	"$auto_complete_event=\"autoCompleteField(this.name,this.value,'$suggestion_box_id','$not_found_message')\"  onkeyup=\"if(event.keyCode == 40 || event.keyCode == 38){return false;}else{autoCompleteField(this.name,this.value,'$suggestion_box_id','$not_found_message');}\"";
 				
 			$auto_complete_button = "<input type='submit' name='update_submit_button' value='$button_text' />";
 	
@@ -3836,6 +3826,26 @@ $auto_complete_display .= "<script>
 
 int_key_$suggestion_box_id = -1;
 
+document.getElementById(\"$dfield\").addEventListener(\"keyup\", function (event) {
+	if(event.keyCode == 40 || event.keyCode == 38)
+	{
+		return false;
+	}
+	else
+	{
+		autoCompleteField(this.name,this.value,'$suggestion_box_id','$not_found_message');
+	}	
+}, true);
+
+document.getElementById(\"$dfield\").addEventListener(\"change\", function (event) {
+		autoCompleteField(this.name,this.value,'$suggestion_box_id','$not_found_message');
+
+}, true);
+
+document.getElementById(\"$dfield\").addEventListener(\"dblclick\", function (event) {
+		autoCompleteField(this.name,this.value,'$suggestion_box_id','$not_found_message');
+
+}, true);
 
 
 window.addEventListener(\"keydown\", function (event) {
@@ -5454,7 +5464,6 @@ array(	'foo' => 'bar',
 												'type'=> 'text',
 												'attr' => "autocomplete='off'",
 												'auto_complete' => true,
-												'auto_complete_event' => 'onchange',
 												'search_type'=> 'start', /// values = start,within
 												'suggestions' => "car,alarm,trigger,fire,ban,ear,fan",
 												//'suggestion_box_id' => "jhjhkjh",
