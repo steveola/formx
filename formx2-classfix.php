@@ -3789,7 +3789,7 @@ $auto_complete_attr = "";
 			$auto_complete_button = "<input type='submit' name='update_submit_button' value='$button_text' />";
 			$auto_complete_button = ""; ////overwrite above
 	
-			$auto_complete_display = "<div id='$suggestion_box_id'  onclick=\"this.innerHTML ='';int_key_$suggestion_box_id = -1;\" style='position:absolute;background:red;'></div> $auto_complete_button";
+			$auto_complete_display = "<div id='$suggestion_box_id'  onclick=\"this.innerHTML ='';int_key_$suggestion_box_id = -1;\" style='position:absolute;background:white;'></div> $auto_complete_button";
 			/////END SET AUTO COMPLETE FUNCTIONALITY
 		$auto_complete_display .= "
 <script>
@@ -3804,6 +3804,7 @@ var x =document.getElementById(\"$suggestion_box_id\").children;
 var i;
 for (i = 0; i < x.length; i++) {
 x[i].style.backgroundColor = '';
+x[i].style.color = 'black';
 //return true;	
 };
 
@@ -3813,7 +3814,8 @@ document.getElementById(\"$dfield\").value = fill_value_id.innerHTML;
 int_key_$suggestion_box_id = parseInt(fill_value_id.id);
 
 	
-fill_value_id.style.backgroundColor = 'lime';
+fill_value_id.style.backgroundColor = '#67f';
+fill_value_id.style.color = 'white';
 }
 
 function inactiveAutoFill_$dfield(fill_value_id){
