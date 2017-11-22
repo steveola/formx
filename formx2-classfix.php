@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
 <script src="jquery.js"></script>
@@ -2139,7 +2140,7 @@ else
 	}	
 
 ////put code to check for update
-if(isset($_REQUEST['update_submit_button']) || isset($_REQUEST["active_tabnamex"])){
+if(isset($_REQUEST['update_submit_button']) || isset($_REQUEST["active_tabnamex"]) || isset($_REQUEST["auto_complete"])){
 //	$this->alert("update is set!!!");
 	
 	////update stuffs is here
@@ -2231,11 +2232,42 @@ else{
 	
 	}
 	
+	}
+
+	if(isset($_REQUEST["auto_complete"])){
+		foreach ($postsx as $valuex) 
+		{	
+				$namex = $valuex;	
+				$$valuex = $typex[$namex];
+				$$namex = $typex[$valuex]; 
+				$this_name = $namex;
+				$this_value = $$namex;
+		
+		
+		
+		
+		
+		
+		}
+		
+		
+		
+		
+		
+	}
+	else
+	{
+//		$this->alert("auto_complete is not set");
 	}	
 }
 
+
+///put code for auto_complete
+//	if(isset($_REQUEST['update_submit_button']) && isset($_REQUEST["auto_complete"])){
+		
+//	}
 	
-	}
+}
 	
 }
 /////Check Post /////
@@ -3234,8 +3266,8 @@ else{
 			
 		}
 		else{
-		///code for current tab	
-				if(($request_tab == $tabname_botton) && (isset($_REQUEST["$tabname_botton"."_tab_button"]) || isset($_REQUEST[$display->form_id])  || isset($_REQUEST['update_submit_button']))){
+		///code for current tab	//taberror
+				if(($request_tab == $tabname_botton) && (  (isset($_REQUEST["$tabname_botton"."_tab_button"]) || isset($_REQUEST[$display->form_id])  || isset($_REQUEST['update_submit_button'])))){
 		$tabed_array[] = "$tab_button_start<div onclick=\"$tabscript document.getElementById('active_tabnamex').value='$tabname_botton';return false;\" id=\"tab_button_id_$tabname_botton\" class='active_tab'><input type='submit' name='$tabname_botton"."_tab_button' value='$tabname_botton' /></div>$tab_button_end";				
 		$error_active_tab .= "<script>document.getElementById('tab_button_id_$tabname_botton').className='active_tab';</script>";			
 				}
@@ -3688,11 +3720,21 @@ use $dfield for field name if not accessing $display use $dfieldx
 
 */
 
-switch ($input_type)  ////////@@@@@@@@    SWITCH FOR FORM INPUT TYPES
-{
-	case "select": //selection type data
-	{
-	
+/////SETTING UPDATE BUTTON	
+$update_button = "";	
+		if(isset($display->fields->$dfieldx->to_update)){  ////come set		fields
+//$this->alert('found');		
+		$to_update_button = "&gt;";	
+		if(isset($display->fields->$dfieldx->to_update_button)){
+			$to_update_button = $display->fields->$dfieldx->to_update_button;
+		}	
+			
+		$update_button = "<input type='submit' name='update_submit_button'  value='$to_update_button' />";	
+		}
+/////END SETTING UPDATE BUTTON
+
+
+//////SET UPDATE FUNCTIONALITY
 	$ajax_update = "";
 	if(isset($display->fields->$dfieldx->to_update)){
 	
@@ -3703,9 +3745,287 @@ switch ($input_type)  ////////@@@@@@@@    SWITCH FOR FORM INPUT TYPES
 			else{
 			$to_update_event = "onchange";	
 			}
+//not_found_message			
+			if(isset($display->fields->$dfieldx->not_found_message)){
+				$not_found_message = $display->fields->$dfieldx->not_found_message;
+			}
+			else{
+			$not_found_message = "";	
+			}			
 	//onchange="loadFieldUpdate(this.name,this.value,'myDiv')"		
-	$ajax_update = "$to_update_event=\"loadFieldUpdate(this.name,this.value,'$to_update')\"";					
+	$ajax_update = "$to_update_event=\"loadFieldUpdate(this.name,this.value,'$to_update','$not_found_message')\"";					
 	}	
+//////END SET UPDATE FUNCTIONALITY
+
+//////SET AUTO COMPLETE FUNCTIONALITY
+$auto_complete_display = "";
+$auto_complete_button = "";
+$auto_complete_attr = "";
+
+
+	if(isset($display->fields->$dfieldx->auto_complete)){
+		if(($display->fields->$dfieldx->auto_complete) == true){
+			$button_text = "...";
+				if(isset($display->fields->$dfieldx->button_text)){
+					$button_text = $display->fields->$dfieldx->button_text;
+				}
+			
+			if(isset($display->fields->$dfieldx->auto_complete_event)){
+				$auto_complete_event = $display->fields->$dfieldx->auto_complete_event;
+			}
+			else{
+			$auto_complete_event = "onchange";	
+			}
+			
+			if(isset($display->fields->$dfieldx->not_found_message)){
+				$not_found_message = $display->fields->$dfieldx->not_found_message;
+			}
+			else{
+			$not_found_message = "";	
+			}
+
+			
+			
+			if(isset($display->fields->$dfieldx->suggestion_box_id)){
+				$suggestion_box_id = $display->fields->$dfieldx->suggestion_box_id;
+			}
+			else{
+				$suggestion_box_id = $dfieldx . "_autocomplete";	
+			}
+			
+
+			$auto_complete_attr = 	"$auto_complete_event=\"autoCompleteField(this.name,this.value,'$suggestion_box_id','$not_found_message')\"  onkeyup=\"if(event.keyCode == 40 || event.keyCode == 38){return false;}else{autoCompleteField(this.name,this.value,'$suggestion_box_id','$not_found_message');}\"";
+				
+			$auto_complete_button = "<input type='submit' name='update_submit_button' value='$button_text' />";
+	
+			$auto_complete_display = "<div id='$suggestion_box_id'  onclick=\"this.innerHTML ='';int_key_$suggestion_box_id = -1;\" style='position:absolute;background:red;'></div> $auto_complete_button";
+			/////END SET AUTO COMPLETE FUNCTIONALITY
+		$auto_complete_display .= "
+<script>
+//alert('found');
+function auto_fill_$dfield(fill_value){
+document.getElementById(\"$dfield\").value = fill_value;	
+}
+
+function activeAutoFill_$dfield(fill_value_id){
+	
+var x =document.getElementById(\"$suggestion_box_id\").children;
+var i;
+for (i = 0; i < x.length; i++) {
+x[i].style.backgroundColor = '';
+//return true;	
+};
+
+
+//document.getElementById(\"$dfield\").value = fill_value_id.innerHTML;
+
+int_key_$suggestion_box_id = parseInt(fill_value_id.id);
+
+	
+fill_value_id.style.backgroundColor = 'lime';
+}
+
+function inactiveAutoFill_$dfield(fill_value_id){
+//fill_value_id.style.backgroundColor = '';	
+}
+
+</script>
+";
+
+$auto_complete_display .= "<script>
+
+int_key_$suggestion_box_id = -1;
+
+
+
+window.addEventListener(\"keydown\", function (event) {
+
+
+if(document.getElementById(\"$suggestion_box_id\").children.length > 0){
+//alert(int_key_$suggestion_box_id);
+
+if(event.keyCode == 38){
+	if(int_key_$suggestion_box_id >= -1){
+	int_key_$suggestion_box_id -= 1;
+	current_suggestion = document.getElementById(\"$suggestion_box_id\").children[int_key_$suggestion_box_id];
+	current_suggestion_id = document.getElementById(\"$suggestion_box_id\").children[int_key_$suggestion_box_id].id;
+	activeAutoFill_$dfield(current_suggestion,current_suggestion_id);
+	}	
+}
+
+if(event.keyCode == 40){
+	
+	if(int_key_$suggestion_box_id <= document.getElementById(\"$suggestion_box_id\").children.length - 1){
+	int_key_$suggestion_box_id += 1;
+//alert(int_key_$suggestion_box_id);	
+	current_suggestion = document.getElementById(\"$suggestion_box_id\").children[int_key_$suggestion_box_id];
+	current_suggestion_id = document.getElementById(\"$suggestion_box_id\").children[int_key_$suggestion_box_id].id;
+	activeAutoFill_$dfield(current_suggestion,current_suggestion_id);
+	}	
+}
+
+if(event.keyCode == 13 || event.keyCode == 39){
+	
+	if(int_key_$suggestion_box_id > -1){	
+document.getElementById(\"$dfield\").value = document.getElementById(\"$suggestion_box_id\").children[int_key_$suggestion_box_id].innerHTML;;
+document.getElementById(\"$suggestion_box_id\").innerHTML = \"\";
+int_key_$suggestion_box_id = -1;
+	}
+
+	if(event.keyCode == 39){
+		if(int_key_$suggestion_box_id > -1){	
+			document.getElementById(\"$dfield\").value = document.getElementById(\"$suggestion_box_id\").children[int_key_$suggestion_box_id].innerHTML;;
+			document.getElementById(\"$suggestion_box_id\").innerHTML = \"\";
+			int_key_$suggestion_box_id = -1;
+			var fieldelement = document.getElementById(\"$dfield\");	
+			autoCompleteField(fieldelement.name,fieldelement.value,'$suggestion_box_id','$not_found_message');	
+		}	
+	}	
+
+	
+
+}
+
+
+	
+}
+
+else{
+	
+if(event.keyCode == 40){	
+autoCompleteField(document.getElementById(\"$dfield\").name,document.getElementById(\"$dfield\").value,'$suggestion_box_id','$not_found_message');	
+}
+	
+}
+  if (event.defaultPrevented) {
+    return; // Should do nothing if the default action has been cancelled
+  }
+
+  var handled = false;
+  if (event.key !== undefined) {
+    // Handle the event with KeyboardEvent.key and set handled true.
+  } else if (event.keyIdentifier !== undefined) {
+    // Handle the event with KeyboardEvent.keyIdentifier and set handled true.
+  } else if (event.keyCode !== undefined) {
+    // Handle the event with KeyboardEvent.keyCode and set handled true.
+  }
+
+  if (handled) {
+    // Suppress \"double action\" if event handled
+    event.preventDefault();
+  }
+}, true);
+
+window.addEventListener(\"click\", function (event) {
+
+document.getElementById(\"$suggestion_box_id\").innerHTML = \"\";
+
+  if (event.defaultPrevented) {
+    return; // Should do nothing if the default action has been cancelled
+  }
+
+  var handled = false;
+  if (event.key !== undefined) {
+    // Handle the event with KeyboardEvent.key and set handled true.
+  } else if (event.keyIdentifier !== undefined) {
+    // Handle the event with KeyboardEvent.keyIdentifier and set handled true.
+  } else if (event.keyCode !== undefined) {
+    // Handle the event with KeyboardEvent.keyCode and set handled true.
+  }
+
+  if (handled) {
+    // Suppress \"double action\" if event handled
+    event.preventDefault();
+  }
+}, true);
+</script>";		
+		
+		}
+	}
+	
+$auto_complete_response = "";
+$suggestions = "";
+//	req = "auto_complete_button=" + sname + "&auto_complete_request=" + sname + "&auto_complete_value=" + svalue;
+
+if(isset($_REQUEST['auto_complete_request'])){
+	if($_REQUEST['auto_complete_request'] == "$dfield"){
+$auto_complete_value = $_REQUEST['auto_complete_value'];
+
+if(isset($display->fields->$dfieldx->suggestions)){
+$suggestions .= $display->fields->$dfieldx->suggestions;
+}
+
+if(isset($display->fields->$dfieldx->db_suggestion)){
+$tablename = "";
+$value_column = "";	
+	if(isset($display->fields->$dfieldx->db_suggestion['tablename'])){
+		$tablename = $display->fields->$dfieldx->db_suggestion['tablename'];
+	}
+	if(isset($display->fields->$dfieldx->db_suggestion['value_column'])){
+		$value_column = $display->fields->$dfieldx->db_suggestion['value_column'];
+	}
+
+	$suggestion_sql = "SELECT $value_column FROM $tablename where $value_column like '%$auto_complete_value%';";
+$suggest_list = ",";
+$suggestion_query = $this->run_query("$suggestion_sql");
+	if($suggestion_query)
+	{		
+		while($suggestion_row = $this->fetch_assoc($suggestion_query))
+		  {
+	$suggest_list .= $suggestion_row[$value_column] . ",";	
+		  }	
+	}
+	
+
+$suggest_list = substr($suggest_list, 0, -1);	
+
+
+$suggestions .= $suggest_list;	
+}
+
+$suggestion_array = explode(",",$suggestions);
+
+$matched_suggestion = array();
+
+$sug_id = -1;
+
+foreach($suggestion_array as $suggestion_key => $suggestion){
+
+$match_val = strtolower($auto_complete_value);
+$sug_val = strtolower($suggestion);
+
+if(preg_match("/^$match_val/",$sug_val)){
+
+$sug_id += 1;	
+$matched_suggestion[] = "<div 
+onclick=\"auto_fill_$dfield(this.innerHTML);\" 
+onmouseenter=\"activeAutoFill_$dfield(this,this.id);\" 
+onmouseout=\"inactiveAutoFill_$dfield(this);\" 
+id=\"$sug_id\" 
+>$suggestion</div>";
+
+}
+	
+}
+
+$print_suggestion = implode("",$matched_suggestion);
+	
+$auto_complete_response = "<auto_complete-response>6 $print_suggestion<auto_complete-response>6";
+
+echo "$auto_complete_response";	
+echo die();	
+	
+	}
+	
+}
+
+
+	
+switch ($input_type)  ////////@@@@@@@@    SWITCH FOR FORM INPUT TYPES
+{
+	case "select": //selection type data
+	{
+	
 	
 	
 	$this->input_element["$dfield"] .= "<select name='$dfield' $attr style=\"$server_error_element_style\" class=\"$server_error_element_class\"  id='$id' $ajax_update >";
@@ -3864,18 +4184,9 @@ if(isset($this->update_fields_ajax["$dfield"]))
 
 
 		$this->input_element["$dfield"] .= "</select>";
+		
+		$this->input_element["$dfield"] .= $update_button;
 
-/////SETTING UPDATE BUTTON		
-		if(isset($display->fields->$dfieldx->to_update)){  ////come set		fields
-//$this->alert('found');		
-		$to_update_button = "&gt;";	
-		if(isset($display->fields->$dfieldx->to_update_button)){
-			$to_update_button = $display->fields->$dfieldx->to_update_button;
-		}	
-			
-		$this->input_element["$dfield"] .= "<input type='submit' name='update_submit_button'  value='$to_update_button' />";	
-		}
-/////END SETTING UPDATE BUTTON	
 		
 		////End selection each option
 	} 	///END SELECTION TYPE
@@ -4135,19 +4446,6 @@ if(isset($this->update_fields_ajax["$dfield"]))
     case "radio":
 	{ 
 	
-	$ajax_update = "";
-	if(isset($display->fields->$dfieldx->to_update)){
-	
-	$to_update = $display->fields->$dfieldx->to_update;
-			if(isset($display->fields->$dfieldx->to_update_event)){
-				$to_update_event = $display->fields->$dfieldx->to_update_event;
-			}
-			else{
-			$to_update_event = "onchange";	
-			}
-	//onchange="loadFieldUpdate(this.name,this.value,'myDiv')"		
-	$ajax_update = "$to_update_event=\"loadFieldUpdate(this.name,this.value,'$to_update')\"";					
-	}	
 		$element_separator = "";
 		if(isset($display->fields->$dfieldx->element_separator)){
 		$element_separator = $display->fields->$dfieldx->element_separator;
@@ -4261,17 +4559,7 @@ if(isset($this->update_fields_ajax["$dfield"]))
 }
 
 
-/////SETTING UPDATE BUTTON		
-		if(isset($display->fields->$dfieldx->to_update)){  ////come set		fields
-//$this->alert('found');		
-		$to_update_button = "&gt;";	
-		if(isset($display->fields->$dfieldx->to_update_button)){
-			$to_update_button = $display->fields->$dfieldx->to_update_button;
-		}	
-			
-		$this->input_element["$dfield"] .= "<input type='submit' name='update_submit_button'  value='$to_update_button' />";	
-		}
-/////END SETTING UPDATE BUTTON	
+		$this->input_element["$dfield"] .= $update_button;
 	
 	}
         break;
@@ -4288,7 +4576,9 @@ if(isset($this->update_fields_ajax["$dfield"]))
 	{
 	
 	$reprint_value = htmlspecialchars($reprint_value);			
-		$this->input_element["$dfield"] .= "<input type='text' name='$dfield' $attr  style=\"$server_error_element_style\" class=\"$server_error_element_class\"   id='$id' value=\"$reprint_value\" />";
+		$this->input_element["$dfield"] .= "<input type='text' name='$dfield' $ajax_update $auto_complete_attr $attr  style=\"$server_error_element_style\" class=\"$server_error_element_class\"   id='$id' value=\"$reprint_value\" />";
+		$this->input_element["$dfield"] .= $auto_complete_display;		
+		$this->input_element["$dfield"] .= $update_button;
 		
 	}
         break;
@@ -4297,8 +4587,9 @@ if(isset($this->update_fields_ajax["$dfield"]))
 	{
 
 	
-		$this->input_element["$dfield"] .= "<input type='number' name='$dfield' $attr  style=\"$server_error_element_style\" class=\"$server_error_element_class\"   id='$id' value=\"$reprint_value\" />";
-		
+		$this->input_element["$dfield"] .= "<input type='number' name='$dfield' $ajax_update $attr  style=\"$server_error_element_style\" class=\"$server_error_element_class\"   id='$id' value=\"$reprint_value\" />";
+		$this->input_element["$dfield"] .= $auto_complete_display;		
+		$this->input_element["$dfield"] .= $update_button;		
 
 	}
         break;	
@@ -4307,8 +4598,9 @@ if(isset($this->update_fields_ajax["$dfield"]))
 	{
 		
 	$reprint_value = htmlspecialchars($reprint_value);		
-	$this->input_element["$dfield"] .= "	<textarea type='text'  id='$id' $attr  style=\"$server_error_element_style\" class=\"$server_error_element_class\"   name='$dfield'>$reprint_value</textarea>";
-
+	$this->input_element["$dfield"] .= "	<textarea type='text'  id='$id' $ajax_update $attr  style=\"$server_error_element_style\" class=\"$server_error_element_class\"   name='$dfield'>$reprint_value</textarea>";
+	$this->input_element["$dfield"] .= $auto_complete_display;		
+	$this->input_element["$dfield"] .= $update_button;
 	}
         break;
 	case "customHTML":  	////// Replacing with customized html content 
@@ -4357,8 +4649,9 @@ if(isset($this->update_fields_ajax["$dfield"]))
 	{	
 
 		
-		$this->input_element["$dfield"] .= "<input type='color'  name='$dfield' $attr  style=\"$server_error_element_style\" class=\"$server_error_element_class\"   id='$id' value='$reprint_value' />";
-
+		$this->input_element["$dfield"] .= "<input type='color'  name='$dfield' $ajax_update $attr  style=\"$server_error_element_style\" class=\"$server_error_element_class\"   id='$id' value='$reprint_value' />";
+		$this->input_element["$dfield"] .= $auto_complete_display;		
+		$this->input_element["$dfield"] .= $update_button;
 
 	}
         break;		
@@ -4366,8 +4659,9 @@ if(isset($this->update_fields_ajax["$dfield"]))
 	{
 	
 
-	$this->input_element["$dfield"] .= "<input type='range' name='$dfield' $attr  style=\"$server_error_element_style\" class=\"$server_error_element_class\"   id='$id' value='$reprint_value' />";
-	
+	$this->input_element["$dfield"] .= "<input type='range' name='$dfield'  $ajax_update $attr  style=\"$server_error_element_style\" class=\"$server_error_element_class\"   id='$id' value='$reprint_value' />";
+	$this->input_element["$dfield"] .= $auto_complete_display;		
+	$this->input_element["$dfield"] .= $update_button;
 
 	}
         break;
@@ -4809,7 +5103,7 @@ $time = time();
 {///add field under dev $add_field
 }
 $add_free_field  = array( //must add proccessors   ////when $add_free_field is declared, parameter 2 must be same as that set in $display->fields->type
-					array("house","number"),
+					array("house","customHTML"),
 					array("location","color"),  /////must still be set in display to choose type
 					array("place","select"),
 					array("joint","textarea"),
@@ -4863,13 +5157,13 @@ array(	'foo' => 'bar',
 		'server_error_element_style' => "background:red;",
 		'server_error_separator' => "",
 		'custom_tab' => $ctab,
-		'tabsX' => array("PERSONAL"=>'faculty_sel,faculty_sel2,faculty_day_added,faculty_year_added,faculty_campus,faculty_shortname,faculty_id,faculty_note',
+		'tabs' => array("PERSONAL"=>'faculty_auto,faculty_sel,faculty_sel2,faculty_day_added,faculty_year_added,faculty_campus,faculty_shortname,faculty_id,faculty_note',
 						"OFFICE"=>'faculty_text,faculty_files,location,faculty_logo,faculty_fullname,institution_id',
 						"OTHERS"=>'house,free_no_display,joint,cvupload,2ndpasswprd,faculty_code,faculty_month_added'),
 		
 		'update' => $update, /////UPDATE
 		'submit_message' => "<i>Read instructions clearfully</i>",
-		'form_attr' => "onsubmit='\$this->alert(57689'",  ////// What happens on submit of form
+		'form_attr' => "",  ////// What happens on submit of form
 		'form_method' => "POST",  ////// method //required /// set as defalut property
 		'form_id' => "formxxx",  ////// What happens on submit of form
 		'form_action' => "",  ////// What happens on submit of form
@@ -5085,9 +5379,9 @@ array(	'foo' => 'bar',
 													),	
 
 'house' => (object) array ( 	
-												'type'=> 'number', 									
-											//	'type'=> 'customPHP', 
-												'content'=> " echo \" <h1>\$print_lang YEYOOO PHP</h1>\";",  ///use "" for string   data field: $dfield or $print_lang
+											//	'type'=> 'number', 									
+												'type'=> 'customHTML', 
+												'content'=> "HELLO",  ///use "" for string   data field: $dfield or $print_lang
 												//'ValidateAsDate' => 1,	
 												),	
 'location' => (object) array ( 	
@@ -5106,7 +5400,7 @@ array(	'foo' => 'bar',
 																				),
 												),
 'faculty_sel' => (object) array ( 	
-													'type'=> 'radio', 
+													'type'=> 'select', 
 								
 													'values_for_select' => array(	"one" => "1",
 																					"two" => "2",
@@ -5119,12 +5413,12 @@ array(	'foo' => 'bar',
 												),
 'faculty_sel2' => (object) array ( 	
 												//	'type'=> 'multipleselect', 
-													'type'=> 'checkbox', 
+													'type'=> 'radio', 
 											//		'to_update' => 'faculty_sel2,2ndpasswprd',
 													'to_update' => '',
 													'to_update_event' => 'onclick',
 													'to_update_button' => '&gt;&gt;',	
-													'values_for_select' => array("Select"=>""),
+													'values_for_select' => array("Select"=>"none"),
 													'update_values' => 	array(	"1" => array(	"1one" => "11",
 																									"1two" => "21",
 																									"1three" => "31",
@@ -5156,12 +5450,32 @@ array(	'foo' => 'bar',
 																					) 													
 													
 												),													
+'faculty_auto' => (object) array ( 	
+												'type'=> 'text',
+												'attr' => "autocomplete='off'",
+												'auto_complete' => true,
+												'auto_complete_event' => 'onchange',
+												'search_type'=> 'start', /// values = start,within
+												'suggestions' => "car,alarm,trigger,fire,ban,ear,fan",
+												//'suggestion_box_id' => "jhjhkjh",
+												'button_text' => "..>..",
+												'db_suggestion' => array(
+																	'tablename'=>'institution',
+																	'value_column'=>'institution_fullname',
+																	),
+/*												'to_update' => 'faculty_sel2,2ndpasswprd',
+												'to_update_event' => 'onkeyup',
+												'to_update_button' => '&gt;&gt;',
+												'not_found_message' => 'No records found'				
+*/												
+												),
 'joint' => (object) array ( 	
 												'type'=> 'textarea', 									
 											//	'type'=> 'customPHP', 
 												'content'=> " echo \" <h1>\$print_lang YEYOOO PHP</h1>\";",  ///use "" for string   data field: $dfield or $print_lang
 												'set_mod2' => "modify"	
-												),													
+												),
+													
 'faculty_day_added' => (object) array ( 	'type'=> 'select',
 												//'code'=> '' ///Code to be executed could unset other objects
 													'values_for_select' => array(	"SELECT" => "",
@@ -5409,7 +5723,7 @@ $custom_to_db = array("faculty_time_todb" => "$time");
 
 $tablename = "faculty";
 $exception = array("deleted", "faculty_time_todb");
-$sort_array = array(/*'location',*/'faculty_sel','faculty_sel2','faculty_logo','faculty_description','faculty_campus','institution_id','faculty_code','faculty_day_added','faculty_year_added');
+$sort_array = array(/*'location',*/'faculty_auto','faculty_sel','faculty_sel2','faculty_logo','faculty_description','faculty_campus','institution_id','faculty_code','faculty_day_added','faculty_year_added');
 
 
 /*
@@ -5448,7 +5762,84 @@ $form2->form_render($renderer2);
 ?>
 <script>
 //,stag
-function loadFieldUpdate(sname,svalue,stag_data)
+function loadFieldUpdate(sname,svalue,stag_data,not_found_message)
+{
+
+	stag_array = stag_data.split(",");
+//	alert("working ajax");
+
+	for(xvalueKey in stag_array){
+
+stag = stag_array[xvalueKey];
+//	alert(stag);
+	
+	if(svalue != ""){
+	var xmlhttp;
+	if (window.XMLHttpRequest)
+	  {// code for IE7+, Firefox, Chrome, Opera, Safari
+	  xmlhttp=new XMLHttpRequest();
+
+	  }
+	else
+	  {// code for IE6, IE5
+	  xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+
+	  }
+	  
+
+	  
+	  
+	xmlhttp.onreadystatechange=function(){
+		  	 	  	
+		 if (xmlhttp.readyState==1)
+	  {
+	// document.getElementById("myDiv").innerHTML="Loading.....";
+	 // alert(7777);
+
+	  } 
+	  
+
+	  if (xmlhttp.readyState==4 && xmlhttp.status==200)
+		{
+	  deli = 4+5;  
+		response_text_array = xmlhttp.responseText.split("<xx--xx--xx>" + deli);
+	//	alert(response_text_array.length);
+		if(response_text_array[1] == undefined){
+		document.getElementById(stag).innerHTML = not_found_message;	
+		}
+		else
+		{
+		document.getElementById(stag).innerHTML=response_text_array[1];
+		}
+		
+		document.getElementById('seeresult').value=response_text_array[1];
+		
+		//	sleep(1000);
+//	alert(stag);
+		}
+	  }
+url = window.location.href;
+	//change this url to same script
+xmlhttp.open("POST",url,false);
+xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded;charset=UTF-8");
+
+	req = "update_submit_button=" + sname + "&update_ajax_request=" + sname + "&update_current_field=" + stag + "&" + sname + "=" + svalue;
+
+//alert(stag);
+	xmlhttp.setRequestHeader("Content-length", req.length);
+	xmlhttp.setRequestHeader("Connection", "close");
+	xmlhttp.send(req);
+
+	}
+
+}
+}
+
+</script>
+
+<script>
+//,stag
+function autoCompleteField(sname,svalue,stag_data,not_found_message)
 {
 	stag_array = stag_data.split(",");
 //	alert("working ajax");
@@ -5457,7 +5848,7 @@ function loadFieldUpdate(sname,svalue,stag_data)
 stag = stag_array[xvalueKey];
 //	alert(stag);
 	
-	if(svalue != ""){
+	if((svalue != undefined) || (svalue != null)){
 	var xmlhttp;
 	if (window.XMLHttpRequest)
 	  {// code for IE7+, Firefox, Chrome, Opera, Safari
@@ -5482,23 +5873,34 @@ stag = stag_array[xvalueKey];
 	  
 	  if (xmlhttp.readyState==4 && xmlhttp.status==200)
 		{
-	  deli = 4+5;  
-		response_text_array = xmlhttp.responseText.split("<xx--xx--xx>" + deli);
+	  deli = 4+2; 
+//<auto_complete-response>6	  
+		response_text_array = xmlhttp.responseText.split("<auto_complete-response>" + deli);
 	//	alert(response_text_array.length);
-
+		if(response_text_array[1] == undefined){
+		document.getElementById(stag).innerHTML = not_found_message;	
+		}
+		else
+		{
 		document.getElementById(stag).innerHTML=response_text_array[1];
+		}
+		
 		document.getElementById('seeresult').value=response_text_array[1];
+		
 		//	sleep(1000);
 //	alert(stag);
 		}
 	  }
 
-	//////change this url to same script
-	xmlhttp.open("POST","",false);
-	xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-	req = "update_submit_button=" + sname + "&update_ajax_request=" + sname + "&update_current_field=" + stag + "&" + sname + "=" + svalue;
+	url = window.location.href;
+	//change this url to same script
+	xmlhttp.open("POST",url,true);
+	xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded;charset=UTF-8");
+	req = "auto_complete_button=" + sname + "&auto_complete_request=" + sname + "&auto_complete_value=" + svalue;
 
 //alert(stag);
+	xmlhttp.setRequestHeader("Content-length", req.length);
+	xmlhttp.setRequestHeader("Connection", "close");
 	xmlhttp.send(req);
 
 	}
