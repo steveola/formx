@@ -4011,7 +4011,7 @@ $matched_suggestion[] = "<div
 onclick=\"auto_fill_$dfield(this.innerHTML);\" 
 onmouseenter=\"activeAutoFill_$dfield(this,this.id);\" 
 onmouseout=\"inactiveAutoFill_$dfield(this);\" 
-id=\"$sug_id\" 
+id=\"$sug_id\" style='padding-left:3px;';
 >$suggestion</div>";
 
 }
