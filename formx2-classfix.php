@@ -536,6 +536,21 @@ if ($method != "blank"){
 				$arr[$name] = $value;
 			$identifiers->$name = $value;					
 				}
+
+//////GET FILE DETAILS HERE TOO
+	$ftype = $_FILES;
+	$fa=$ftype;
+	$fvalue_name = $fa;
+	$fposts = $fvalue_name;
+	//print_r($posts);		
+	foreach ($fposts as $fvaluex=>$fvalue) 
+	{	
+	$fname = $fvaluex;
+	//$$fvalue =$ftype[$fname];
+	$fvalue = $ftype[$fname];
+	$arr[$fname] = $fvalue;
+	$identifiers->$fname = $fvalue;
+	}
 				
 	
 	if(isset($display->extra_data))
@@ -1075,8 +1090,9 @@ if ($name != $sub){
 				//$update_othertr = "";	
 				
 				///SQL for updation
-				$this_arrayupdate = "UPDATE $othertablename SET $update_othertr ". "$this_data_column = '$oarrayvalue' " ." WHERE $other_tr_key='$update_data_pre';";
-				$arrayupdate_sql .= $this_arrayupdate;
+		//		$this_arrayupdate = "UPDATE $othertablename SET $update_othertr ". "$this_data_column = '$oarrayvalue' " ." WHERE $other_tr_key='$update_data_pre';";
+		//		$arrayupdate_sql .= $this_arrayupdate;
+				$arrayupdate_sql .= "";
 				
 				///SQL for insertion		
 				$arrayinsert_sql .= "INSERT INTO $othertablename ($ocolumn_sql_value) VALUES ($orow_sql_value"."'$oarrayvalue');";
@@ -1189,8 +1205,9 @@ $delete_multirow_sql .= "DELETE FROM $other_tr_table WHERE $other_tr_key = '$upd
 						//$oarrayvalue = "$oarrayvalue";
 				
 				///SQL for updation
-				$this_arrayupdate = "UPDATE $othertablename SET $update_othertr ". "$this_data_column = $oarrayvalue " ." WHERE $other_tr_key='$update_data_pre';";
-				$arrayupdate_sql .= $this_arrayupdate;
+			//	$this_arrayupdate = "UPDATE $othertablename SET $update_othertr ". "$this_data_column = $oarrayvalue " ." WHERE $other_tr_key='$update_data_pre';";
+			//	$arrayupdate_sql .= $this_arrayupdate;
+				$arrayupdate_sql .= "";
 
 				
 				///SQL for insertion		
@@ -1260,7 +1277,7 @@ if(isset($display->fields->$name->field_separator))
 					
 	
 ////////////// FILEUPLOAD MANAGER /////////
-
+$uploadOk = 1;
 $array_of_uploaded_filename = array();  ////Declaration of array to carry list of uploaded file, Delete if SQL fails
 
 	$type = $_FILES;
@@ -1284,7 +1301,7 @@ $file_type ="";
 
 if(isset($field_processor->$name)){
 $processor = $field_processor->$name;	
-if(isset($field_processor->$name->content)){
+if(isset($field_processor->$name->content)){ ////remove
 	eval($field_processor->$name->content);
 }
 
@@ -1301,6 +1318,20 @@ if(is_string($processor)){
 			else
 				$not_contained = 0;
 		}
+		
+		if(is_bool($sql_array)){
+			if($sql_array == false){
+				$uploadOk = 0;
+				echo "<h1 style='color:red;'>file failed</h1>";
+				//$display->fields->$name->folder
+				$file_error = " ";
+				if(isset($display->fields->$name->file_error)){
+					$file_error = $display->fields->$name->file_error;
+				}
+				$this->validation_error["$name"][] = $file_error;
+			}
+		}
+		
 		
 		if((!$sql_array)||(!is_array($sql_array)) || ($not_contained == 1)){
 			$sql_array = $sql_arrayx;
@@ -1366,7 +1397,7 @@ if(isset($display->fields->$name->max_size)){
 $max_size = $display->fields->$name->max_size;
 }
 else {
-$max_size = 5000000;
+$max_size = ini_get('post_max_size');
 }
 	
 if ($_FILES["$name"]["size"] > $max_size) {
@@ -1381,6 +1412,7 @@ if ($_FILES["$name"]["size"] > $max_size) {
 	
 	
 	if ( $uploadOk !=0 && move_uploaded_file($_FILES["$name"]["tmp_name"], $target_file)) {
+//	if ( $uploadOk !=0 && copy($_FILES["$name"]["tmp_name"], $target_file)) {
 			echo "The file ". basename( $_FILES["$name"]["name"]). " has been uploaded.";
 		
 		
@@ -1484,13 +1516,14 @@ if ($_FILES["$name"]["size"] > $max_size) {
 				//$update_othertr = "";	
 				
 				///SQL for updation
-				$this_arrayupdate = "UPDATE $othertablename SET $update_othertr ". "$this_data_column = '$oarrayvalue' " ." WHERE $other_tr_key='$update_data_pre';";
-				$arrayupdate_sql .= $this_arrayupdate;
+			//	$this_arrayupdate = "UPDATE $othertablename SET $update_othertr ". "$this_data_column = '$oarrayvalue' " ." WHERE $other_tr_key='$update_data_pre';";
+			//	$arrayupdate_sql .= $this_arrayupdate;
+				$arrayupdate_sql .= "";
 				
 				///SQL for insertion		
-				//$arrayinsert_sql .= "INSERT INTO $othertablename ($ocolumn_sql_value) VALUES ($orow_sql_value"."'$oarrayvalue');";
+				$arrayinsert_sql .= "INSERT INTO $othertablename ($ocolumn_sql_value) VALUES ($orow_sql_value"."'$oarrayvalue');";
 				
-				$arrayinsert_sql .= $this_arrayupdate;
+			//	$arrayinsert_sql .= $this_arrayupdate;
 				
 
 						
@@ -1549,7 +1582,6 @@ $reprint->$name = "";
 		if(isset($display->fields->$name->type)){
 		
 		///I file is not an image
-$uploadOk = 1;
 	
 		////set folder
 	if(isset($display->fields->$name->folder))
@@ -1583,7 +1615,7 @@ if(isset($display->fields->$name->max_size)){
 $max_size = $display->fields->$name->max_size;
 }
 else {
-$max_size = 5000000;
+$max_size = ini_get('post_max_size');
 }
 	
 if ($_FILES["$name"]["size"][$f] > $max_size) {
@@ -1593,6 +1625,7 @@ if ($_FILES["$name"]["size"][$f] > $max_size) {
 
 	
 	if ( $uploadOk !=0 && move_uploaded_file($_FILES["$name"]["tmp_name"][$f], $target_file)) {
+//	if ( $uploadOk !=0 && copy($_FILES["$name"]["tmp_name"][$f], $target_file)) {
 			echo "The file ". basename( $_FILES["$name"]["name"][$f]). " has been uploaded.";
 		
 
@@ -1748,8 +1781,9 @@ $delete_multirow_sql .= "DELETE FROM $other_tr_table WHERE $other_tr_key = '$upd
 						//$oarrayvalue = "$oarrayvalue";
 				
 				///SQL for updation
-				$this_arrayupdate = "UPDATE $othertablename SET $update_othertr ". "$this_data_column = $oarrayvalue " ." WHERE $other_tr_key='$update_data_pre';";
-				$arrayupdate_sql .= $this_arrayupdate;
+			//	$this_arrayupdate = "UPDATE $othertablename SET $update_othertr ". "$this_data_column = $oarrayvalue " ." WHERE $other_tr_key='$update_data_pre';";
+			//	$arrayupdate_sql .= $this_arrayupdate;
+				$arrayupdate_sql .= "";
 
 				
 				///SQL for insertion		
@@ -1838,10 +1872,7 @@ if(isset($display->fields->$name->field_separator))
 //print_r($custom_to_db);
 ////////////////////////////////////
 /////////////////////////////////////
-if(!(isset($_FILES))){
-$uploadOk = "1";
 
-}
 
 /////ADDDING custom TO DB/////
 foreach($custom_to_db as $custom_column => $custom_value)
@@ -1871,18 +1902,37 @@ $row_sql_value = substr($row_sql_value, 0, -1);
 
 $insert_sql = "";
 
-if(isset($display->filemust))
-{	if($display->filemust == 0)
-{
-	$uploadOk = "1";
-}}
+if(isset($display->file_must))
+{	
+	if($display->file_must == 0)
+	{
+		$uploadOk = "1";
+	}
+	else
+	{
+		$file_must_error = "All file(s) must be selected";
+		if(isset($display->file_must_error)){
+			$file_must_error = $display->file_must_error;
+		}
+		$this->validation_error["file_must"][] = $file_must_error;
+		
+		
+	}
+
+}
 
 
 
 		
 $allow_sql += $this->allow_sql;
 
-if($uploadOk !=0 && $allow_sql ==0){
+$stop_sql = false;
+if(isset($display->stop_sql)){
+$stop_sql = $display->stop_sql;
+}
+/////set if to run the query	stop_sql
+
+if($uploadOk !=0 && $allow_sql ==0 && $stop_sql == false && (empty($this->validation_error))){
 	
 ////writing updating sql query
 $set_update = "";
@@ -2012,7 +2062,20 @@ if ($query = $this->multi_query($insert_sql)) ///break apart use loops to return
 				}
 				else
 				{
-					$reprint = (object) array();
+					$insert_reprint = false;
+					if(isset($display->insert_reprint)){
+						$insert_reprint = $display->insert_reprint;
+					}
+					
+					if($insert_reprint == true)
+					{
+						$reprint = $reprint;
+					}
+					else
+					{
+						$reprint = (object) array();	
+					}	
+					///reprint for insert
 				}
 
 		
@@ -2075,7 +2138,8 @@ $sql_error = "";
 		{	
 		unlink($ufilename);	
 		}
-		
+
+		if($stop_sql == false){
 		////failures
 		if(isset($display->update)){
 		if(($display->update->set == true )){
@@ -2099,19 +2163,61 @@ $sql_error = "";
 			
 			$this->insert_failure($insert_failure);
 		}
-									}
-								
+				}
+		}				
+						
+						
 		////End failures	
 	
 }
 	
 	
 
+//////set collection of value from valid re quest an proccess further
+echo "<pre>";
+print_r($arr);
+print_r($sql_array);
+echo "</pre>";
 
+if(isset($display->form_data)){
 
-
-
+	if(is_callable($display->form_data)){
+$form_data = $display->form_data;		
+		$form_data_func = call_user_func($form_data,$arr,$sql_array);
+	}
 	
+}
+
+/*				
+if(isset($field_processor->$name)){
+$processor = $field_processor->$name;	
+if(isset($field_processor->$name->content)){
+	eval($field_processor->$name->content);
+}
+
+if(is_string($processor)){
+	//echo "<h1>STRING - $name</h1>";
+	if(is_callable($processor)){
+		$sql_arrayx = $sql_array;
+		$sql_array = call_user_func($processor,$name,$value,$arr,$sql_array);
+		
+	//	$not_contained = 0;  ////to enable proccessor alter sql_array, uncomment the beginning of this line and comment below if statement 
+		if(is_array($sql_array)){
+			if((count(array_diff_assoc($sql_arrayx,$sql_array))!=0))			
+				$not_contained = 1;
+			else
+				$not_contained = 0;
+		}
+		
+		if((!$sql_array)||(!is_array($sql_array)) || ($not_contained == 1)){
+			$sql_array = $sql_arrayx;
+			}
+
+	}
+}
+
+}
+*/	
 		
 		}
 else
@@ -2433,8 +2539,11 @@ $label_lang = str_replace("-u@","", $label_lang);
 $label_lang = str_replace("_"," ", $label_lang);	
 }
 
-
+$this_value = "";
+if(isset($reprint->$val_error)){
 $this_value = $reprint->$val_error; //input value
+}
+
 $val_error_print = str_replace("@name", $val_error, $val_error_print);
 $val_error_print = str_replace("@label", $label_lang, $val_error_print);
 $val_error_print = str_replace("@value", $this_value, $val_error_print);
@@ -3422,7 +3531,8 @@ if(isset($updatedata->$dfield) || isset($display->fields->$dfield->to_other_tr))
 if($this->update_success ==1)
 {sleep(0.5);} /// to allow finishing update queries before redrawing the forms again
 
-//	echo "found $dfield <br />";	
+//	echo "found $dfield <br />";
+if(isset($display->update)){	
 if(isset($display->fields->$dfield->type)){
 
 $field_type = $display->fields->$dfield->type;
@@ -3460,6 +3570,7 @@ else{
 }	
 
 	
+}
 }
 	
 }	
@@ -3789,7 +3900,7 @@ $auto_complete_attr = "";
 			$auto_complete_button = "<input type='submit' name='update_submit_button' value='$button_text' />";
 			$auto_complete_button = ""; ////overwrite above
 	
-			$auto_complete_display = "<div id='$suggestion_box_id'  onclick=\"this.innerHTML ='';int_key_$suggestion_box_id = -1;\" style='position:absolute;background:white;'></div> $auto_complete_button";
+			$auto_complete_display = "<div id='$suggestion_box_id'  onclick=\"this.innerHTML ='';int_key_$suggestion_box_id = -1;\" style='position:absolute;background:#eee;'></div> $auto_complete_button";
 			/////END SET AUTO COMPLETE FUNCTIONALITY
 		$auto_complete_display .= "
 <script>
@@ -3809,7 +3920,7 @@ x[i].style.color = 'black';
 };
 
 
-document.getElementById(\"$dfield\").value = fill_value_id.innerHTML;
+document.getElementById(\"$dfield\").value = fill_value_id.title;
 
 int_key_$suggestion_box_id = parseInt(fill_value_id.id);
 
@@ -3830,35 +3941,39 @@ $auto_complete_display .= "<script>
 int_key_$suggestion_box_id = -1;
 
 document.getElementById(\"$dfield\").addEventListener(\"keyup\", function (event) {
-	if(event.keyCode == 40 || event.keyCode == 38)
-	{
-		return false;
-	}
-	else
-	{
-		int_key_$suggestion_box_id = -1;
-		autoCompleteField(this.name,this.value,'$suggestion_box_id','$not_found_message');
+	if(document.activeElement.id == this.id){
+		if(event.keyCode == 40 || event.keyCode == 38)
+		{
+			return false;
+		}
+		else
+		{
+			int_key_$suggestion_box_id = -1;
+			autoCompleteField(this.name,this.value,'$suggestion_box_id','$not_found_message');
+		}
 	}	
 }, true);
 
 document.getElementById(\"$dfield\").addEventListener(\"change\", function (event) {
+	if(document.activeElement.id == this.id){	
 		autoCompleteField(this.name,this.value,'$suggestion_box_id','$not_found_message');
 	if(this.value==\"\"){
 	int_key_$suggestion_box_id = -1;
 	}
 	int_key_$suggestion_box_id = -1;	
-	
+	}
 }, true);
 
 document.getElementById(\"$dfield\").addEventListener(\"dblclick\", function (event) {
+		if(document.activeElement.id == this.id){
 		autoCompleteField(this.name,this.value,'$suggestion_box_id','$not_found_message');
-
+		}
 }, true);
 
 
 window.addEventListener(\"keydown\", function (event) {
 
-
+if(document.activeElement.id == document.getElementById(\"$dfield\").id){
 if(document.getElementById(\"$suggestion_box_id\").children.length > 0){
 
 
@@ -3892,14 +4007,14 @@ if(event.keyCode == 40){
 if(event.keyCode == 13 || event.keyCode == 39 || event.keyCode == 37){
 	
 	if(int_key_$suggestion_box_id > -1){	
-document.getElementById(\"$dfield\").value = document.getElementById(\"$suggestion_box_id\").children[int_key_$suggestion_box_id].innerHTML;;
+document.getElementById(\"$dfield\").value = document.getElementById(\"$suggestion_box_id\").children[int_key_$suggestion_box_id].title;
 document.getElementById(\"$suggestion_box_id\").innerHTML = \"\";
 int_key_$suggestion_box_id = -1;
 	}
 
 	if(event.keyCode == 39){
 		if(int_key_$suggestion_box_id > -1){	
-			document.getElementById(\"$dfield\").value = document.getElementById(\"$suggestion_box_id\").children[int_key_$suggestion_box_id].innerHTML;;
+			document.getElementById(\"$dfield\").value = document.getElementById(\"$suggestion_box_id\").children[int_key_$suggestion_box_id].title;;
 			document.getElementById(\"$suggestion_box_id\").innerHTML = \"\";
 			int_key_$suggestion_box_id = -1;
 			var fieldelement = document.getElementById(\"$dfield\");	
@@ -3939,6 +4054,8 @@ autoCompleteField(document.getElementById(\"$dfield\").name,document.getElementB
     // Suppress \"double action\" if event handled
     event.preventDefault();
   }
+  
+} 
 }, true);
 
 window.addEventListener(\"click\", function (event) {
@@ -3976,9 +4093,26 @@ if(isset($_REQUEST['auto_complete_request'])){
 	if($_REQUEST['auto_complete_request'] == "$dfield"){
 $auto_complete_value = $_REQUEST['auto_complete_value'];
 
+
+
 if(isset($display->fields->$dfieldx->suggestions)){
-$suggestions .= $display->fields->$dfieldx->suggestions;
+if(is_array($display->fields->$dfieldx->suggestions)){
+$sug_set = 1;	
+foreach($display->fields->$dfieldx->suggestions as $sug_key=>$sug_value){
+$suggestions .= 	$sug_key . "=>" .  $sug_value . ",";
 }
+
+$suggestions = substr($suggestions, 0, -1);	
+}
+else{
+	$suggestions .= $display->fields->$dfieldx->suggestions;
+}
+
+}
+
+/////check if sugesstion is array then put like car{%%%%}CAR strip earlier of tags
+
+
 
 if(isset($display->fields->$dfieldx->db_suggestion)){
 $tablename = "";
@@ -4010,6 +4144,8 @@ $suggestions .= $suggest_list;
 
 $suggestion_array = explode(",",$suggestions);
 
+sort($suggestion_array, SORT_NATURAL | SORT_FLAG_CASE);
+
 $matched_suggestion = array();
 
 $sug_id = -1;
@@ -4021,9 +4157,22 @@ $sug_val = strtolower($suggestion);
 
 if(preg_match("/^$match_val/",$sug_val)){
 
-$sug_id += 1;	
+$sug_id += 1;
+
+if(isset($sug_set) && strpbrk($suggestion,"=>") != false){
+$new_sug_arr = explode("=>",$suggestion);
+$sug_title = $new_sug_arr[0];
+$suggestion = $new_sug_arr[1];
+	
+}
+else{
+$sug_title = strip_tags($suggestion);
+}
+/////suggestion if array here,
+
+	
 $matched_suggestion[] = "<div 
-onclick=\"auto_fill_$dfield(this.innerHTML);\" 
+onclick=\"auto_fill_$dfield(this.title);\" title='$sug_title' 
 onmouseenter=\"activeAutoFill_$dfield(this,this.id);\" 
 onmouseout=\"inactiveAutoFill_$dfield(this);\" 
 id=\"$sug_id\" style='padding-left:3px;';
@@ -4709,7 +4858,7 @@ if(isset($display->update))
 }
 */
 
-$this->input_element["$dfield"] .= "$reprint_value";   ///comment out to prevent showing
+//$this->input_element["$dfield"] .= "$reprint_value";   ///comment out to prevent showing
 	
 	$this->input_element["$dfield"] .= "<input type='file' name='$dfield' $attr  style=\"$server_error_element_style\" class=\"$server_error_element_class\"   id='$id' value='' />";
 	
@@ -4738,7 +4887,7 @@ if(isset($display->update))
 
 */
 
-$this->input_element["$dfield"] .= "$reprint_value";   ///comment out to prevent showing
+//$this->input_element["$dfield"] .= "$reprint_value";   ///comment out to prevent showing
 	
 	$this->input_element["$dfield"] .= "<input type='file'  multiple=\"multiple\" name='$dfield" . "[]' $attr  style=\"$server_error_element_style\" class=\"$server_error_element_class\"   id='$id' value='' />";
 	
@@ -4873,8 +5022,10 @@ $identifier_row = $select_row["$with_select_identifier"];
 }	
 	
 	else{/////just from same table
+	$raw_select = "";
+	if(isset($updatedata->$dfieldx)){
 	$raw_select =  $updatedata->$dfieldx;
-
+	}
 if(isset($display->fields->$dfieldx->field_separator))
 				{
 					$field_separator = $display->fields->$dfieldx->field_separator;
@@ -4952,16 +5103,18 @@ if(isset($this->update_fields_ajax["$dfield"]))
 if ($row[$describe_type] == "text")
 {
 
-	$reprint_value = htmlspecialchars($reprint_value);	
-
-	$this->input_element["$dfield"] .= "	<textarea type='text' name='$dfield' $attr  style=\"$server_error_element_style\" class=\"$server_error_element_class\"  id='$dfield'>$reprint_value</textarea>";
+	$reprint_value = htmlspecialchars($reprint_value);		
+	$this->input_element["$dfield"] .= "	<textarea type='text'  id='$id' $ajax_update $attr  style=\"$server_error_element_style\" class=\"$server_error_element_class\"   name='$dfield'>$reprint_value</textarea>";
+	$this->input_element["$dfield"] .= $auto_complete_display;		
+	$this->input_element["$dfield"] .= $update_button;
 
 }
 
 else{
-$reprint_value = htmlspecialchars($reprint_value);	
-$this->input_element["$dfield"] .= "	<input type='text' name='$dfield' $attr  id='$dfield' value='$reprint_value' />";
-
+	$reprint_value = htmlspecialchars($reprint_value);			
+		$this->input_element["$dfield"] .= "<input type='text' name='$dfield' $ajax_update $auto_complete_attr $attr  style=\"$server_error_element_style\" class=\"$server_error_element_class\"   id='$id' value=\"$reprint_value\" />";
+		$this->input_element["$dfield"] .= $auto_complete_display;		
+		$this->input_element["$dfield"] .= $update_button;
 	
 }
 
@@ -5118,7 +5271,7 @@ $ctab = array(
 ////update database table
 $update = (object) array	(
 'set' => true,
-'where' => 'faculty_id = 12334', //	2345, 1233
+'where' => 'faculty_id = 12334', //	222, 1233
 						);
 
 
@@ -5141,7 +5294,8 @@ $add_free_field  = array( //must add proccessors   ////when $add_free_field is d
 {$display = (object) //must be declared
 array(	'foo' => 'bar',
 		'property' => 'value',
-		'filemust' => 0, //// check if file must be upload to allow form submission
+		'file_must' => 0, //// check if file must be upload to allow form submission
+		'file_must_error' => "All files must be uploaded", //// check if file must be upload to allow form submission
 		'submit_button' => 'APPLY',
 		//'insert_callback' => "\$this->alert(\"Data inserted Successfully\");",
 		'insert_callback' => "<script>alert('insert is good');</script>",
@@ -5159,6 +5313,8 @@ array(	'foo' => 'bar',
 		'separator' => 'div', //div, p,custom, floated div add class values id's
 		'custom_content' => $custom_content, //div, p, floated div add class values id's
 		///@@@@@@@@@@@@@@@@@@@@ End Printing type @@@@@@@@@@@@@@@@///
+		'insert_reprint' => true,
+		'form_data' => 'alldata',
 		'submit_attr' => "style=''",
 		'server_validate' => true,
 		'server_validate_inline' => true, //inline //list
@@ -5182,11 +5338,12 @@ array(	'foo' => 'bar',
 		'server_error_element_style' => "background:red;",
 		'server_error_separator' => "",
 		'custom_tab' => $ctab,
-		'tabs' => array("PERSONAL"=>'faculty_auto,faculty_sel,faculty_sel2,faculty_day_added,faculty_year_added,faculty_campus,faculty_shortname,faculty_id,faculty_note',
+		'tabsX' => array("PERSONAL"=>'faculty_auto,faculty_auto2,faculty_sel,faculty_sel2,faculty_day_added,faculty_year_added,faculty_campus,faculty_shortname,faculty_id,faculty_note',
 						"OFFICE"=>'faculty_text,faculty_files,location,faculty_logo,faculty_fullname,institution_id',
 						"OTHERS"=>'house,free_no_display,joint,cvupload,2ndpasswprd,faculty_code,faculty_month_added'),
 		
 		'update' => $update, /////UPDATE
+		'stop_sql' => false, /////UPDATE
 		'submit_message' => "<i>Read instructions clearfully</i>",
 		'form_attr' => "",  ////// What happens on submit of form
 		'form_method' => "POST",  ////// method //required /// set as defalut property
@@ -5348,6 +5505,7 @@ array(	'foo' => 'bar',
 												'max_size'=> '500000000', ///file size ib bytes
 												'folder'=>'downloads', ///folder to move file too
 												'file_type'=>'', //// comment if not an image or remove rule
+												'proccessor'=>'filep', //// comment if not an image or remove rule
 										 
 										//		'type'=> 'customPHP', //'customHTML',customisizing
 										//		'rename_rule'=> $faculty_shortname, 
@@ -5396,6 +5554,7 @@ array(	'foo' => 'bar',
 												//	'type'=> 'customPHP', 'customHTML',customisizing
 													'rename_rule'=> $faculty_shortname, 
 													'rename_rule'=> time(). "falculty" . "campus", 
+													'file_error'=> "THIS FILE MUST  BE UPLOADED!", 
 													
 													'phprequired'=> "",  /////if decleared block insert
 										//			'overwrite'=> "1", ////set one not to overwrite
@@ -5480,7 +5639,8 @@ array(	'foo' => 'bar',
 												'attr' => "autocomplete='off'",
 												'auto_complete' => true,
 												'search_type'=> 'start', /// values = start,within
-												'suggestions' => "car,alarm,trigger,fire,ban,ear,fan",
+											//	'suggestions' => "<b>car</b>,alarm<input type='submit' value='null' style='color:red; background:none;border:none;'>,trigger,fire,ban,ear,fan",
+												'suggestions' => array("car"=>"Car","horse"=>"Horse"),
 												//'suggestion_box_id' => "jhjhkjh",
 												'button_text' => "..>..",
 												'db_suggestion' => array(
@@ -5493,6 +5653,24 @@ array(	'foo' => 'bar',
 												'not_found_message' => 'No records found'				
 */												
 												),
+'faculty_auto2' => (object) array ( 	
+												'type'=> 'text',
+												'attr' => "autocomplete='off'",
+												'auto_complete' => true,
+												'search_type'=> 'start', /// values = start,within
+												'suggestions' => "apple,ball,cat,dog,ram,fan,xamp,php",
+												//'suggestion_box_id' => "jhjhkjh",
+												'button_text' => "..>..",
+												'db_suggestion' => array(
+																	'tablename'=>'institution',
+																	'value_column'=>'institution_fullname',
+																	),
+/*												'to_update' => 'faculty_sel2,2ndpasswprd',
+												'to_update_event' => 'onkeyup',
+												'to_update_button' => '&gt;&gt;',
+												'not_found_message' => 'No records found'				
+*/												
+												),												
 'joint' => (object) array ( 	
 												'type'=> 'textarea', 									
 											//	'type'=> 'customPHP', 
@@ -5591,6 +5769,25 @@ array(	'foo' => 'bar',
 	);
 }
 	
+	////form data
+	function alldata($arr,$sql_array){
+	//	echo "<h1>" . $arr['faculty_campus']['tmp_name'] . "</h1>";
+	if(file_exists($arr['faculty_campus']['tmp_name'])){	
+	$imgString = file_get_contents($arr['faculty_campus']['tmp_name']);
+	$image = imagecreatefromstring($imgString);
+	imagejpeg($image, "newpic.jpg", 100);
+	}
+	else{
+		return false;
+	}
+
+		echo "<hr />";
+		print_r($arr);
+		
+	}
+	
+	
+	
 	
 	///for set modifier
 	function modify($value,$arr){
@@ -5622,7 +5819,10 @@ array(	'foo' => 'bar',
 	
 	///element wrapper
 	function belement($value,$name,$udata,$lang){
+		$cons = "";
+		if(isset($udata->faculty_id)){
 			$cons  = $udata->faculty_id;
+		}
 			$lang  = $lang->$name;
 		$before = "B4[$value]($name)--$cons --$lang";
 	
@@ -5665,8 +5865,23 @@ $before = "";
 	//	return true;
 	//	return $sql_array;		//return to perform sql function
 	}
+
+		function filep($name,$value,$arr,$sql_array){ /////pass all 4 parameter variables FILE PROCCESSOR
+		echo "<h1>XX FILE $name -- $value </h1>";
+		$sql_array["$name"] = $value;
+		echo $_FILES[$name]['tmp_name'];
+		echo $_FILES[$name]['size'];
+	//	$sql_array = array(4,0,5);
+	//	return true;
+	//	return $sql_array;		//return to perform sql function
+	if($_FILES[$name]['error'] == 4){
+			return false;
+	}
+	
+	}
+	
 		////for field_processor
-		
+	//udate callback	
 	function up_good(){
 		echo "<script>alert('update is working well');</script>";
 	}	
@@ -5737,6 +5952,7 @@ $custom_to_db = array("faculty_time_todb" => "$time");
 'location' => (object) array(), //////use undesrscore for spaced values
 '2ndpasswprd' => (object) array(),
 'place' => (object) array(),	
+'faculty_campus' => 'filep',	
 'joint' => "fpro",				///string as callable and object array as eval() function if source code is known						
 'cvupload' => (object) array(),  //for all additional field is recommened to add at least a blank proccessor
 //'free_no_display' => (object) array(),															
@@ -5747,7 +5963,7 @@ $custom_to_db = array("faculty_time_todb" => "$time");
 
 $tablename = "faculty";
 $exception = array("deleted", "faculty_time_todb");
-$sort_array = array(/*'location',*/'faculty_auto','faculty_sel','faculty_sel2','faculty_logo','faculty_description','faculty_campus','institution_id','faculty_code','faculty_day_added','faculty_year_added');
+$sort_array = array(/*'location',*/'faculty_auto','faculty_auto2','faculty_sel','faculty_sel2','faculty_logo','faculty_description','faculty_campus','institution_id','faculty_code','faculty_day_added','faculty_year_added');
 
 
 /*
@@ -5863,13 +6079,13 @@ xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded;chars
 
 <script>
 //,stag
-function autoCompleteField(sname,svalue,stag_data,not_found_message)
+function autoCompleteField(sname,svalue,stag,not_found_message)
 {
-	stag_array = stag_data.split(",");
+//	stag_array = stag_data.split(",");
 //	alert("working ajax");
-	for(xvalueKey in stag_array){
+//	for(xvalueKey in stag_array){
 	
-stag = stag_array[xvalueKey];
+//stag = stag_array[xvalueKey];
 //	alert(stag);
 	
 	if((svalue != undefined) || (svalue != null)){
@@ -5890,7 +6106,7 @@ stag = stag_array[xvalueKey];
 	  {
 		 if (xmlhttp.readyState==1)
 	  {
-	// document.getElementById("myDiv").innerHTML="Loading.....";
+	 document.getElementById(stag).innerHTML="Loading...";
 	 // alert(7777);
 	  } 
 	  
@@ -5929,7 +6145,7 @@ stag = stag_array[xvalueKey];
 
 	}
 
-}
+//}
 }
 
 </script>
