@@ -5148,6 +5148,27 @@ foreach($wrapper_array as $wrapper_key=>$wrapper){
 
 	
 //FORM ELEMENT WRITER
+	if(isset($display->fields->$dfieldx->wrapper))
+	{
+		$custom_wrapper = $display->fields->$dfieldx->wrapper;
+		
+		$custom_wrapper = str_replace("%element%",$this->input_element["$dfield"],$custom_wrapper);
+		$custom_wrapper = str_replace("%label%",$this->input_label["$dfield"],$custom_wrapper);
+		
+		$custom_wrapper = str_replace("%before_label%",$before_label,$custom_wrapper);
+		$custom_wrapper = str_replace("%after_label%",$after_label,$custom_wrapper);
+		
+		$custom_wrapper = str_replace("%before_element%",$before_element,$custom_wrapper);
+		$custom_wrapper = str_replace("%after_element%",$after_element,$custom_wrapper);
+		
+		$custom_wrapper = str_replace("%error_before_element%",$error_before_element,$custom_wrapper);
+		$custom_wrapper = str_replace("%error_after_element%",$error_after_element,$custom_wrapper);
+		
+		$this->field_data["$dfield"] .= $custom_wrapper;
+		
+	}
+		else
+	{
 	$this->field_data["$dfield"] .= $this->separator['row_begin'];
 	
 	$this->field_data["$dfield"] .= $column_textdisplay_open;
@@ -5175,7 +5196,9 @@ foreach($wrapper_array as $wrapper_key=>$wrapper){
 	
 	$this->field_data["$dfield"] .= $column_formdisplay_close;
 	
-	$this->field_data["$dfield"] .= $this->separator['row_end'];	
+	$this->field_data["$dfield"] .= $this->separator['row_end'];
+}
+	
 		
 //END FORM ELEMENT WRITER		
 	
@@ -5647,6 +5670,7 @@ array(	'foo' => 'bar',
 																	'tablename'=>'institution',
 																	'value_column'=>'institution_fullname',
 																	),
+												'wrapper' => "<tr><td colspan='2'> %label% -- %element% </td></tr>",					
 /*												'to_update' => 'faculty_sel2,2ndpasswprd',
 												'to_update_event' => 'onkeyup',
 												'to_update_button' => '&gt;&gt;',
@@ -5875,7 +5899,7 @@ $before = "";
 	//	return true;
 	//	return $sql_array;		//return to perform sql function
 	if($_FILES[$name]['error'] == 4){
-			return false;
+	//		return false;
 	}
 	
 	}
