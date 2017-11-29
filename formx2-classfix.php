@@ -272,6 +272,9 @@ public $separator = array();
 ////TAB SEPARATOR PROPERTIES
 public $tab_separator = array();
 
+public $set_client_validator = array();
+public $print_client_validator = array();
+
 
 
 
@@ -412,6 +415,10 @@ function formx($tablename, $print_form, $exception,$sort_array, $display, $addti
 //$this->run_db();
 
 $reprint =  (object) array();
+$this->post_print['form_printer'] = "";
+$this->pre_print['call_client_validator'] = "";
+$this->pre_print['print_client_validator'] = "";
+$this->pre_print['begin_form'] = "";
 
 ////Define form callbacks
 if(isset($display->insert_callback)){	
@@ -803,7 +810,7 @@ $reprint->$name = $value;
 				if(is_callable($validate_error)){
 				$validate_error = call_user_func($validate_error,$name,$value,$arr,$lang);
 				}
-				if(!$validate_error){$value = $xvalidate_error;}	
+				if(!$validate_error){$validate_error = $xvalidate_error;}	
 				///set as callback
 					$this->ValidateAsEmail($name,$value,$validate_error);
 					}	
@@ -822,7 +829,7 @@ $reprint->$name = $value;
 				if(is_callable($validate_error)){
 				$validate_error = call_user_func($validate_error,$name,$value,$arr,$lang);
 				}
-				if(!$validate_error){$value = $xvalidate_error;}	
+				if(!$validate_error){$validate_error = $xvalidate_error;}	
 				///set as callback
 					$this->ValidateAsInteger($name,$value,$validate_error);
 				}
@@ -841,7 +848,7 @@ $reprint->$name = $value;
 				if(is_callable($validate_error)){
 				$validate_error = call_user_func($validate_error,$name,$value,$arr,$lang);
 				}
-				if(!$validate_error){$value = $xvalidate_error;}	
+				if(!$validate_error){$validate_error = $xvalidate_error;}	
 				///set as callback
 				$this->ValidateAsFloat($name,$value,$validate_error);
 				}
@@ -861,7 +868,7 @@ $reprint->$name = $value;
 				if(is_callable($validate_error)){
 				$validate_error = call_user_func($validate_error,$name,$value,$arr,$lang);
 				}
-				if(!$validate_error){$value = $xvalidate_error;}	
+				if(!$validate_error){$validate_error = $xvalidate_error;}	
 				///set as callback
 						
 						
@@ -891,7 +898,7 @@ $reprint->$name = $value;
 				if(is_callable($validate_error)){
 				$validate_error = call_user_func($validate_error,$name,$value,$arr,$lang);
 				}
-				if(!$validate_error){$value = $xvalidate_error;}	
+				if(!$validate_error){$validate_error = $xvalidate_error;}	
 				///set as callback		
 				$this->CustomValidation($name,$value,$label,$arr,$validation_callback,$validate_error);
 				}
@@ -2826,16 +2833,19 @@ $form_action = $display->form_action;
 }
 
 
+$this->pre_print['call_client_validator'] .= "<script>
+function validateForm_$form_id(this_form){\n
+prevent_submit = 0;\n";
+$this->pre_print['print_client_validator'] .= "<script>";
 
-
-$this->pre_print[0] .= "<form method='$form_method' action='$form_action'  id='$form_id' enctype='multipart/form-data' $form_attr>";
+$this->pre_print['begin_form'] .= "<form method='$form_method' onsubmit='return validateForm_$form_id(this);' action='$form_action'  id='$form_id' enctype='multipart/form-data' $form_attr>";
 
 
 	//}
 
 
 
-$this->pre_print[0] .= $container_open;
+$this->pre_print['begin_form'] .= $container_open;
 ///----//end draw type check//////*****@@@@@@@@@@@@@	
 
 
@@ -3142,9 +3152,8 @@ $print_lang,$column_textdisplay_close,
 	
 
 	////End of While
-$this->post_print[0] .= $row_begin;
-
-$this->post_print[0] .= $column_textdisplay_open;
+	
+	
 
 
 ///// submission message
@@ -3152,14 +3161,13 @@ $submit_message = "";
 if(isset($display->submit_message)){
 $submit_message = $display->submit_message;	
 }
-$this->post_print[0] .= "$submit_message";
+
+
 /////End submission message
 
-$this->post_print[0] .= $column_formdisplay_close;
 
-$this->post_print[0] .= $column_formdisplay_open;
 	///////Close form tag/////
-/////	if ($print_form == true){
+
 $submit_attr = "";
 if(isset($display->submit_attr))
 {
@@ -3170,15 +3178,48 @@ $submit_button = "SUBMIT";
 	if(isset($display->submit_button))
 	{$submit_button = $display->submit_button;}
 
-$this->post_print[0] .= "<input type='submit' value='$submit_button' name='$form_id' id='$form_id' $submit_attr />";	
+$submit_element = "<input type='submit' value='$submit_button' name='$form_id' id='$form_id' $submit_attr />";
+
+if(isset($display->submit_wrapper))
+{
+$submit_wrapper = $display->submit_wrapper;
+
+$submit_wrapper = str_replace("%submit_message%",$submit_message,$submit_wrapper);
+$submit_wrapper = str_replace("%submit_element%",$submit_element,$submit_wrapper);
+
+$this->post_print['form_printer'] .= $submit_wrapper;	
+}
+	else
+{
+$this->post_print['form_printer'] .= $row_begin;
+
+$this->post_print['form_printer'] .= $column_textdisplay_open;
+
+$this->post_print['form_printer'] .= $submit_message;
+
+$this->post_print['form_printer'] .= $column_formdisplay_close;
+$this->post_print['form_printer'] .= $column_formdisplay_open;
+
+$this->post_print['form_printer'] .= $submit_element;	
+
+$this->post_print['form_printer'] .= $column_formdisplay_close;
+$this->post_print['form_printer'] .= $row_end;
+}
+
+
+$this->pre_print['call_client_validator'] .= "
+if(prevent_submit > 0){
+	return false;
+}
+else{
+	
+}
+ }</script>";
+$this->pre_print['print_client_validator'] .= "</script>";
 
 	
-	/////}
-	$this->post_print[0] .= $column_formdisplay_close;
-	$this->post_print[0] .= $row_end;
-	
-		$this->post_print[0] .= $container_close;
-$this->post_print[0] .="</form>";	
+		$this->post_print['form_printer'] .= $container_close;
+$this->post_print['form_printer'] .="</form>";	
 //$newfields = $newfields;	
 
 
@@ -3236,7 +3277,7 @@ $custom_content = "
 										*/
 
 
-//$this->post_print[0]
+//$this->post_print['form_printer']
 /*
 		$this->separator[$container_open] = $container_open;
 		$this->separator[$container_close] = $container_close;
@@ -3824,6 +3865,59 @@ $this->field_data["$dfield"] = "";
 
 		
 $this->input_label["$dfield"] = "<label for=\"$dfield\" accesskey=\"\" class=\"$server_error_label_class\" style=\"$server_error_label_style\">".  $print_lang . "</label> ";//LABEL
+/////////////////////////////////////
+////////////CLIENT SIDE VALIDATION//
+/////////////////////////////////////
+/////////////////////////////////////
+				
+if(isset($display->fields->$dfieldx->ValidateAsInteger)){
+		if($display->fields->$dfieldx->ValidateAsInteger == true){
+		$validate_error = "**not_set";				
+					if(isset($display->fields->$dfieldx->ValidateAsIntegerErrorMessage))
+			{
+				$validate_error = $display->fields->$dfieldx->ValidateAsIntegerErrorMessage;
+			}
+							///set as callback	
+	$xvalidate_error = $validate_error;
+	if(is_callable($validate_error)){
+	$validate_error = call_user_func($validate_error,$dfieldx,$value,$arr,$lang);
+	}
+	if(!$validate_error){$validate_error = $xvalidate_error;}	
+	///set as callback
+	//	$this->alert("very set");
+	$this->pre_print['call_client_validator'] .= "ValidateAsInteger(this_form,'$dfield','$validate_error'); \n";
+
+	//set_client_validator
+	if(!isset($this->set_client_validator['ValidateAsInteger'])){
+	$this->pre_print['print_client_validator'] .= "function ValidateAsInteger(this_form,form_field,error_msg){
+	var field_value = this_form[form_field].value;
+	var n = field_value.search(/^[0-9]+$/);
+		if(n == -1){
+		prevent_submit += 1;	
+		alert(error_msg);
+		}
+		else{
+			///remove error css from elements
+		}
+	}";
+	$this->set_client_validator['ValidateAsInteger'] = true;
+		}
+	}
+
+}
+
+////////////////////////////////////
+////////////////////////////////////
+////////////////////////////////////
+//////////END CLIENT VALIDATION////
+////////////////////////////////////
+////////////////////////////////////
+////////////////////////////////////
+
+
+
+
+
 
 ////NOTE
 /*
@@ -3864,7 +3958,18 @@ $update_button = "";
 			$not_found_message = "";	
 			}			
 	//onchange="loadFieldUpdate(this.name,this.value,'myDiv')"		
-	$ajax_update = "$to_update_event=\"loadFieldUpdate(this.name,this.value,'$to_update','$not_found_message')\"";					
+	$ajax_update = "$to_update_event=\"loadFieldUpdate(this.name,this.value,'$to_update','$not_found_message')\"";
+/*
+$this->input_element["$dfield"] .= "
+<script>
+document.getElementById(\"$dfield\").addEventListener(\"change\", function (event) {
+//loadFieldUpdate(document.getElementById(\"$dfield\").name,document.getElementById(\"$dfield\").value,'$to_update','$not_found_message');
+alert('hrloe');
+	}, true);
+</script>
+";
+*/
+	
 	}	
 //////END SET UPDATE FUNCTIONALITY
 
@@ -5320,6 +5425,7 @@ array(	'foo' => 'bar',
 		'file_must' => 0, //// check if file must be upload to allow form submission
 		'file_must_error' => "All files must be uploaded", //// check if file must be upload to allow form submission
 		'submit_button' => 'APPLY',
+		'submit_wrapper' => "<tr><td colspan='2'><center> %submit_message% --- %submit_element% </center></td></tr>",
 		//'insert_callback' => "\$this->alert(\"Data inserted Successfully\");",
 		'insert_callback' => "<script>alert('insert is good');</script>",
 		//'insert_failure' => "\$this->alert(\"Data insertion failed\");",
@@ -5437,7 +5543,7 @@ array(	'foo' => 'bar',
 		'free_no_display' => (object) array ( 	'type'=> 'text', //checkbox, multipleselect		
 												'ValidateAsInteger' => true,
 											//	'ValidateAsIntegerErrorMessage' => "@name @label @value is not an integer",
-												'ValidateAsIntegerErrorMessage' => "not an integer",		
+												'ValidateAsIntegerErrorMessage' => "not a whole number",		
 													'values_for_select' => array(	"January" => "1", ////The key is displayed & value = value
 																					"February" => "2",
 																					"March" => "3"
