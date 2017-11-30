@@ -2835,7 +2835,9 @@ $form_action = $display->form_action;
 
 $this->pre_print['call_client_validator'] .= "<script>
 function validateForm_$form_id(this_form){\n
-prevent_submit = 0;\n";
+prevent_submit = 0;\n 
+var validation = [];
+";
 $this->pre_print['print_client_validator'] .= "<script>";
 
 $this->pre_print['begin_form'] .= "<form method='$form_method' onsubmit='return validateForm_$form_id(this);' action='$form_action'  id='$form_id' enctype='multipart/form-data' $form_attr>";
@@ -3208,11 +3210,34 @@ $this->post_print['form_printer'] .= $row_end;
 
 
 $this->pre_print['call_client_validator'] .= "
+for(f in validation){
+
+//interger validation	
+if(validation[f][1][validation[f][2]].type){
+	get_input_value = 	validation[f][1][validation[f][2]].value;
+}
+else{
+	//get_input_value = 	document.querySelector('input[name=faculty_shortname][checked]').value;	
+	var radios = 	validation[f][1][validation[f][2]];
+	
+    // loop through list of radio buttons
+    for (var i=0, len=radios.length; i<len; i++) {
+        if ( radios[i].checked || radios[i].selected) { // radio checked?
+            get_input_value = radios[i].value; // if so, hold its value in val
+            break; // and break out of for loop
+        }
+    }	
+}
+eval('var field_value' + \"='\" + get_input_value + \"';var n = field_value.search(/^[0-9]+$/);alert(field_value);if(n == -1){prevent_submit += 1;alert(validation[f][3]);}\");
+//End interger validation	
+	
+}
+//return false;
 if(prevent_submit > 0){
 	return false;
 }
 else{
-	
+	return true;
 }
  }</script>";
 $this->pre_print['print_client_validator'] .= "</script>";
@@ -3864,7 +3889,7 @@ $this->input_element["$dfield"] = "";
 $this->field_data["$dfield"] = "";
 
 		
-$this->input_label["$dfield"] = "<label for=\"$dfield\" accesskey=\"\" class=\"$server_error_label_class\" style=\"$server_error_label_style\">".  $print_lang . "</label> ";//LABEL
+$this->input_label["$dfield"] = "<label for=\"$dfield\" accesskey=\"\" id='$dfield"."_label' class=\"$server_error_label_class\" style=\"$server_error_label_style\">".  $print_lang . "</label> ";//LABEL
 /////////////////////////////////////
 ////////////CLIENT SIDE VALIDATION//
 /////////////////////////////////////
@@ -3885,20 +3910,165 @@ if(isset($display->fields->$dfieldx->ValidateAsInteger)){
 	if(!$validate_error){$validate_error = $xvalidate_error;}	
 	///set as callback
 	//	$this->alert("very set");
-	$this->pre_print['call_client_validator'] .= "ValidateAsInteger(this_form,'$dfield','$validate_error'); \n";
+//	$this->pre_print['call_client_validator'] .= "ValidateAsInteger(this_form,'$dfield','$validate_error'); \n ";
+	$this->pre_print['call_client_validator'] .= "validation.push(['ValidateAsInteger',this_form,'$dfield','$validate_error']); \n ";
 
 	//set_client_validator
+//	$error_element_style = $display->server_error_element_style;
+
+{///set default values error
+if(isset($display->server_validate_each_container)){
+$validate_each_container = 	$display->server_validate_each_container;
+}
+else{
+$validate_each_container = "p";
+}
+
+if(isset($display->server_validate_all_container)){
+$validate_all_container = 	$display->server_validate_all_container;
+}
+else{
+$validate_all_container = "div";
+}
+
+if(isset($display->server_validate_each_class)){
+$validate_each_class = 	$display->server_validate_each_class;
+}
+else{
+$validate_each_class = "";
+}
+
+if(isset($display->server_validate_all_class)){
+$validate_all_class = 	$display->server_validate_all_class;
+}
+else{
+$validate_all_class = "";
+}
+
+if(isset($display->server_validate_each_style)){
+$validate_each_style = 	$display->server_validate_each_style;
+}
+else{
+$validate_each_style = "";
+}
+
+
+if(isset($display->server_validate_all_style)){
+$alidate_all_style = 	$display->server_validate_all_style;
+}
+else{
+$validate_all_style = "";
+}
+
+
+if(isset($display->server_validate_list_class)){
+$validate_list_class = 	$display->server_validate_list_class;
+}
+else{
+$validate_list_class = "";
+}
+
+
+if(isset($display->server_validate_list_style)){
+$validate_list_style = 	$display->server_validate_list_style;
+}
+else{
+$validate_list_style = "";
+}
+
+if(isset($display->server_error_label_container_class)){
+$error_label_container_class = 	$display->server_error_label_container_class;
+}
+else{
+$error_label_container_class = "";
+}
+
+
+if(isset($display->server_error_label_container_style)){
+$error_label_container_style = 	$display->server_error_label_container_style;
+}
+else{
+$error_label_container_style = "";
+}
+
+
+if(isset($display->server_error_label_class)){
+$error_label_class = $display->server_error_label_class;
+}
+else{
+$error_label_class = "";
+}
+
+if(isset($display->server_error_label_style)){
+$error_label_style = $display->server_error_label_style;
+}
+else{
+$error_label_style = "";
+}
+
+if(isset($display->server_error_element_container_class)){
+$error_element_container_class = $display->server_error_element_container_class;
+}
+else{
+$error_element_container_class = "";
+}
+
+if(isset($display->server_error_element_container_style)){
+$error_element_container_style = $display->server_error_element_container_style;
+}
+else{
+$error_element_container_style = "";
+}
+
+if(isset($display->server_error_element_class)){
+$error_element_class = $display->server_error_element_class;
+}
+else{
+$error_element_class = "";
+}
+
+if(isset($display->server_error_element_style)){
+$error_element_style = $display->server_error_element_style;
+}
+else{
+$error_element_style = "";
+}
+
+if(isset($display->server_error_separator)){
+$error_separator = $display->server_error_separator;
+}
+else{
+$error_separator = "";
+}
+
+}///END set default values
+	
+
+
+
 	if(!isset($this->set_client_validator['ValidateAsInteger'])){
 	$this->pre_print['print_client_validator'] .= "function ValidateAsInteger(this_form,form_field,error_msg){
+//alert(form_field);
 	var field_value = this_form[form_field].value;
+	
 	var n = field_value.search(/^[0-9]+$/);
-		if(n == -1){
-		prevent_submit += 1;	
+		if(n == -1){	
+		prevent_submit += 1;
+//		this_form[form_field].style = '$error_element_style';
+//		get_label = document.querySelectorAll(\"label[for='\" + this_form[form_field].id + \"']\");
+//		get_label = document.getElementById(this_form[form_field].id + '_label');
+//		get_label.style = '$error_label_style';
 		alert(error_msg);
 		}
 		else{
-			///remove error css from elements
+//		prevent_submit += 1;	
+//		this_form[form_field].style = '';
+	//	get_label = document.getElementById(this_form[form_field].id + '_label');
+	//	document.getElementById(this_form[form_field].id + '_label').style = '';
+	//	get_label.style = '';
+
 		}
+		return true;	
 	}";
 	$this->set_client_validator['ValidateAsInteger'] = true;
 		}
@@ -4127,7 +4297,7 @@ int_key_$suggestion_box_id = -1;
 		}	
 	}	
 
-	
+    event.preventDefault();	
 
 }
 
