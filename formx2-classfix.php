@@ -3215,6 +3215,7 @@ $this->pre_print['call_client_validator'] .= "
 for(f in validation){
 //alert(validation[f][0]);	
 validation_type = 	validation[f][0];
+var get_input_value;
 switch (validation_type) {//start witch
 ";	
 
@@ -4050,8 +4051,9 @@ else{
         }
     }	
 }
-
+if(get_input_value != undefined){
 eval('var field_value' + \"='\" + get_input_value + \"';var n = field_value.search(/^[0-9]+$/);alert(field_value);if(n == -1){prevent_submit += 1;alert(validation[f][3]);validation[f][1][validation[f][2]].className='$error_element_class';}else{validation[f][1][validation[f][2]].className='';}\");
+	}	
 	}
 	break;
 ";
