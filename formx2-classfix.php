@@ -17,6 +17,8 @@
 #tabs {margin:0px; }
 #tabs div {margin:0px; float:left;}
 #tabs td {border:0px;padding:0px;}
+
+.error_class {background:blue;}
 </style>
 <?php
 
@@ -273,7 +275,7 @@ public $separator = array();
 public $tab_separator = array();
 
 public $set_client_validator = array();
-public $print_client_validator = array();
+public $print_client_validator = "";
 
 
 
@@ -2838,7 +2840,7 @@ function validateForm_$form_id(this_form){\n
 prevent_submit = 0;\n 
 var validation = [];
 ";
-$this->pre_print['print_client_validator'] .= "<script>";
+//$this->pre_print['print_client_validator'] .= "<script>";
 
 $this->pre_print['begin_form'] .= "<form method='$form_method' onsubmit='return validateForm_$form_id(this);' action='$form_action'  id='$form_id' enctype='multipart/form-data' $form_attr>";
 
@@ -3211,26 +3213,16 @@ $this->post_print['form_printer'] .= $row_end;
 
 $this->pre_print['call_client_validator'] .= "
 for(f in validation){
+//alert(validation[f][0]);	
+validation_type = 	validation[f][0];
+switch (validation_type) {//start witch
+";	
 
-//interger validation	
-if(validation[f][1][validation[f][2]].type){
-	get_input_value = 	validation[f][1][validation[f][2]].value;
-}
-else{
-	//get_input_value = 	document.querySelector('input[name=faculty_shortname][checked]').value;	
-	var radios = 	validation[f][1][validation[f][2]];
-	
-    // loop through list of radio buttons
-    for (var i=0, len=radios.length; i<len; i++) {
-        if ( radios[i].checked || radios[i].selected) { // radio checked?
-            get_input_value = radios[i].value; // if so, hold its value in val
-            break; // and break out of for loop
-        }
-    }	
-}
-eval('var field_value' + \"='\" + get_input_value + \"';var n = field_value.search(/^[0-9]+$/);alert(field_value);if(n == -1){prevent_submit += 1;alert(validation[f][3]);}\");
-//End interger validation	
-	
+$this->pre_print['call_client_validator'] .= $this->print_client_validator;
+
+$this->pre_print['call_client_validator'] .= "	
+}//end switch
+
 }
 //return false;
 if(prevent_submit > 0){
@@ -3240,7 +3232,7 @@ else{
 	return true;
 }
  }</script>";
-$this->pre_print['print_client_validator'] .= "</script>";
+//$this->pre_print['print_client_validator'] .= "</script>";
 
 	
 		$this->post_print['form_printer'] .= $container_close;
@@ -3894,28 +3886,6 @@ $this->input_label["$dfield"] = "<label for=\"$dfield\" accesskey=\"\" id='$dfie
 ////////////CLIENT SIDE VALIDATION//
 /////////////////////////////////////
 /////////////////////////////////////
-				
-if(isset($display->fields->$dfieldx->ValidateAsInteger)){
-		if($display->fields->$dfieldx->ValidateAsInteger == true){
-		$validate_error = "**not_set";				
-					if(isset($display->fields->$dfieldx->ValidateAsIntegerErrorMessage))
-			{
-				$validate_error = $display->fields->$dfieldx->ValidateAsIntegerErrorMessage;
-			}
-							///set as callback	
-	$xvalidate_error = $validate_error;
-	if(is_callable($validate_error)){
-	$validate_error = call_user_func($validate_error,$dfieldx,$value,$arr,$lang);
-	}
-	if(!$validate_error){$validate_error = $xvalidate_error;}	
-	///set as callback
-	//	$this->alert("very set");
-//	$this->pre_print['call_client_validator'] .= "ValidateAsInteger(this_form,'$dfield','$validate_error'); \n ";
-	$this->pre_print['call_client_validator'] .= "validation.push(['ValidateAsInteger',this_form,'$dfield','$validate_error']); \n ";
-
-	//set_client_validator
-//	$error_element_style = $display->server_error_element_style;
-
 {///set default values error
 if(isset($display->server_validate_each_container)){
 $validate_each_container = 	$display->server_validate_each_container;
@@ -4044,37 +4014,115 @@ $error_separator = "";
 }///END set default values
 	
 
+//////CLEINT VALIDATE AS INTERGER				
+if(isset($display->fields->$dfieldx->ValidateAsInteger)){
+		if($display->fields->$dfieldx->ValidateAsInteger == true){
+		$validate_error = "**not_set";				
+					if(isset($display->fields->$dfieldx->ValidateAsIntegerErrorMessage))
+			{
+				$validate_error = $display->fields->$dfieldx->ValidateAsIntegerErrorMessage;
+			}
+							///set as callback	
+	$xvalidate_error = $validate_error;
+	if(is_callable($validate_error)){
+	$validate_error = call_user_func($validate_error,$dfieldx,$value,$arr,$lang);
+	}
+	if(!$validate_error){$validate_error = $xvalidate_error;}	
 
+	$this->pre_print['call_client_validator'] .= "validation.push(['ValidateAsInteger',this_form,'$dfield','$validate_error']); \n ";
 
 	if(!isset($this->set_client_validator['ValidateAsInteger'])){
-	$this->pre_print['print_client_validator'] .= "function ValidateAsInteger(this_form,form_field,error_msg){
-//alert(form_field);
-	var field_value = this_form[form_field].value;
+	$this->print_client_validator .= "
+case 'ValidateAsInteger':
+	{	
+if(validation[f][1][validation[f][2]].type){
+	get_input_value = 	validation[f][1][validation[f][2]].value;
+}
+else{
+	//get_input_value = 	document.querySelector('input[name=faculty_shortname][checked]').value;	
+	var radios = 	validation[f][1][validation[f][2]];
 	
-	var n = field_value.search(/^[0-9]+$/);
-		if(n == -1){	
-		prevent_submit += 1;
-//		this_form[form_field].style = '$error_element_style';
-//		get_label = document.querySelectorAll(\"label[for='\" + this_form[form_field].id + \"']\");
-//		get_label = document.getElementById(this_form[form_field].id + '_label');
-//		get_label.style = '$error_label_style';
-		alert(error_msg);
-		}
-		else{
-//		prevent_submit += 1;	
-//		this_form[form_field].style = '';
-	//	get_label = document.getElementById(this_form[form_field].id + '_label');
-	//	document.getElementById(this_form[form_field].id + '_label').style = '';
-	//	get_label.style = '';
+    // loop through list of radio buttons
+    for (var i=0, len=radios.length; i<len; i++) {
+        if ( radios[i].checked || radios[i].selected) { // radio checked?
+            get_input_value = radios[i].value; // if so, hold its value in val
+            break; // and break out of for loop
+        }
+    }	
+}
 
-		}
-		return true;	
-	}";
+eval('var field_value' + \"='\" + get_input_value + \"';var n = field_value.search(/^[0-9]+$/);alert(field_value);if(n == -1){prevent_submit += 1;alert(validation[f][3]);validation[f][1][validation[f][2]].className='$error_element_class';}else{validation[f][1][validation[f][2]].className='';}\");
+	}
+	break;
+";
 	$this->set_client_validator['ValidateAsInteger'] = true;
 		}
+		
+		
+		
+		
+		
 	}
 
 }
+
+//////END CLEINT VALIDATE AS INTERGER	
+
+	
+
+//////CLEINT VALIDATE AS EMAIL		
+if(isset($display->fields->$dfieldx->ValidateAsEmail)){
+		if($display->fields->$dfieldx->ValidateAsEmail == true){
+		$validate_error = "**not_set";				
+					if(isset($display->fields->$dfieldx->ValidateAsEmailErrorMessage))
+			{
+				$validate_error = $display->fields->$dfieldx->ValidateAsEmailErrorMessage;
+			}
+							///set as callback	
+	$xvalidate_error = $validate_error;
+	if(is_callable($validate_error)){
+	$validate_error = call_user_func($validate_error,$dfieldx,$value,$arr,$lang);
+	}
+	if(!$validate_error){$validate_error = $xvalidate_error;}	
+
+	$this->pre_print['call_client_validator'] .= "validation.push(['ValidateAsEmail',this_form,'$dfield','$validate_error']); \n ";
+
+	if(!isset($this->set_client_validator['ValidateAsEmail'])){
+	$this->print_client_validator .= "
+case 'ValidateAsEmail':
+	{	
+if(validation[f][1][validation[f][2]].type){
+	get_input_value = 	validation[f][1][validation[f][2]].value;
+}
+else{
+	//get_input_value = 	document.querySelector('input[name=faculty_shortname][checked]').value;	
+	var radios = 	validation[f][1][validation[f][2]];
+	
+    // loop through list of radio buttons
+    for (var i=0, len=radios.length; i<len; i++) {
+        if ( radios[i].checked || radios[i].selected) { // radio checked?
+            get_input_value = radios[i].value; // if so, hold its value in val
+            break; // and break out of for loop
+        }
+    }	
+}
+
+eval('var field_value' + \"='\" + get_input_value + \"';var n = field_value.search(/^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-._]+..[a-zA-Z0-9-.]+$/);alert(field_value);if(n == -1){prevent_submit += 1;alert(validation[f][3]);validation[f][1][validation[f][2]].className='$error_element_class';}else{validation[f][1][validation[f][2]].className='';}\");
+	}
+	break;
+";
+	$this->set_client_validator['ValidateAsEmail'] = true;
+		}
+		
+		
+		
+		
+		
+	}
+
+}
+
+//////END CLEINT VALIDATE AS EMAIL
 
 ////////////////////////////////////
 ////////////////////////////////////
@@ -5584,6 +5632,7 @@ $add_free_field  = array( //must add proccessors   ////when $add_free_field is d
 					array("place","select"),
 					array("joint","textarea"),
 					array("free_no_display","text"),
+					array("free_no_display2","text"),
 					//array("","");
 						);
 
@@ -5634,12 +5683,12 @@ array(	'foo' => 'bar',
 		'server_error_element_container_class' => "",
 		'server_error_element_container_style' => "",
 		'server_error_element_class' => "error_class",
-		'server_error_element_style' => "background:red;",
+		'server_error_element_style' => "",
 		'server_error_separator' => "",
 		'custom_tab' => $ctab,
 		'tabsX' => array("PERSONAL"=>'faculty_auto,faculty_auto2,faculty_sel,faculty_sel2,faculty_day_added,faculty_year_added,faculty_campus,faculty_shortname,faculty_id,faculty_note',
 						"OFFICE"=>'faculty_text,faculty_files,location,faculty_logo,faculty_fullname,institution_id',
-						"OTHERS"=>'house,free_no_display,joint,cvupload,2ndpasswprd,faculty_code,faculty_month_added'),
+						"OTHERS"=>'house,free_no_display,free_no_display2,joint,cvupload,2ndpasswprd,faculty_code,faculty_month_added'),
 		
 		'update' => $update, /////UPDATE
 		'stop_sql' => false, /////UPDATE
@@ -5727,7 +5776,18 @@ array(	'foo' => 'bar',
 																					),
 													'element_separator' => '<br />', ///HTML TAG
 												///	'checked' => array('2','3')
-												),												
+												),
+		'free_no_display2' => (object) array ( 	'type'=> 'text', //checkbox, multipleselect		
+												'ValidateAsEmail' => true,
+											//	'ValidateAsIntegerErrorMessage' => "@name @label @value is not an integer",
+												'ValidateAsEmailErrorMessage' => "not a valid email",		
+													'values_for_select' => array(	"January" => "1", ////The key is displayed & value = value
+																					"February" => "2",
+																					"March" => "3"
+																				),
+													'element_separator' => '<br />', ///HTML TAG
+												///	'checked' => array('2','3')
+												),													
 		'institution_id' => (object) array ( 	'type'=> 'select',
 												'id' => 'insssss',		
 								/*
