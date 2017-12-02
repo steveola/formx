@@ -19,6 +19,7 @@
 #tabs td {border:0px;padding:0px;}
 
 .error_class {background:blue;}
+.error_label_class {background:blue;}
 </style>
 <?php
 
@@ -2399,135 +2400,135 @@ $form_attr = $display->form_attr;
 
 //LIST VALIDATION ERROR
 {///set default values error
-if(isset($display->server_validate_each_container)){
-$server_validate_each_container = 	$display->server_validate_each_container;
+if(isset($display->form_validate_each_container)){
+$form_validate_each_container = 	$display->form_validate_each_container;
 }
 else{
-$server_validate_each_container = "p";
+$form_validate_each_container = "p";
 }
 
-if(isset($display->server_validate_all_container)){
-$server_validate_all_container = 	$display->server_validate_all_container;
+if(isset($display->form_validate_all_container)){
+$form_validate_all_container = 	$display->form_validate_all_container;
 }
 else{
-$server_validate_all_container = "div";
+$form_validate_all_container = "div";
 }
 
-if(isset($display->server_validate_each_class)){
-$server_validate_each_class = 	$display->server_validate_each_class;
+if(isset($display->form_validate_each_class)){
+$form_validate_each_class = 	$display->form_validate_each_class;
 }
 else{
-$server_validate_each_class = "";
+$form_validate_each_class = "";
 }
 
-if(isset($display->server_validate_all_class)){
-$server_validate_all_class = 	$display->server_validate_all_class;
+if(isset($display->form_validate_all_class)){
+$form_validate_all_class = 	$display->form_validate_all_class;
 }
 else{
-$server_validate_all_class = "";
+$form_validate_all_class = "";
 }
 
-if(isset($display->server_validate_each_style)){
-$server_validate_each_style = 	$display->server_validate_each_style;
+if(isset($display->form_validate_each_style)){
+$form_validate_each_style = 	$display->form_validate_each_style;
 }
 else{
-$server_validate_each_style = "";
+$form_validate_each_style = "";
 }
 
 
-if(isset($display->server_validate_all_style)){
-$server_validate_all_style = 	$display->server_validate_all_style;
+if(isset($display->form_validate_all_style)){
+$form_validate_all_style = 	$display->form_validate_all_style;
 }
 else{
-$server_validate_all_style = "";
+$form_validate_all_style = "";
 }
 
 
-if(isset($display->server_validate_list_class)){
-$server_validate_list_class = 	$display->server_validate_list_class;
+if(isset($display->form_validate_list_class)){
+$form_validate_list_class = 	$display->form_validate_list_class;
 }
 else{
-$server_validate_list_class = "";
+$form_validate_list_class = "";
 }
 
 
-if(isset($display->server_validate_list_style)){
-$server_validate_list_style = 	$display->server_validate_list_style;
+if(isset($display->form_validate_list_style)){
+$form_validate_list_style = 	$display->form_validate_list_style;
 }
 else{
-$server_validate_list_style = "";
+$form_validate_list_style = "";
 }
 
-if(isset($display->server_error_label_container_class)){
-$server_error_label_container_class = 	$display->server_error_label_container_class;
+if(isset($display->form_error_label_container_class)){
+$form_error_label_container_class = 	$display->form_error_label_container_class;
 }
 else{
-$server_error_label_container_class = "";
+$form_error_label_container_class = "";
 }
 
 
-if(isset($display->server_error_label_container_style)){
-$server_error_label_container_style = 	$display->server_error_label_container_style;
+if(isset($display->form_error_label_container_style)){
+$form_error_label_container_style = 	$display->form_error_label_container_style;
 }
 else{
-$server_error_label_container_style = "";
+$form_error_label_container_style = "";
 }
 
 
-if(isset($display->server_error_label_class)){
-$server_error_label_class = $display->server_error_label_class;
+if(isset($display->form_error_label_class)){
+$form_error_label_class = $display->form_error_label_class;
 }
 else{
-$server_error_label_class = "";
+$form_error_label_class = "";
 }
 
-if(isset($display->server_error_label_style)){
-$server_error_label_style = $display->server_error_label_style;
+if(isset($display->form_error_label_style)){
+$form_error_label_style = $display->form_error_label_style;
 }
 else{
-$server_error_label_style = "";
+$form_error_label_style = "";
 }
 
-if(isset($display->server_error_element_container_class)){
-$server_error_element_container_class = $display->server_error_element_container_class;
+if(isset($display->form_error_element_container_class)){
+$form_error_element_container_class = $display->form_error_element_container_class;
 }
 else{
-$server_error_element_container_class = "";
+$form_error_element_container_class = "";
 }
 
-if(isset($display->server_error_element_container_style)){
-$server_error_element_container_style = $display->server_error_element_container_style;
+if(isset($display->form_error_element_container_style)){
+$form_error_element_container_style = $display->form_error_element_container_style;
 }
 else{
-$server_error_element_container_style = "";
+$form_error_element_container_style = "";
 }
 
-if(isset($display->server_error_element_class)){
-$server_error_element_class = $display->server_error_element_class;
+if(isset($display->form_error_element_class)){
+$form_error_element_class = $display->form_error_element_class;
 }
 else{
-$server_error_element_class = "";
+$form_error_element_class = "";
 }
 
-if(isset($display->server_error_element_style)){
-$server_error_element_style = $display->server_error_element_style;
+if(isset($display->form_error_element_style)){
+$form_error_element_style = $display->form_error_element_style;
 }
 else{
-$server_error_element_style = "";
+$form_error_element_style = "";
 }
 
-if(isset($display->server_error_separator)){
-$server_error_separator = $display->server_error_separator;
+if(isset($display->form_error_separator)){
+$form_error_separator = $display->form_error_separator;
 }
 else{
-$server_error_separator = "<hr />";
+$form_error_separator = "<hr />";
 }
 
 }///END set default values
 ///check validation error
 foreach($this->validation_error as $val_error=>$val_error_msg)
 		{
-			echo "<ul style=\"$server_validate_list_style\" class=\"$server_validate_list_class\">";
+			echo "<ul style=\"$form_validate_list_style\" class=\"$form_validate_list_class\">";
 			
 				foreach($val_error_msg as $val_error_print)
 			{
@@ -2842,7 +2843,22 @@ var validation = [];
 ";
 //$this->pre_print['print_client_validator'] .= "<script>";
 
-$this->pre_print['begin_form'] .= "<form method='$form_method' onsubmit='return validateForm_$form_id(this);' action='$form_action'  id='$form_id' enctype='multipart/form-data' $form_attr>";
+//$this->pre_print['begin_form'] .= "<form method='$form_method' onsubmit='return validateForm_$form_id(this);' action='$form_action'  id='$form_id' enctype='multipart/form-data' $form_attr>";  ///WITH INLINE EVENT SUBMISSION
+
+$this->pre_print['begin_form'] .= "<form method='$form_method' action='$form_action'  id='$form_id' enctype='multipart/form-data' $form_attr>";
+
+$this->pre_print['begin_form'] .= "
+<script>
+document.getElementById(\"$form_id\").addEventListener(\"submit\", function (event) {
+var allow_submit = validateForm_$form_id(this);
+if(allow_submit==false)
+{event.preventDefault();}
+else
+{}	
+}, false);
+</script>
+";
+
 
 
 	//}
@@ -3701,128 +3717,128 @@ $error_before_element = "";
 $error_after_element = "";
 
 {///set default values error
-if(isset($display->server_validate_each_container)){
-$server_validate_each_container = 	$display->server_validate_each_container;
+if(isset($display->form_validate_each_container)){
+$form_validate_each_container = 	$display->form_validate_each_container;
 }
 else{
-$server_validate_each_container = "p";
+$form_validate_each_container = "p";
 }
 
-if(isset($display->server_validate_all_container)){
-$server_validate_all_container = 	$display->server_validate_all_container;
+if(isset($display->form_validate_all_container)){
+$form_validate_all_container = 	$display->form_validate_all_container;
 }
 else{
-$server_validate_all_container = "div";
+$form_validate_all_container = "div";
 }
 
-if(isset($display->server_validate_each_class)){
-$server_validate_each_class = 	$display->server_validate_each_class;
+if(isset($display->form_validate_each_class)){
+$form_validate_each_class = 	$display->form_validate_each_class;
 }
 else{
-$server_validate_each_class = "";
+$form_validate_each_class = "";
 }
 
-if(isset($display->server_validate_all_class)){
-$server_validate_all_class = 	$display->server_validate_all_class;
+if(isset($display->form_validate_all_class)){
+$form_validate_all_class = 	$display->form_validate_all_class;
 }
 else{
-$server_validate_all_class = "";
+$form_validate_all_class = "";
 }
 
-if(isset($display->server_validate_each_style)){
-$server_validate_each_style = 	$display->server_validate_each_style;
+if(isset($display->form_validate_each_style)){
+$form_validate_each_style = 	$display->form_validate_each_style;
 }
 else{
-$server_validate_each_style = "";
+$form_validate_each_style = "";
 }
 
 
-if(isset($display->server_validate_all_style)){
-$server_validate_all_style = 	$display->server_validate_all_style;
+if(isset($display->form_validate_all_style)){
+$form_validate_all_style = 	$display->form_validate_all_style;
 }
 else{
-$server_validate_all_style = "";
+$form_validate_all_style = "";
 }
 
 
-if(isset($display->server_validate_list_class)){
-$server_validate_list_class = 	$display->server_validate_list_class;
+if(isset($display->form_validate_list_class)){
+$form_validate_list_class = 	$display->form_validate_list_class;
 }
 else{
-$server_validate_list_class = "";
+$form_validate_list_class = "";
 }
 
 
-if(isset($display->server_validate_list_style)){
-$server_validate_list_style = 	$display->server_validate_list_style;
+if(isset($display->form_validate_list_style)){
+$form_validate_list_style = 	$display->form_validate_list_style;
 }
 else{
-$server_validate_list_style = "";
+$form_validate_list_style = "";
 }
 
-if(isset($display->server_error_label_container_class)){
-$server_error_label_container_class = 	$display->server_error_label_container_class;
+if(isset($display->form_error_label_container_class)){
+$form_error_label_container_class = 	$display->form_error_label_container_class;
 }
 else{
-$server_error_label_container_class = "";
+$form_error_label_container_class = "";
 }
 
 
-if(isset($display->server_error_label_container_style)){
-$server_error_label_container_style = 	$display->server_error_label_container_style;
+if(isset($display->form_error_label_container_style)){
+$form_error_label_container_style = 	$display->form_error_label_container_style;
 }
 else{
-$server_error_label_container_style = "";
+$form_error_label_container_style = "";
 }
 
 
-if(isset($display->server_error_label_class)){
-$server_error_label_class = $display->server_error_label_class;
+if(isset($display->form_error_label_class)){
+$form_error_label_class = $display->form_error_label_class;
 }
 else{
-$server_error_label_class = "";
+$form_error_label_class = "";
 }
 
-if(isset($display->server_error_label_style)){
-$server_error_label_style = $display->server_error_label_style;
+if(isset($display->form_error_label_style)){
+$form_error_label_style = $display->form_error_label_style;
 }
 else{
-$server_error_label_style = "";
+$form_error_label_style = "";
 }
 
-if(isset($display->server_error_element_container_class)){
-$server_error_element_container_class = $display->server_error_element_container_class;
+if(isset($display->form_error_element_container_class)){
+$form_error_element_container_class = $display->form_error_element_container_class;
 }
 else{
-$server_error_element_container_class = "";
+$form_error_element_container_class = "";
 }
 
-if(isset($display->server_error_element_container_style)){
-$server_error_element_container_style = $display->server_error_element_container_style;
+if(isset($display->form_error_element_container_style)){
+$form_error_element_container_style = $display->form_error_element_container_style;
 }
 else{
-$server_error_element_container_style = "";
+$form_error_element_container_style = "";
 }
 
-if(isset($display->server_error_element_class)){
-$server_error_element_class = $display->server_error_element_class;
+if(isset($display->form_error_element_class)){
+$form_error_element_class = $display->form_error_element_class;
 }
 else{
-$server_error_element_class = "";
+$form_error_element_class = "";
 }
 
-if(isset($display->server_error_element_style)){
-$server_error_element_style = $display->server_error_element_style;
+if(isset($display->form_error_element_style)){
+$form_error_element_style = $display->form_error_element_style;
 }
 else{
-$server_error_element_style = "";
+$form_error_element_style = "";
 }
 
-if(isset($display->server_error_separator)){
-$server_error_separator = $display->server_error_separator;
+if(isset($display->form_error_separator)){
+$form_error_separator = $display->form_error_separator;
 }
 else{
-$server_error_separator = "";
+$form_error_separator = "";
 }
 
 }///END set default values
@@ -3830,10 +3846,10 @@ $server_error_separator = "";
 
 $invalid_error = "";
 
-if(isset($display->server_validate_inline)){ ////setting inline error details
-	if(($display->server_validate_inline == true)){
+if(isset($display->form_validate_inline)){ ////setting inline error details
+	if(($display->form_validate_inline == true)){
 if(isset($validation_error["$dfield"])){
-$invalid_error .= "<$server_validate_all_container class=\"$server_validate_all_class\" style=\"$server_validate_all_style\">";
+$invalid_error .= "<$form_validate_all_container class=\"$form_validate_all_class\" style=\"$form_validate_all_style\">";
 
 				foreach($validation_error["$dfield"] as $val_error_print)
 			{
@@ -3843,25 +3859,25 @@ $val_error_print = str_replace("@name", $dfield, $val_error_print);
 $val_error_print = str_replace("@label", $print_lang, $val_error_print);
 $val_error_print = str_replace("@value", $this_value, $val_error_print);
 //End erro custome
-			$invalid_error .= "<$server_validate_each_container style=\"$server_validate_each_style\" class=\"$server_validate_each_class\" >" . $val_error_print . "</$server_validate_each_container>";
+			$invalid_error .= "<$form_validate_each_container style=\"$form_validate_each_style\" class=\"$form_validate_each_class\" >" . $val_error_print . "</$form_validate_each_container>";
 			}
-$invalid_error .= "</$server_validate_all_container>$server_error_separator";		
+$invalid_error .= "</$form_validate_all_container>$form_error_separator";		
 			
 		}
 		else{
 			
-			$server_error_label_class = "";
-			$server_error_label_style = "";			
-			$server_error_element_class = "";
-			$server_error_element_style = "";
+			$form_error_label_class = "";
+			$form_error_label_style = "";			
+			$form_error_element_class = "";
+			$form_error_element_style = "";
 			
 		}
 
 ///inline error position
 
 
-if(isset($display->server_validate_inline_position)){
-	if($display->server_validate_inline_position=="before"){
+if(isset($display->form_validate_inline_position)){
+	if($display->form_validate_inline_position=="before"){
 		$error_before_element = "$invalid_error";		
 	}
 	else{
@@ -3882,131 +3898,140 @@ $this->input_element["$dfield"] = "";
 $this->field_data["$dfield"] = "";
 
 		
-$this->input_label["$dfield"] = "<label for=\"$dfield\" accesskey=\"\" id='$dfield"."_label' class=\"$server_error_label_class\" style=\"$server_error_label_style\">".  $print_lang . "</label> ";//LABEL
+$this->input_label["$dfield"] = "<label for=\"$dfield\" accesskey=\"\" id='$dfield"."_label' class=\"$form_error_label_class\" style=\"$form_error_label_style\">".  $print_lang . "</label> ";//LABEL
 /////////////////////////////////////
 ////////////CLIENT SIDE VALIDATION//
 /////////////////////////////////////
 /////////////////////////////////////
 {///set default values error
-if(isset($display->server_validate_each_container)){
-$validate_each_container = 	$display->server_validate_each_container;
+
+
+if(isset($display->form_validate_inline_position)){
+$validate_inline_position = 	$display->form_validate_inline_position;
 }
 else{
-$validate_each_container = "p";
+$validate_inline_position = "after";
 }
 
-if(isset($display->server_validate_all_container)){
-$validate_all_container = 	$display->server_validate_all_container;
+if(isset($display->form_validate_each_container)){
+$validate_each_container = 	strtoupper($display->form_validate_each_container);
 }
 else{
-$validate_all_container = "div";
+$validate_each_container = strtoupper("p");
 }
 
-if(isset($display->server_validate_each_class)){
-$validate_each_class = 	$display->server_validate_each_class;
+if(isset($display->form_validate_all_container)){
+$validate_all_container = 	strtoupper($display->form_validate_all_container);
+}
+else{
+$validate_all_container = strtoupper("div");
+}
+
+if(isset($display->form_validate_each_class)){
+$validate_each_class = 	$display->form_validate_each_class;
 }
 else{
 $validate_each_class = "";
 }
 
-if(isset($display->server_validate_all_class)){
-$validate_all_class = 	$display->server_validate_all_class;
+if(isset($display->form_validate_all_class)){
+$validate_all_class = 	$display->form_validate_all_class;
 }
 else{
 $validate_all_class = "";
 }
 
-if(isset($display->server_validate_each_style)){
-$validate_each_style = 	$display->server_validate_each_style;
+if(isset($display->form_validate_each_style)){
+$validate_each_style = 	$display->form_validate_each_style;
 }
 else{
 $validate_each_style = "";
 }
 
 
-if(isset($display->server_validate_all_style)){
-$alidate_all_style = 	$display->server_validate_all_style;
+if(isset($display->form_validate_all_style)){
+$validate_all_style = 	$display->form_validate_all_style;
 }
 else{
 $validate_all_style = "";
 }
 
 
-if(isset($display->server_validate_list_class)){
-$validate_list_class = 	$display->server_validate_list_class;
+if(isset($display->form_validate_list_class)){
+$validate_list_class = 	$display->form_validate_list_class;
 }
 else{
 $validate_list_class = "";
 }
 
 
-if(isset($display->server_validate_list_style)){
-$validate_list_style = 	$display->server_validate_list_style;
+if(isset($display->form_validate_list_style)){
+$validate_list_style = 	$display->form_validate_list_style;
 }
 else{
 $validate_list_style = "";
 }
 
-if(isset($display->server_error_label_container_class)){
-$error_label_container_class = 	$display->server_error_label_container_class;
+if(isset($display->form_error_label_container_class)){
+$error_label_container_class = 	$display->form_error_label_container_class;
 }
 else{
 $error_label_container_class = "";
 }
 
 
-if(isset($display->server_error_label_container_style)){
-$error_label_container_style = 	$display->server_error_label_container_style;
+if(isset($display->form_error_label_container_style)){
+$error_label_container_style = 	$display->form_error_label_container_style;
 }
 else{
 $error_label_container_style = "";
 }
 
 
-if(isset($display->server_error_label_class)){
-$error_label_class = $display->server_error_label_class;
+if(isset($display->form_error_label_class)){
+$error_label_class = $display->form_error_label_class;
 }
 else{
 $error_label_class = "";
 }
 
-if(isset($display->server_error_label_style)){
-$error_label_style = $display->server_error_label_style;
+if(isset($display->form_error_label_style)){
+$error_label_style = $display->form_error_label_style;
 }
 else{
 $error_label_style = "";
 }
 
-if(isset($display->server_error_element_container_class)){
-$error_element_container_class = $display->server_error_element_container_class;
+if(isset($display->form_error_element_container_class)){
+$error_element_container_class = $display->form_error_element_container_class;
 }
 else{
 $error_element_container_class = "";
 }
 
-if(isset($display->server_error_element_container_style)){
-$error_element_container_style = $display->server_error_element_container_style;
+if(isset($display->form_error_element_container_style)){
+$error_element_container_style = $display->form_error_element_container_style;
 }
 else{
 $error_element_container_style = "";
 }
 
-if(isset($display->server_error_element_class)){
-$error_element_class = $display->server_error_element_class;
+if(isset($display->form_error_element_class)){
+$error_element_class = $display->form_error_element_class;
 }
 else{
 $error_element_class = "";
 }
 
-if(isset($display->server_error_element_style)){
-$error_element_style = $display->server_error_element_style;
+if(isset($display->form_error_element_style)){
+$error_element_style = $display->form_error_element_style;
 }
 else{
 $error_element_style = "";
 }
 
-if(isset($display->server_error_separator)){
-$error_separator = $display->server_error_separator;
+if(isset($display->form_error_separator)){
+$error_separator = $display->form_error_separator;
 }
 else{
 $error_separator = "";
@@ -4051,8 +4076,13 @@ else{
         }
     }	
 }
+
+/*
+if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); this_err_parent.appendChild(newItemAll);} else {newItemAll = document.getElementById(validation[f][2]  + '_inline_error')} */
+
 if(get_input_value != undefined){
-eval('var field_value' + \"='\" + get_input_value + \"';var n = field_value.search(/^[0-9]+$/);alert(field_value);if(n == -1){prevent_submit += 1;alert(validation[f][3]);validation[f][1][validation[f][2]].className='$error_element_class';}else{validation[f][1][validation[f][2]].className='';}\");
+eval('var field_value' + \"='\" + get_input_value + \"';var n = field_value.search(/^[0-9]+$/);alert(field_value);if(n == -1){prevent_submit += 1;alert(validation[f][3]);validation[f][1][validation[f][2]].className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll);  if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll); alert('xxxxx not set yet');}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2])); alert('xxxxx not set yet');}	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); } else{validation[f][1][validation[f][2]].className='';document.getElementById(validation[f][2] + '_label').className=''; if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
+	
 	}	
 	}
 	break;
@@ -4527,7 +4557,7 @@ switch ($input_type)  ////////@@@@@@@@    SWITCH FOR FORM INPUT TYPES
 	
 	
 	
-	$this->input_element["$dfield"] .= "<select name='$dfield' $attr style=\"$server_error_element_style\" class=\"$server_error_element_class\"  id='$id' $ajax_update >";
+	$this->input_element["$dfield"] .= "<select name='$dfield' $attr style=\"$form_error_element_style\" class=\"$form_error_element_class\"  id='$id' $ajax_update >";
 	
 	$options_array = array();
 	//$this->update_fields_where[$to_update]
@@ -4692,7 +4722,7 @@ if(isset($this->update_fields_ajax["$dfield"]))
         break;
 	case "multipleselect": //selection type data
 	{
-	$this->input_element["$dfield"] .= "<select name='$dfield"."[]' $attr multiple='multiple'  style=\"$server_error_element_style\" class=\"$server_error_element_class\"   id='$id' selected='$dfield'>";
+	$this->input_element["$dfield"] .= "<select name='$dfield"."[]' $attr multiple='multiple'  style=\"$form_error_element_style\" class=\"$form_error_element_class\"   id='$id' selected='$dfield'>";
 	
 	$options_array = array();
 	
@@ -5040,8 +5070,8 @@ $not_ingroup  = "";
 				
 				
 			}
-				$not_ingroup .= "<input type='radio' name='$dfield' $ajax_update $attr  style=\"$server_error_element_style\" class=\"$server_error_element_class\"   $selected id='$id" . "_" . "$option_value' value='$option_value'> $option_display $element_separator";
-			//	$this->input_element["$dfield"] .= "<input type='radio' name='$dfield' $attr  style=\"$server_error_element_style\" class=\"$server_error_element_class\"   $selected id='$id" . "_" . "$option_value' value='$option_value'> $option_display $element_separator";
+				$not_ingroup .= "<input type='radio' name='$dfield' $ajax_update $attr  style=\"$form_error_element_style\" class=\"$form_error_element_class\"   $selected id='$id" . "_" . "$option_value' value='$option_value'> $option_display $element_separator";
+			//	$this->input_element["$dfield"] .= "<input type='radio' name='$dfield' $attr  style=\"$form_error_element_style\" class=\"$form_error_element_class\"   $selected id='$id" . "_" . "$option_value' value='$option_value'> $option_display $element_separator";
 				
 				
 				}
@@ -5066,7 +5096,7 @@ if(isset($this->update_fields_ajax["$dfield"]))
 	{	
 	$reprint_value = htmlspecialchars($reprint_value);	
 		
-	$this->input_element["$dfield"] .= "	<input type='password' name='$dfield' $attr  style=\"$server_error_element_style\" class=\"$server_error_element_class\"   id='$id' value='$reprint_value' />";
+	$this->input_element["$dfield"] .= "	<input type='password' name='$dfield' $attr  style=\"$form_error_element_style\" class=\"$form_error_element_class\"   id='$id' value='$reprint_value' />";
 
 	}
         break;
@@ -5075,7 +5105,7 @@ if(isset($this->update_fields_ajax["$dfield"]))
 	{
 	
 	$reprint_value = htmlspecialchars($reprint_value);			
-		$this->input_element["$dfield"] .= "<input type='text' name='$dfield' $ajax_update $auto_complete_attr $attr  style=\"$server_error_element_style\" class=\"$server_error_element_class\"   id='$id' value=\"$reprint_value\" />";
+		$this->input_element["$dfield"] .= "<input type='text' name='$dfield' $ajax_update $auto_complete_attr $attr  style=\"$form_error_element_style\" class=\"$form_error_element_class\"   id='$id' value=\"$reprint_value\" />";
 		$this->input_element["$dfield"] .= $auto_complete_display;		
 		$this->input_element["$dfield"] .= $update_button;
 		
@@ -5086,7 +5116,7 @@ if(isset($this->update_fields_ajax["$dfield"]))
 	{
 
 	
-		$this->input_element["$dfield"] .= "<input type='number' name='$dfield' $ajax_update $attr  style=\"$server_error_element_style\" class=\"$server_error_element_class\"   id='$id' value=\"$reprint_value\" />";
+		$this->input_element["$dfield"] .= "<input type='number' name='$dfield' $ajax_update $attr  style=\"$form_error_element_style\" class=\"$form_error_element_class\"   id='$id' value=\"$reprint_value\" />";
 		$this->input_element["$dfield"] .= $auto_complete_display;		
 		$this->input_element["$dfield"] .= $update_button;		
 
@@ -5097,7 +5127,7 @@ if(isset($this->update_fields_ajax["$dfield"]))
 	{
 		
 	$reprint_value = htmlspecialchars($reprint_value);		
-	$this->input_element["$dfield"] .= "	<textarea type='text'  id='$id' $ajax_update $attr  style=\"$server_error_element_style\" class=\"$server_error_element_class\"   name='$dfield'>$reprint_value</textarea>";
+	$this->input_element["$dfield"] .= "	<textarea type='text'  id='$id' $ajax_update $attr  style=\"$form_error_element_style\" class=\"$form_error_element_class\"   name='$dfield'>$reprint_value</textarea>";
 	$this->input_element["$dfield"] .= $auto_complete_display;		
 	$this->input_element["$dfield"] .= $update_button;
 	}
@@ -5148,7 +5178,7 @@ if(isset($this->update_fields_ajax["$dfield"]))
 	{	
 
 		
-		$this->input_element["$dfield"] .= "<input type='color'  name='$dfield' $ajax_update $attr  style=\"$server_error_element_style\" class=\"$server_error_element_class\"   id='$id' value='$reprint_value' />";
+		$this->input_element["$dfield"] .= "<input type='color'  name='$dfield' $ajax_update $attr  style=\"$form_error_element_style\" class=\"$form_error_element_class\"   id='$id' value='$reprint_value' />";
 		$this->input_element["$dfield"] .= $auto_complete_display;		
 		$this->input_element["$dfield"] .= $update_button;
 
@@ -5158,7 +5188,7 @@ if(isset($this->update_fields_ajax["$dfield"]))
 	{
 	
 
-	$this->input_element["$dfield"] .= "<input type='range' name='$dfield'  $ajax_update $attr  style=\"$server_error_element_style\" class=\"$server_error_element_class\"   id='$id' value='$reprint_value' />";
+	$this->input_element["$dfield"] .= "<input type='range' name='$dfield'  $ajax_update $attr  style=\"$form_error_element_style\" class=\"$form_error_element_class\"   id='$id' value='$reprint_value' />";
 	$this->input_element["$dfield"] .= $auto_complete_display;		
 	$this->input_element["$dfield"] .= $update_button;
 
@@ -5185,7 +5215,7 @@ if(isset($display->update))
 
 //$this->input_element["$dfield"] .= "$reprint_value";   ///comment out to prevent showing
 	
-	$this->input_element["$dfield"] .= "<input type='file' name='$dfield' $attr  style=\"$server_error_element_style\" class=\"$server_error_element_class\"   id='$id' value='' />";
+	$this->input_element["$dfield"] .= "<input type='file' name='$dfield' $attr  style=\"$form_error_element_style\" class=\"$form_error_element_class\"   id='$id' value='' />";
 	
 
 	}
@@ -5214,7 +5244,7 @@ if(isset($display->update))
 
 //$this->input_element["$dfield"] .= "$reprint_value";   ///comment out to prevent showing
 	
-	$this->input_element["$dfield"] .= "<input type='file'  multiple=\"multiple\" name='$dfield" . "[]' $attr  style=\"$server_error_element_style\" class=\"$server_error_element_class\"   id='$id' value='' />";
+	$this->input_element["$dfield"] .= "<input type='file'  multiple=\"multiple\" name='$dfield" . "[]' $attr  style=\"$form_error_element_style\" class=\"$form_error_element_class\"   id='$id' value='' />";
 	
 
 	}
@@ -5392,7 +5422,7 @@ foreach($array_raw_select as $skey => $sdata)
 				
 				
 			}	
-				$not_ingroup .= "<input type='checkbox' $selected value='$value'  $attr  style=\"$server_error_element_style\" class=\"$server_error_element_class\"   id='$id"."_value' name='$dfield"."[]' /> $option $element_separator";
+				$not_ingroup .= "<input type='checkbox' $selected value='$value'  $attr  style=\"$form_error_element_style\" class=\"$form_error_element_class\"   id='$id"."_value' name='$dfield"."[]' /> $option $element_separator";
 				}
 //}
 	
@@ -5429,7 +5459,7 @@ if ($row[$describe_type] == "text")
 {
 
 	$reprint_value = htmlspecialchars($reprint_value);		
-	$this->input_element["$dfield"] .= "	<textarea type='text'  id='$id' $ajax_update $attr  style=\"$server_error_element_style\" class=\"$server_error_element_class\"   name='$dfield'>$reprint_value</textarea>";
+	$this->input_element["$dfield"] .= "	<textarea type='text'  id='$id' $ajax_update $attr  style=\"$form_error_element_style\" class=\"$form_error_element_class\"   name='$dfield'>$reprint_value</textarea>";
 	$this->input_element["$dfield"] .= $auto_complete_display;		
 	$this->input_element["$dfield"] .= $update_button;
 
@@ -5437,7 +5467,7 @@ if ($row[$describe_type] == "text")
 
 else{
 	$reprint_value = htmlspecialchars($reprint_value);			
-		$this->input_element["$dfield"] .= "<input type='text' name='$dfield' $ajax_update $auto_complete_attr $attr  style=\"$server_error_element_style\" class=\"$server_error_element_class\"   id='$id' value=\"$reprint_value\" />";
+		$this->input_element["$dfield"] .= "<input type='text' name='$dfield' $ajax_update $auto_complete_attr $attr  style=\"$form_error_element_style\" class=\"$form_error_element_class\"   id='$id' value=\"$reprint_value\" />";
 		$this->input_element["$dfield"] .= $auto_complete_display;		
 		$this->input_element["$dfield"] .= $update_button;
 	
@@ -5667,26 +5697,26 @@ array(	'foo' => 'bar',
 		'form_data' => 'alldata',
 		'submit_attr' => "style=''",
 		'server_validate' => true,
-		'server_validate_inline' => true, //inline //list
-		'server_validate_list' => true, //inline //list
-		'server_validate_inline_position' => "after", //before,after      //before or after elemen
-		'server_validate_each_container' => "span", //span, p, div 
-		'server_validate_each_class' => "", //span, p, div 
-		'server_validate_each_style' => "color:red;", //span, p, div 
-		'server_validate_all_container' => "span", //span, p, div 
-		'server_validate_all_class' => "", //span, p, div 
-		'server_validate_all_style' => "", //span, p, div 
-		'server_validate_list_class' => "", 
-		'server_validate_list_style' => "color:red;margin:0px;", 
-		'server_error_label_container_class' => "",
-		'server_error_label_container_style' => "",
-		'server_error_label_class' => "",
-		'server_error_label_style' => "color:red;",
-		'server_error_element_container_class' => "",
-		'server_error_element_container_style' => "",
-		'server_error_element_class' => "error_class",
-		'server_error_element_style' => "",
-		'server_error_separator' => "",
+		'form_validate_inline' => true, //inline //list
+		'form_validate_list' => true, //inline //list
+		'form_validate_inline_position' => "after", //before,after      //before or after elemen
+		'form_validate_each_container' => "span", //span, p, div 
+		'form_validate_each_class' => "", //span, p, div 
+		'form_validate_each_style' => "color:red;", //span, p, div 
+		'form_validate_all_container' => "span", //span, p, div 
+		'form_validate_all_class' => "", //span, p, div 
+		'form_validate_all_style' => "", //span, p, div 
+		'form_validate_list_class' => "", 
+		'form_validate_list_style' => "color:red;margin:0px;", 
+		'form_error_label_container_class' => "",
+		'form_error_label_container_style' => "",
+		'form_error_label_class' => "error_label_class",
+		'form_error_label_style' => "color:red;",
+		'form_error_element_container_class' => "",
+		'form_error_element_container_style' => "",
+		'form_error_element_class' => "error_class",
+		'form_error_element_style' => "",
+		'form_error_separator' => "",
 		'custom_tab' => $ctab,
 		'tabsX' => array("PERSONAL"=>'faculty_auto,faculty_auto2,faculty_sel,faculty_sel2,faculty_day_added,faculty_year_added,faculty_campus,faculty_shortname,faculty_id,faculty_note',
 						"OFFICE"=>'faculty_text,faculty_files,location,faculty_logo,faculty_fullname,institution_id',
@@ -5904,6 +5934,7 @@ array(	'foo' => 'bar',
 													'type'=> 'text',
 													'ValidateAsDate' => true, //ValidateAsDate, ValidateAsEmail, ValidateAsFloat, ValidateAsInteger
 													'ValidateAsDateErrorMessage' => "not_date",
+												//	'ValidateAsFloat' => 'true',
 													'DateSeparator' => "-"	//no slash (/)fix letter
 													),	
 	'faculty_campus' => (object) array ( 	
