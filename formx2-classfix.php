@@ -13,7 +13,7 @@
 
 .each_tab {background:grey;}
 
-.inactive_tab:hover {background:grey;width:100px; text-align:center;cursor: pointer;}
+.inactive_tab:hover {background:red;width:100px; text-align:center;cursor: pointer;}
 #tabs {margin:0px; }
 #tabs div {margin:0px; float:left;}
 #tabs td {border:0px;padding:0px;}
@@ -277,6 +277,8 @@ public $tab_separator = array();
 
 public $set_client_validator = array();
 public $print_client_validator = "";
+
+public $client_validator_array = array();
 
 
 
@@ -2840,6 +2842,9 @@ $this->pre_print['call_client_validator'] .= "<script>
 function validateForm_$form_id(this_form){\n
 prevent_submit = 0;\n 
 var validation = [];
+
+var ini_tab = 0;
+
 ";
 //$this->pre_print['print_client_validator'] .= "<script>";
 
@@ -3227,29 +3232,8 @@ $this->post_print['form_printer'] .= $row_end;
 }
 
 
-$this->pre_print['call_client_validator'] .= "
-for(f in validation){
-//alert(validation[f][0]);	
-validation_type = 	validation[f][0];
-var get_input_value;
-switch (validation_type) {//start witch
-";	
+//////cleintvalid
 
-$this->pre_print['call_client_validator'] .= $this->print_client_validator;
-
-$this->pre_print['call_client_validator'] .= "	
-}//end switch
-
-}
-//return false;
-if(prevent_submit > 0){
-	return false;
-}
-else{
-	return true;
-}
- }</script>";
-//$this->pre_print['print_client_validator'] .= "</script>";
 
 	
 		$this->post_print['form_printer'] .= $container_close;
@@ -3292,39 +3276,10 @@ foreach($field_sort as $skey)
 $field_sort_flip = array_flip($field_sort);
 $while_sort_interset = array_diff_key($this->field_data,$field_sort_flip);
 $sorted_data = array_merge($while_sorted,$while_sort_interset);
+
+
 ////DEVELOP RENDERER
 $this->renderer = array();
-//'tabs' => array("PERSONAL"=>'faculty_day_added,faculty_year_added,faculty_campus',"OFFICE"=>'Faculty_text,faculty_files,location'),
-/*
-$custom_content = "
-		
-		\$container_open = \"<fieldset style='border:4px black double;'><legend>Testing the form</legend>\";
-		\$container_close = \"</fieldset>\";
-		\$row_begin = \"\";
-		\$row_end = \"\";
-		\$column_textdisplay_open = \"\";
-		\$column_textdisplay_close = \": \";
-		\$column_formdisplay_open = \"\";
-		\$column_formdisplay_close = \"<hr width='50%' />\";
-				
-										";
-										*/
-
-
-//$this->post_print['form_printer']
-/*
-		$this->separator[$container_open] = $container_open;
-		$this->separator[$container_close] = $container_close;
-		$this->separator[$row_begin] = $row_begin;
-		$this->separator[$row_end] = $row_end;
-		$this->separator[$column_textdisplay_open] = $column_textdisplay_open;
-		$this->separator[$column_textdisplay_close] = $column_textdisplay_close;
-		$this->separator[$column_formdisplay_open] = $column_formdisplay_open;
-		$this->separator[$column_formdisplay_close] = $column_formdisplay_close;
-
-*/
-
-
 
 
 $tab_start = $this->tab_separator['$tab_start'];
@@ -3354,6 +3309,9 @@ $error_tab = "";
 $error_active_tab = "";
 $tab_layout_current = "";
 $request_tab = "";
+
+$client_error_script = "";
+$client_error_tab = "";
 //active_tab_namex
 if(isset($_REQUEST["active_tabnamex"])){
 //	if($REQUEST['active_tabnamex'] != ""){
@@ -3362,6 +3320,7 @@ if(isset($_REQUEST["active_tabnamex"])){
 //	}	
 }	
 //$this->alert($request_tab);
+
 
 if(isset($display->tabs)){
 		$tabs = $display->tabs;
@@ -3467,7 +3426,8 @@ else{
 }	
 					}
 $tabed_array[] = $tab_menu_area_end;	
-$tab_count = 0;				
+$tab_count = 0;
+$fields_array = array();				
 		foreach($tabs as $tabname=>$tabarray){
 $tab_value = $tabname . "_tab_button";			
 if(!$_REQUEST){	
@@ -3523,7 +3483,17 @@ else
 				if(array_key_exists($fieldname,$sorted_data)){
 					//$this->alert("$tabname -- $fieldname");
 					if(!in_array($sorted_data[$fieldname],$tabed_array)){
+						
 					$tabed_array[]  = $sorted_data[$fieldname];   ///may refine renderer
+					$fields_array[$fieldname] = "$tabname";
+					$client_error_tab .= "tabindex_" . $fieldname. " = " ."'$tabname';\n";
+					//$client_error_script
+					if(array_key_exists($fieldname,$this->client_validator_array)){
+						foreach($this->client_validator_array[$fieldname] as $cli_err_key=>$cli_err_value){
+							$client_error_script .= $cli_err_value;
+						}
+					}
+					
 					}
 				}
 			}
@@ -3537,13 +3507,79 @@ else
 
 $current_tab = "<input type='text' name='active_tabnamex'  id='active_tabnamex' style='display:none;' value='$tab_layout_current' />";		
 $tabed_style[] = "</script>$excute_current_tab $error_active_tab $current_tab";
-		
+
+//$this->pre_print['call_client_validator'] .=  $client_error_tab;
+$this->pre_print['call_client_validator'] =  "<script>" . $client_error_tab . "</script>\n" . $this->pre_print['call_client_validator'];
+$this->pre_print['call_client_validator'] .=  $client_error_script;
+
+$this->pre_print['call_client_validator'] .= "
+for(f in validation){
+//alert(validation[f][0]);	
+validation_type = 	validation[f][0];
+var get_input_value;
+var tab_set = 1;
+switch (validation_type) {//start witch
+";	
+
+$this->pre_print['call_client_validator'] .= $this->print_client_validator;
+
+$this->pre_print['call_client_validator'] .= "	
+}//end switch
+
+}
+//return false;
+if(prevent_submit > 0){
+	return false;
+}
+else{
+	return true;
+}
+ }</script>";
+
+	echo $client_error_script;
+	print_r($fields_array);		
 	$this->renderer = array_merge($this->pre_print,$tabed_button,$tabed_array,$tabed_style,$this->post_print);
 
 }
 
 else
 {
+	$this->pre_print['call_client_validator'] .=  $client_error_script;
+	foreach($sorted_data as $fieldkey=>$fieldval){
+	//$client_error_script
+	if(array_key_exists($fieldkey,$this->client_validator_array)){
+		foreach($this->client_validator_array[$fieldkey] as $cli_err_key=>$cli_err_value){
+			$client_error_script .= $cli_err_value;
+		}
+	}
+	}	
+$this->pre_print['call_client_validator'] .=  $client_error_script;	
+$this->pre_print['call_client_validator'] .= "
+for(f in validation){
+//alert(validation[f][0]);	
+validation_type = 	validation[f][0];
+var get_input_value;
+var tab_set = 0;
+switch (validation_type) {//start witch
+";	
+
+$this->pre_print['call_client_validator'] .= $this->print_client_validator;
+
+$this->pre_print['call_client_validator'] .= "	
+}//end switch
+
+}
+//return false;
+if(prevent_submit > 0){
+	return false;
+}
+else{
+	return true;
+}
+ }</script>";	
+	
+//	echo $client_error_script;
+//	print_r($sorted_data); //use to print validation function
 	$this->renderer = array_merge($this->pre_print,$sorted_data,$this->post_print);
 }	
 
@@ -4051,14 +4087,20 @@ if(isset($display->fields->$dfieldx->ValidateAsInteger)){
 							///set as callback	
 	$xvalidate_error = $validate_error;
 	if(is_callable($validate_error)){
-	$validate_error = call_user_func($validate_error,$dfieldx,$value,$arr,$lang);
+	$validate_error = call_user_func($validate_error,$dfield,$value,$arr,$lang);
 	}
 	if(!$validate_error){$validate_error = $xvalidate_error;}	
 
-	$this->pre_print['call_client_validator'] .= "validation.push(['ValidateAsInteger',this_form,'$dfield','$validate_error']); \n ";
+	$call_error_call = "validation.push(['ValidateAsInteger',this_form,'$dfield','$validate_error']); \n ";
+	
+//	$this->pre_print['call_client_validator'] .= $call_error_call;
+	
+	$this->client_validator_array[$dfield][] = $call_error_call;
+	
+	
 
 	if(!isset($this->set_client_validator['ValidateAsInteger'])){
-	$this->print_client_validator .= "
+	$client_error = "
 case 'ValidateAsInteger':
 	{	
 if(validation[f][1][validation[f][2]].type){
@@ -4077,16 +4119,24 @@ else{
     }	
 }
 
-/*
-if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); this_err_parent.appendChild(newItemAll);} else {newItemAll = document.getElementById(validation[f][2]  + '_inline_error')} */
+/////ADD ERROR MESSAGE AT TOP, OR ALERT ERROR MESSAGE
+
+if(tab_set == 1){
+val_str = 'tabindex_' + validation[f][2];
+err_tab = eval(val_str);
+}
 
 if(get_input_value != undefined){
-eval('var field_value' + \"='\" + get_input_value + \"';var n = field_value.search(/^[0-9]+$/);alert(field_value);if(n == -1){prevent_submit += 1;alert(validation[f][3]);validation[f][1][validation[f][2]].className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll);  if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll); alert('xxxxx not set yet');}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2])); alert('xxxxx not set yet');}	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); } else{validation[f][1][validation[f][2]].className='';document.getElementById(validation[f][2] + '_label').className=''; if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
+eval('var field_value' + \"='\" + get_input_value + \"';var n = field_value.search(/^[0-9]+$/);if(n == -1){prevent_submit += 1;validation[f][1][validation[f][2]].className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll);  if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));}	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ document.getElementById('tab_button_id_' + err_tab).click(); ini_tab += 1;}	} else{validation[f][1][validation[f][2]].className='';document.getElementById(validation[f][2] + '_label').className=''; if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
 	
 	}	
 	}
 	break;
 ";
+
+$this->print_client_validator .= $client_error;
+
+
 	$this->set_client_validator['ValidateAsInteger'] = true;
 		}
 		
@@ -4113,14 +4163,19 @@ if(isset($display->fields->$dfieldx->ValidateAsEmail)){
 							///set as callback	
 	$xvalidate_error = $validate_error;
 	if(is_callable($validate_error)){
-	$validate_error = call_user_func($validate_error,$dfieldx,$value,$arr,$lang);
+	$validate_error = call_user_func($validate_error,$dfield,$value,$arr,$lang);
 	}
 	if(!$validate_error){$validate_error = $xvalidate_error;}	
 
-	$this->pre_print['call_client_validator'] .= "validation.push(['ValidateAsEmail',this_form,'$dfield','$validate_error']); \n ";
+	$call_error_call = "validation.push(['ValidateAsEmail',this_form,'$dfield','$validate_error']); \n ";
+	
+//	$this->pre_print['call_client_validator'] .= $call_error_call;
+	
+	$this->client_validator_array[$dfield][] = $call_error_call;
+	
 
 	if(!isset($this->set_client_validator['ValidateAsEmail'])){
-	$this->print_client_validator .= "
+	$client_error = "
 case 'ValidateAsEmail':
 	{	
 if(validation[f][1][validation[f][2]].type){
@@ -4143,6 +4198,10 @@ eval('var field_value' + \"='\" + get_input_value + \"';var n = field_value.sear
 	}
 	break;
 ";
+
+$this->print_client_validator .= $client_error;
+
+
 	$this->set_client_validator['ValidateAsEmail'] = true;
 		}
 		
@@ -5718,7 +5777,7 @@ array(	'foo' => 'bar',
 		'form_error_element_style' => "",
 		'form_error_separator' => "",
 		'custom_tab' => $ctab,
-		'tabsX' => array("PERSONAL"=>'faculty_auto,faculty_auto2,faculty_sel,faculty_sel2,faculty_day_added,faculty_year_added,faculty_campus,faculty_shortname,faculty_id,faculty_note',
+		'tabs' => array("PERSONAL"=>'faculty_auto,faculty_auto2,faculty_sel,faculty_sel2,faculty_day_added,faculty_year_added,faculty_campus,faculty_shortname,faculty_id,faculty_note',
 						"OFFICE"=>'faculty_text,faculty_files,location,faculty_logo,faculty_fullname,institution_id',
 						"OTHERS"=>'house,free_no_display,free_no_display2,joint,cvupload,2ndpasswprd,faculty_code,faculty_month_added'),
 		
