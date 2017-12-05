@@ -3312,6 +3312,17 @@ $request_tab = "";
 
 $client_error_script = "";
 $client_error_tab = "";
+
+$client_success = '';
+if($display->client_success){
+	$client_success = $display->client_success;
+}
+
+$client_failure = '';
+if($display->client_failure){
+	$client_failure = $display->client_failure;
+}
+
 //active_tab_namex
 if(isset($_REQUEST["active_tabnamex"])){
 //	if($REQUEST['active_tabnamex'] != ""){
@@ -3523,15 +3534,30 @@ switch (validation_type) {//start witch
 
 $this->pre_print['call_client_validator'] .= $this->print_client_validator;
 
+$client_submit = 1;
+if(isset($display->client_submit)){
+$client_submit = $display->client_submit;
+}
+
 $this->pre_print['call_client_validator'] .= "	
 }//end switch
 
 }
-//return false;
-if(prevent_submit > 0){
+
+client_submit = $client_submit;
+if(prevent_submit > 0 || client_submit == 0){
+
+if(prevent_submit == 0){
+	$client_success;
+}
+else{
+	$client_failure;
+}
+	
 	return false;
 }
 else{
+	$client_success;
 	return true;
 }
  }</script>";
@@ -3565,12 +3591,18 @@ switch (validation_type) {//start witch
 
 $this->pre_print['call_client_validator'] .= $this->print_client_validator;
 
+$client_submit = 1;
+if(isset($display->client_submit)){
+$client_submit = $display->client_submit;
+}
+
 $this->pre_print['call_client_validator'] .= "	
 }//end switch
 
 }
-//return false;
-if(prevent_submit > 0){
+
+client_submit = $client_submit;
+if(prevent_submit > 0 || client_submit == 0){
 	return false;
 }
 else{
@@ -5753,9 +5785,12 @@ array(	'foo' => 'bar',
 		'custom_content' => $custom_content, //div, p, floated div add class values id's
 		///@@@@@@@@@@@@@@@@@@@@ End Printing type @@@@@@@@@@@@@@@@///
 		'insert_reprint' => true,
-		'form_data' => 'alldata',
+		'form_data' => 'alldata', //after all success on server
 		'submit_attr' => "style=''",
 		'server_validate' => true,
+		'client_submit' => 1,
+		'client_success' => "alert('form is success ' + validation[f][1][4].value)",  ////carry form details in validation[f][1] array check using compact mode for IE, EDGE
+		'client_failure' => "alert('form is failed ' + validation[f][1][5].value)",
 		'form_validate_inline' => true, //inline //list
 		'form_validate_list' => true, //inline //list
 		'form_validate_inline_position' => "after", //before,after      //before or after elemen
