@@ -313,6 +313,35 @@ function ValidateAsInteger($name,$value,$validate_error){
 }
 
 
+function ValidateAsNotEmpty($name,$value,$validate_error){
+	if($value != "")////email
+	{
+		///nothing runs here
+	}
+	else
+	{
+		if($validate_error =="**not_set"){$validate_error ="Input value is empty";}
+		$this->validation_error["$name"][] = $validate_error;
+		$this->allow_sql += 1;
+	}	
+}
+
+
+function ValidateAsSet($name,$value,$validate_error){
+	if(!empty($value))////email
+	{
+		///nothing runs here
+	}
+	else
+	{
+		if($validate_error =="**not_set"){$validate_error ="Input not set";}
+		$this->validation_error["$name"][] = $validate_error;
+		$this->allow_sql += 1;
+	}	
+}
+
+
+
 function ValidateAsFloat($name,$value,$validate_error){
 	if(preg_match("/^[0-9.]+[0-9.]+$/",$value))////email
 	{
@@ -858,6 +887,47 @@ $reprint->$name = $value;
 				$this->ValidateAsFloat($name,$value,$validate_error);
 				}
 				}
+				
+				
+				if(isset($display->fields->$name->ValidateAsNotEmpty))
+				{
+					if($display->fields->$name->ValidateAsNotEmpty == true){
+					$validate_error = "**not_set";					
+					if(isset($display->fields->$name->ValidateAsNotEmptyErrorMessage))
+						{
+							$validate_error = $display->fields->$name->ValidateAsNotEmptyErrorMessage;
+						}
+										///set as callback	
+				$xvalidate_error = $validate_error;
+				if(is_callable($validate_error)){
+				$validate_error = call_user_func($validate_error,$name,$value,$arr,$lang);
+				}
+				if(!$validate_error){$validate_error = $xvalidate_error;}	
+				///set as callback
+				$this->ValidateAsNotEmpty($name,$value,$validate_error);
+				}
+				}				
+
+				
+				if(isset($display->fields->$name->ValidateAsSet))
+				{
+					if($display->fields->$name->ValidateAsSet == true){
+					$validate_error = "**not_set";					
+					if(isset($display->fields->$name->ValidateAsSetErrorMessage))
+						{
+							$validate_error = $display->fields->$name->ValidateAsSetErrorMessage;
+						}
+										///set as callback	
+				$xvalidate_error = $validate_error;
+				if(is_callable($validate_error)){
+				$validate_error = call_user_func($validate_error,$name,$value,$arr,$lang);
+				}
+				if(!$validate_error){$validate_error = $xvalidate_error;}	
+				///set as callback
+				$this->ValidateAsSet($name,$value,$validate_error);
+				}
+				}				
+				
 
 								
 				if(isset($display->fields->$name->ValidateAsDate))
@@ -982,9 +1052,19 @@ $reprint->$name = $value;
 
 ////
 
+$in_free_field = false;
+
+foreach($add_free_field as $f_key=>$f_val){
+	if(is_array($f_val)){	
+		if($f_val[0] == $name){
+			$in_free_field = true;
+		}
+	}	
+}
 
 				
-if(isset($field_processor->$name)){
+if(isset($field_processor->$name) || $in_free_field == true){
+	if(isset($field_processor->$name)){	
 $processor = $field_processor->$name;	
 if(isset($field_processor->$name->content)){
 	eval($field_processor->$name->content);
@@ -1010,7 +1090,7 @@ if(is_string($processor)){
 
 	}
 }
-
+}
 }
 else
 {////
@@ -2558,6 +2638,11 @@ $this_value = $reprint->$val_error; //input value
 
 $val_error_print = str_replace("@name", $val_error, $val_error_print);
 $val_error_print = str_replace("@label", $label_lang, $val_error_print);
+
+	if(is_array($this_value)){
+		$this_value = implode(",", $this_value);
+	}
+
 $val_error_print = str_replace("@value", $this_value, $val_error_print);
 
 				echo "<li><span>$val_error_print</span></li>";
@@ -2842,6 +2927,7 @@ $this->pre_print['call_client_validator'] .= "<script>
 function validateForm_$form_id(this_form){\n
 prevent_submit = 0;\n 
 var validation = [];
+var error = [];
 
 var ini_tab = 0;
 
@@ -3314,6 +3400,8 @@ $client_error_script = "";
 $client_error_tab = "";
 
 $client_success = '';
+
+$first_error = 0;
 if($display->client_success){
 	$client_success = $display->client_success;
 }
@@ -3498,10 +3586,18 @@ else
 					$tabed_array[]  = $sorted_data[$fieldname];   ///may refine renderer
 					$fields_array[$fieldname] = "$tabname";
 					$client_error_tab .= "tabindex_" . $fieldname. " = " ."'$tabname';\n";
+						if(isset($this->validation_error[$fieldname])){
+							if($first_error == 0){		
+							$this->pre_print['call_client_validator'] =  "<script>
+							window.addEventListener(\"load\", function (event) {document.getElementById('$fieldname').focus(); }, true);
+							</script>\n" . $this->pre_print['call_client_validator'];
+							$first_error +=1;
+							}
+						}
 					//$client_error_script
 					if(array_key_exists($fieldname,$this->client_validator_array)){
 						foreach($this->client_validator_array[$fieldname] as $cli_err_key=>$cli_err_value){
-							$client_error_script .= $cli_err_value;
+							$client_error_script .= $cli_err_value;							
 						}
 					}
 					
@@ -3562,8 +3658,8 @@ else{
 }
  }</script>";
 
-	echo $client_error_script;
-	print_r($fields_array);		
+//	echo $client_error_script;
+//	print_r($fields_array);		
 	$this->renderer = array_merge($this->pre_print,$tabed_button,$tabed_array,$tabed_style,$this->post_print);
 
 }
@@ -3572,6 +3668,14 @@ else
 {
 	$this->pre_print['call_client_validator'] .=  $client_error_script;
 	foreach($sorted_data as $fieldkey=>$fieldval){
+						if(isset($this->validation_error[$fieldkey])){
+							if($first_error == 0){		
+								$this->pre_print['call_client_validator'] =  "<script>
+								window.addEventListener(\"load\", function (event) {document.getElementById('$fieldkey').focus(); }, true);
+								</script>\n" . $this->pre_print['call_client_validator'];
+								$first_error +=1;
+							}
+						}
 	//$client_error_script
 	if(array_key_exists($fieldkey,$this->client_validator_array)){
 		foreach($this->client_validator_array[$fieldkey] as $cli_err_key=>$cli_err_value){
@@ -3912,6 +4016,8 @@ $form_error_separator = "";
 }///END set default values
 
 
+
+
 $invalid_error = "";
 
 if(isset($display->form_validate_inline)){ ////setting inline error details
@@ -3925,6 +4031,9 @@ $invalid_error .= "<$form_validate_all_container class=\"$form_validate_all_clas
 $this_value = $reprint_value; //input value
 $val_error_print = str_replace("@name", $dfield, $val_error_print);
 $val_error_print = str_replace("@label", $print_lang, $val_error_print);
+if(is_array($this_value)){
+$this_value = implode(",", $this_value);
+}
 $val_error_print = str_replace("@value", $this_value, $val_error_print);
 //End erro custome
 			$invalid_error .= "<$form_validate_each_container style=\"$form_validate_each_style\" class=\"$form_validate_each_class\" >" . $val_error_print . "</$form_validate_each_container>";
@@ -3958,6 +4067,13 @@ else{
 }
 ///END inline error position
 
+}
+else{
+$form_error_label_class = "";
+$form_error_label_style = "";	
+
+$form_error_element_class = "";
+$form_error_element_style = "";	
 }
 }
 
@@ -4106,12 +4222,23 @@ $error_separator = "";
 }
 
 }///END set default values
+
+$inline_validate = 1;
+		
+if(isset($display->form_validate_inline)){ ////setting inline error details
+	if(($display->form_validate_inline == true)){
+		$inline_validate = 1;
+	}
+		if(($display->form_validate_inline == false)){
+		$inline_validate = 0;
+	}
+}
 	
 
 //////CLEINT VALIDATE AS INTERGER				
 if(isset($display->fields->$dfieldx->ValidateAsInteger)){
 		if($display->fields->$dfieldx->ValidateAsInteger == true){
-		$validate_error = "**not_set";				
+		$validate_error = "Invalid integer";				
 					if(isset($display->fields->$dfieldx->ValidateAsIntegerErrorMessage))
 			{
 				$validate_error = $display->fields->$dfieldx->ValidateAsIntegerErrorMessage;
@@ -4157,9 +4284,9 @@ if(tab_set == 1){
 val_str = 'tabindex_' + validation[f][2];
 err_tab = eval(val_str);
 }
-
+inline_validate = $inline_validate;
 if(get_input_value != undefined){
-eval('var field_value' + \"='\" + get_input_value + \"';var n = field_value.search(/^[0-9]+$/);if(n == -1){prevent_submit += 1;validation[f][1][validation[f][2]].className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll);  if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));}	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ document.getElementById('tab_button_id_' + err_tab).click(); ini_tab += 1;}	} else{validation[f][1][validation[f][2]].className='';document.getElementById(validation[f][2] + '_label').className=''; if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
+eval('var field_value' + \"='\" + get_input_value + \"';var n = field_value.search(/^[0-9]+$/);if(n == -1){prevent_submit += 1;document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ document.getElementById('tab_button_id_' + err_tab).click(); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{document.getElementById(validation[f][2]).className='';document.getElementById(validation[f][2] + '_label').className=''; if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
 	
 	}	
 	}
@@ -4182,12 +4309,15 @@ $this->print_client_validator .= $client_error;
 
 //////END CLEINT VALIDATE AS INTERGER	
 
-	
 
-//////CLEINT VALIDATE AS EMAIL		
+
+
+
+	
+//////CLEINT VALIDATE AS EMAIL
 if(isset($display->fields->$dfieldx->ValidateAsEmail)){
 		if($display->fields->$dfieldx->ValidateAsEmail == true){
-		$validate_error = "**not_set";				
+		$validate_error = "Invalid Email format";				
 					if(isset($display->fields->$dfieldx->ValidateAsEmailErrorMessage))
 			{
 				$validate_error = $display->fields->$dfieldx->ValidateAsEmailErrorMessage;
@@ -4204,6 +4334,7 @@ if(isset($display->fields->$dfieldx->ValidateAsEmail)){
 //	$this->pre_print['call_client_validator'] .= $call_error_call;
 	
 	$this->client_validator_array[$dfield][] = $call_error_call;
+	
 	
 
 	if(!isset($this->set_client_validator['ValidateAsEmail'])){
@@ -4226,7 +4357,17 @@ else{
     }	
 }
 
-eval('var field_value' + \"='\" + get_input_value + \"';var n = field_value.search(/^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-._]+..[a-zA-Z0-9-.]+$/);alert(field_value);if(n == -1){prevent_submit += 1;alert(validation[f][3]);validation[f][1][validation[f][2]].className='$error_element_class';}else{validation[f][1][validation[f][2]].className='';}\");
+/////ADD ERROR MESSAGE AT TOP, OR ALERT ERROR MESSAGE
+
+if(tab_set == 1){
+val_str = 'tabindex_' + validation[f][2];
+err_tab = eval(val_str);
+}
+inline_validate = $inline_validate;
+if(get_input_value != undefined){
+eval('var field_value' + \"='\" + get_input_value + \"';var n = field_value.search(/^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-._]+..[a-zA-Z0-9-.]+$/);if(n == -1){prevent_submit += 1;document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ document.getElementById('tab_button_id_' + err_tab).click(); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{document.getElementById(validation[f][2]).className='';document.getElementById(validation[f][2] + '_label').className=''; if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
+	
+	}	
 	}
 	break;
 ";
@@ -4245,9 +4386,374 @@ $this->print_client_validator .= $client_error;
 
 }
 
-//////END CLEINT VALIDATE AS EMAIL
-
+//////END CLEINT VALIDATE AS EMAIL	
 ////////////////////////////////////
+
+
+
+
+
+
+
+
+	
+//////CLEINT VALIDATE AS SET
+if(isset($display->fields->$dfieldx->ValidateAsSet)){
+		if($display->fields->$dfieldx->ValidateAsSet == true){
+		$validate_error = "not set";				
+					if(isset($display->fields->$dfieldx->ValidateAsSetErrorMessage))
+			{
+				$validate_error = $display->fields->$dfieldx->ValidateAsSetErrorMessage;
+			}
+							///set as callback	
+	$xvalidate_error = $validate_error;
+	if(is_callable($validate_error)){
+	$validate_error = call_user_func($validate_error,$dfield,$value,$arr,$lang);
+	}
+	if(!$validate_error){$validate_error = $xvalidate_error;}	
+
+	$call_error_call = "validation.push(['ValidateAsSet',this_form,'$dfield','$validate_error']); \n ";
+	
+//	$this->pre_print['call_client_validator'] .= $call_error_call;
+	
+	$this->client_validator_array[$dfield][] = $call_error_call;
+	
+	
+
+	if(!isset($this->set_client_validator['ValidateAsSet'])){
+	$client_error = "
+case 'ValidateAsSet':
+	{	
+	var radios = 	document.getElementsByName(validation[f][2] + '[]');
+	
+    // loop through list of radio buttons
+    for (var i=0, len=radios.length; i<len; i++) {
+        if ( radios[i].checked == true) { // radio checked?
+            get_input_value = radios[i].value; // if so, hold its value in val
+            break; // and break out of for loop
+        }
+		else
+		{
+		get_input_value = 'not_set';	
+		}	
+    }	
+
+//alert(get_input_value);
+
+/////ADD ERROR MESSAGE AT TOP, OR ALERT ERROR MESSAGE
+
+if(tab_set == 1){
+val_str = 'tabindex_' + validation[f][2];
+err_tab = eval(val_str);
+}
+
+
+inline_validate = $inline_validate;
+
+if(get_input_value != undefined){
+eval('var field_value' + \"='\" + get_input_value + \"';if(get_input_value == 'not_set'){prevent_submit += 1;document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement;  /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ document.getElementById('tab_button_id_' + err_tab).click(); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{document.getElementById(validation[f][2]).className='';document.getElementById(validation[f][2] + '_label').className=''; if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
+	
+	}	
+	}
+	break;
+";
+
+$this->print_client_validator .= $client_error;
+
+
+	$this->set_client_validator['ValidateAsSet'] = true;
+		}
+		
+		
+		
+		
+		
+	}
+
+}
+
+//////END CLEINT VALIDATE AS SET	
+////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+	
+//////CLEINT VALIDATE AS FLOAT
+if(isset($display->fields->$dfieldx->ValidateAsFloat)){
+		if($display->fields->$dfieldx->ValidateAsFloat == true){
+		$validate_error = "Invalid float";
+		
+			if(isset($display->fields->$dfieldx->ValidateAsFloatErrorMessage))
+			{
+				$validate_error = $display->fields->$dfieldx->ValidateAsFloatErrorMessage;
+			}
+
+
+			///set as callback	
+	$xvalidate_error = $validate_error;
+	if(is_callable($validate_error)){
+	$validate_error = call_user_func($validate_error,$dfield,$value,$arr,$lang);
+	}
+	if(!$validate_error){$validate_error = $xvalidate_error;}	
+	
+
+
+
+	$call_error_call = "validation.push(['ValidateAsFloat',this_form,'$dfield','$validate_error']); \n ";
+	
+//	$this->pre_print['call_client_validator'] .= $call_error_call;
+	
+	$this->client_validator_array[$dfield][] = $call_error_call;
+	
+	
+
+	if(!isset($this->set_client_validator['ValidateAsFloat'])){
+	$client_error = "
+case 'ValidateAsFloat':
+	{	
+if(validation[f][1][validation[f][2]].type){
+	get_input_value = 	validation[f][1][validation[f][2]].value;
+}
+else{
+	//get_input_value = 	document.querySelector('input[name=faculty_shortname][checked]').value;	
+	var radios = 	validation[f][1][validation[f][2]];
+	
+    // loop through list of radio buttons
+    for (var i=0, len=radios.length; i<len; i++) {
+        if ( radios[i].checked || radios[i].selected) { // radio checked?
+            get_input_value = radios[i].value; // if so, hold its value in val
+            break; // and break out of for loop
+        }
+    }	
+}
+
+/////ADD ERROR MESSAGE AT TOP, OR ALERT ERROR MESSAGE
+
+if(tab_set == 1){
+val_str = 'tabindex_' + validation[f][2];
+err_tab = eval(val_str);
+}
+inline_validate = $inline_validate;
+
+
+if(get_input_value != undefined){
+eval('var field_value' + \"='\" + get_input_value + \"';var n = field_value.search(/^[0-9.]+[0-9.]+$/);if(n == -1){prevent_submit += 1;document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ document.getElementById('tab_button_id_' + err_tab).click(); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{document.getElementById(validation[f][2]).className='';document.getElementById(validation[f][2] + '_label').className=''; if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
+	
+	}	
+	}
+	break;
+";
+
+$this->print_client_validator .= $client_error;
+
+
+	$this->set_client_validator['ValidateAsFloat'] = true;
+		}
+		
+		
+		
+		
+		
+	}
+
+}
+
+//////END CLEINT VALIDATE AS FLOAT	
+////////////////////////////////////
+
+
+
+
+	
+//////CLEINT VALIDATE AS NOT EMPTY
+if(isset($display->fields->$dfieldx->ValidateAsNotEmpty)){
+		if($display->fields->$dfieldx->ValidateAsNotEmpty == true){
+		$validate_error = "Empty value!";
+		
+			if(isset($display->fields->$dfieldx->ValidateAsNotEmptyErrorMessage))
+			{
+				$validate_error = $display->fields->$dfieldx->ValidateAsNotEmptyErrorMessage;
+			}
+
+
+			///set as callback	
+	$xvalidate_error = $validate_error;
+	if(is_callable($validate_error)){
+	$validate_error = call_user_func($validate_error,$dfield,$value,$arr,$lang);
+	}
+	if(!$validate_error){$validate_error = $xvalidate_error;}	
+	
+
+
+
+	$call_error_call = "validation.push(['ValidateAsNotEmpty',this_form,'$dfield','$validate_error']); \n ";
+	
+//	$this->pre_print['call_client_validator'] .= $call_error_call;
+	
+	$this->client_validator_array[$dfield][] = $call_error_call;
+	
+	
+
+	if(!isset($this->set_client_validator['ValidateAsNotEmpty'])){
+	$client_error = "
+case 'ValidateAsNotEmpty':
+	{	
+if(validation[f][1][validation[f][2]].type){
+	get_input_value = 	validation[f][1][validation[f][2]].value;
+}
+else{
+	//get_input_value = 	document.querySelector('input[name=faculty_shortname][checked]').value;	
+	var radios = 	validation[f][1][validation[f][2]];
+	
+    // loop through list of radio buttons
+    for (var i=0, len=radios.length; i<len; i++) {
+        if ( radios[i].checked || radios[i].selected) { // radio checked?
+            get_input_value = radios[i].value; // if so, hold its value in val
+            break; // and break out of for loop
+        }
+    }	
+}
+
+/////ADD ERROR MESSAGE AT TOP, OR ALERT ERROR MESSAGE
+
+if(tab_set == 1){
+val_str = 'tabindex_' + validation[f][2];
+err_tab = eval(val_str);
+}
+inline_validate = $inline_validate;
+
+
+if(get_input_value != undefined){
+eval('var field_value' + \"='\" + get_input_value + \"';if(field_value == ''){prevent_submit += 1;document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ document.getElementById('tab_button_id_' + err_tab).click(); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{document.getElementById(validation[f][2]).className='';document.getElementById(validation[f][2] + '_label').className=''; if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
+	
+	}	
+	}
+	break;
+";
+
+$this->print_client_validator .= $client_error;
+
+
+	$this->set_client_validator['ValidateAsNotEmpty'] = true;
+		}
+		
+		
+		
+		
+		
+	}
+
+}
+
+//////END CLEINT VALIDATE AS NOT EMPTY
+////////////////////////////////////
+
+
+
+
+
+
+
+	
+//////CLEINT VALIDATE AS DATE
+if(isset($display->fields->$dfieldx->ValidateAsDate)){
+		if($display->fields->$dfieldx->ValidateAsDate == true){
+		$validate_error = "Invalid Date Format";				
+		$separator = '-';
+		
+			if(isset($display->fields->$dfieldx->ValidateAsFloatErrorMessage))
+			{
+				$separator = $display->fields->$dfieldx->ValidateAsFloatErrorMessage;
+			}
+
+//DateSeparator			
+			if(isset($display->fields->$dfieldx->DateSeparator))
+			{
+				$separator = $display->fields->$dfieldx->DateSeparator;
+			}
+							///set as callback	
+	$xvalidate_error = $validate_error;
+	if(is_callable($validate_error)){
+	$validate_error = call_user_func($validate_error,$dfield,$value,$arr,$lang);
+	}
+	if(!$validate_error){$validate_error = $xvalidate_error;}	
+
+	$call_error_call = "validation.push(['ValidateAsDate',this_form,'$dfield','$validate_error']); \n ";
+	
+//	$this->pre_print['call_client_validator'] .= $call_error_call;
+	
+	$this->client_validator_array[$dfield][] = $call_error_call;
+	
+	
+	if(!isset($this->set_client_validator['ValidateAsDate'])){
+	$client_error = "
+case 'ValidateAsDate':
+	{	
+if(validation[f][1][validation[f][2]].type){
+	get_input_value = 	validation[f][1][validation[f][2]].value;
+}
+else{
+	//get_input_value = 	document.querySelector('input[name=faculty_shortname][checked]').value;	
+	var radios = 	validation[f][1][validation[f][2]];
+	
+    // loop through list of radio buttons
+    for (var i=0, len=radios.length; i<len; i++) {
+        if ( radios[i].checked || radios[i].selected) { // radio checked?
+            get_input_value = radios[i].value; // if so, hold its value in val
+            break; // and break out of for loop
+        }
+    }	
+}
+
+/////ADD ERROR MESSAGE AT TOP, OR ALERT ERROR MESSAGE
+
+if(tab_set == 1){
+val_str = 'tabindex_' + validation[f][2];
+err_tab = eval(val_str);
+}
+inline_validate = $inline_validate;
+
+
+if(get_input_value != undefined){
+eval('var field_value' + \"='\" + get_input_value + \"';var n = field_value.search(/^[0-9]+$separator"."[0-9]+$separator"."[0-9]+$/);if(n == -1){prevent_submit += 1;document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ document.getElementById('tab_button_id_' + err_tab).click(); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{document.getElementById(validation[f][2]).className='';document.getElementById(validation[f][2] + '_label').className=''; if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
+	
+	}	
+	}
+	break;
+";
+
+$this->print_client_validator .= $client_error;
+
+
+	$this->set_client_validator['ValidateAsDate'] = true;
+		}
+		
+		
+		
+		
+		
+	}
+
+}
+
+//////END CLEINT VALIDATE AS DATE	
+////////////////////////////////////
+
+
+
+
+
+
+
+
+
 ////////////////////////////////////
 ////////////////////////////////////
 //////////END CLIENT VALIDATION////
@@ -4601,7 +5107,16 @@ foreach($suggestion_array as $suggestion_key => $suggestion){
 $match_val = strtolower($auto_complete_value);
 $sug_val = strtolower($suggestion);
 
-if(preg_match("/^$match_val/",$sug_val)){
+$reg_pattern = "/$match_val/";	
+if(isset($display->fields->$dfieldx->search_type)){
+if($display->fields->$dfieldx->search_type == 'start'){
+$reg_pattern = "/^$match_val/";	
+}	
+}
+
+
+
+if(preg_match($reg_pattern,$sug_val)){
 
 $sug_id += 1;
 
@@ -5245,20 +5760,24 @@ if(isset($this->update_fields_ajax["$dfield"]))
         break;
 	case "customPHP":		////// Replacing with customized php content eval()
 	{	
-
+$php_content = "";
 	//echo "Your favourite PHP CODE";
 	///////////check set////////////
 	if (isset($display->fields->$dfieldx->content))
 	{
-	$php_content =$display->fields->$dfieldx->content;
+	$php_content = $display->fields->$dfieldx->content;
 	}
-	else
-	{
-	//$this->input_element["$dfield"] . = "echo \"\";";
+	
+	if(is_callable($php_content)){
+	$php_content = call_user_func($php_content,$dfield,$reprint_value);
 	}
+	else{
+	$php_content = eval($php_content);
+	}
+
 	///////////End check set////////////
 	
-	eval($php_content); /// use "" in object  
+	$this->input_element["$dfield"] .= $php_content; /// use "" in object  
 	
 
 		
@@ -5513,7 +6032,7 @@ foreach($array_raw_select as $skey => $sdata)
 				
 				
 			}	
-				$not_ingroup .= "<input type='checkbox' $selected value='$value'  $attr  style=\"$form_error_element_style\" class=\"$form_error_element_class\"   id='$id"."_value' name='$dfield"."[]' /> $option $element_separator";
+				$not_ingroup .= "<input type='checkbox' $selected value='$value'  $attr  style=\"$form_error_element_style\" class=\"$form_error_element_class\"   id='$id"."_$value' name='$dfield"."[]' /> $option $element_separator";
 				}
 //}
 	
@@ -5750,12 +6269,15 @@ $time = time();
 {///add field under dev $add_field
 }
 $add_free_field  = array( //must add proccessors   ////when $add_free_field is declared, parameter 2 must be same as that set in $display->fields->type
-					array("house","customHTML"),
+					array("house","customPHP"),
 					array("location","color"),  /////must still be set in display to choose type
 					array("place","select"),
 					array("joint","textarea"),
 					array("free_no_display","text"),
 					array("free_no_display2","text"),
+					array("free_no_display3","text"),
+					array("free_no_display4","text"),
+					array("free_no_display5","checkbox"),
 					//array("","");
 						);
 
@@ -5789,8 +6311,9 @@ array(	'foo' => 'bar',
 		'submit_attr' => "style=''",
 		'server_validate' => true,
 		'client_submit' => 1,
-		'client_success' => "alert('form is success ' + validation[f][1][4].value)",  ////carry form details in validation[f][1] array check using compact mode for IE, EDGE
-		'client_failure' => "alert('form is failed ' + validation[f][1][5].value)",
+	//	'client_success' => "alert('form is success ' + validation[f][1][4].value)",  ////carry form details in validation[f][1] array check using compact mode for IE, EDGE
+		'client_success' => "alert('form is success ' + validation[f][1]['faculty_id'].value)",  ////details in validation[f][1] array check using compact mode for IE, EDGE
+		'client_failure' => "alert('form is failed ' + error)",
 		'form_validate_inline' => true, //inline //list
 		'form_validate_list' => true, //inline //list
 		'form_validate_inline_position' => "after", //before,after      //before or after elemen
@@ -5814,7 +6337,7 @@ array(	'foo' => 'bar',
 		'custom_tab' => $ctab,
 		'tabs' => array("PERSONAL"=>'faculty_auto,faculty_auto2,faculty_sel,faculty_sel2,faculty_day_added,faculty_year_added,faculty_campus,faculty_shortname,faculty_id,faculty_note',
 						"OFFICE"=>'faculty_text,faculty_files,location,faculty_logo,faculty_fullname,institution_id',
-						"OTHERS"=>'house,free_no_display,free_no_display2,joint,cvupload,2ndpasswprd,faculty_code,faculty_month_added'),
+						"OTHERS"=>'house,free_no_display,free_no_display2,free_no_display3,free_no_display4,free_no_display5,joint,cvupload,2ndpasswprd,faculty_code,faculty_month_added'),
 		
 		'update' => $update, /////UPDATE
 		'stop_sql' => false, /////UPDATE
@@ -5913,7 +6436,39 @@ array(	'foo' => 'bar',
 																				),
 													'element_separator' => '<br />', ///HTML TAG
 												///	'checked' => array('2','3')
-												),													
+												),
+		'free_no_display3' => (object) array ( 	'type'=> 'text', //checkbox, multipleselect		
+												'ValidateAsFloat' => true,
+											//	'ValidateAsIntegerErrorMessage' => "@name @label @value is not an integer",
+												'ValidateAsFloatErrorMessage' => "not a valid float",		
+													'values_for_select' => array(	"January" => "1", ////The key is displayed & value = value
+																					"February" => "2",
+																					"March" => "3"
+																				),
+													'element_separator' => '<br />', ///HTML TAG
+												///	'checked' => array('2','3')
+												),
+		'free_no_display4' => (object) array ( 	'type'=> 'text', //checkbox, multipleselect		
+												'ValidateAsNotEmpty' => true,
+											//	'ValidateAsIntegerErrorMessage' => "@name @label @value is not an integer",
+												'ValidateAsNotEmptyErrorMessage' => "Input is empty",		
+													'values_for_select' => array(	"January" => "1", ////The key is displayed & value = value
+																					"February" => "2",
+																					"March" => "3"
+																				),
+													'element_separator' => '<br />', ///HTML TAG
+												///	'checked' => array('2','3')
+												),
+		'free_no_display5' => (object) array ( 	'type'=> 'checkbox', //checkbox, multipleselect		
+												'ValidateAsSet' => true,
+												'ValidateAsSet' => "Input not set",		
+													'values_for_select' => array(	"January" => "1", ////The key is displayed & value = value
+																					"February" => "2",
+																					"March" => "3"
+																				),
+													'element_separator' => '<br />', ///HTML TAG
+												//	'checked' => array('1')
+												),												
 		'institution_id' => (object) array ( 	'type'=> 'select',
 												'id' => 'insssss',		
 								/*
@@ -6029,7 +6584,7 @@ array(	'foo' => 'bar',
 													'ValidateAsDate' => true, //ValidateAsDate, ValidateAsEmail, ValidateAsFloat, ValidateAsInteger
 													'ValidateAsDateErrorMessage' => "not_date",
 												//	'ValidateAsFloat' => 'true',
-													'DateSeparator' => "-"	//no slash (/)fix letter
+													'DateSeparator' => '-'	//no slash (/)fix letter
 													),	
 	'faculty_campus' => (object) array ( 	
 													'type'=> 'file',
@@ -6050,8 +6605,11 @@ array(	'foo' => 'bar',
 
 'house' => (object) array ( 	
 											//	'type'=> 'number', 									
-												'type'=> 'customHTML', 
-												'content'=> "HELLO",  ///use "" for string   data field: $dfield or $print_lang
+											//	'type'=> 'customHTML', 
+												'type'=> 'customPHP', 
+											//	'content'=> "HELLO",  ///use "" for string   data field: $dfield or $print_lang
+												'content'=> "echo \"\$dfield\";", // $this->input_element["$dfield"] .= $php_content; ///use "" for string   data field: $dfield or $print_lang
+												'content'=> "cphp", // $this->input_element["$dfield"] .= $php_content; ///use "" for string   data field: $dfield or $print_lang
 												//'ValidateAsDate' => 1,	
 												),	
 'location' => (object) array ( 	
@@ -6255,6 +6813,11 @@ array(	'foo' => 'bar',
 	
 	);
 }
+
+function cphp($name,$value){
+return "$name ---- $value";	
+}
+
 	
 	////form data
 	function alldata($arr,$sql_array){
@@ -6439,6 +7002,7 @@ $custom_to_db = array("faculty_time_todb" => "$time");
 'location' => (object) array(), //////use undesrscore for spaced values
 '2ndpasswprd' => (object) array(),
 'place' => (object) array(),	
+//'free_no_display5' => '',	
 'faculty_campus' => 'filep',	
 'joint' => "fpro",				///string as callable and object array as eval() function if source code is known						
 'cvupload' => (object) array(),  //for all additional field is recommened to add at least a blank proccessor
