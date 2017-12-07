@@ -4417,15 +4417,40 @@ if(isset($display->fields->$dfieldx->ValidateAsSet)){
 //	$this->pre_print['call_client_validator'] .= $call_error_call;
 	
 	$this->client_validator_array[$dfield][] = $call_error_call;
-	
-	
 
-	if(!isset($this->set_client_validator['ValidateAsSet'])){
-	$client_error = "
-case 'ValidateAsSet':
-	{	
-	var radios = 	document.getElementsByName(validation[f][2] + '[]');
+$input_settype = "	var radios = 	validation[f][1][validation[f][2]];
 	
+    // loop through list of radio buttons
+    for (var i=0, len=radios.length; i<len; i++) {
+        if ( radios[i].checked || radios[i].selected) { // radio checked?
+            get_input_value = radios[i].value; // if so, hold its value in val
+            break; // and break out of for loop
+        }
+		else
+		{
+			get_input_value = 'not_set';
+		}
+    }";
+
+if($display->fields->$dfieldx->type == 'radio'){
+$input_settype = "	var radios = 	validation[f][1][validation[f][2]];
+	
+    // loop through list of radio buttons
+    for (var i=0, len=radios.length; i<len; i++) {
+        if ( radios[i].checked || radios[i].selected) { // radio checked?
+            get_input_value = radios[i].value; // if so, hold its value in val
+            break; // and break out of for loop
+        }
+		else
+		{
+			get_input_value = 'not_set';
+		}
+    }";	
+}	
+
+
+if($display->fields->$dfieldx->type == 'checkbox'){
+$input_settype = "	var radios = 	document.getElementsByName(validation[f][2] + '[]');	
     // loop through list of radio buttons
     for (var i=0, len=radios.length; i<len; i++) {
         if ( radios[i].checked == true) { // radio checked?
@@ -4436,7 +4461,15 @@ case 'ValidateAsSet':
 		{
 		get_input_value = 'not_set';	
 		}	
-    }	
+    }";	
+}		
+
+	if(!isset($this->set_client_validator['ValidateAsSet'])){
+	$client_error = "
+case 'ValidateAsSet':
+	{	
+	
+$input_settype	
 
 //alert(get_input_value);
 
@@ -6277,7 +6310,7 @@ $add_free_field  = array( //must add proccessors   ////when $add_free_field is d
 					array("free_no_display2","text"),
 					array("free_no_display3","text"),
 					array("free_no_display4","text"),
-					array("free_no_display5","checkbox"),
+					array("free_no_display5","multipleselect"),
 					//array("","");
 						);
 
@@ -6459,7 +6492,7 @@ array(	'foo' => 'bar',
 													'element_separator' => '<br />', ///HTML TAG
 												///	'checked' => array('2','3')
 												),
-		'free_no_display5' => (object) array ( 	'type'=> 'checkbox', //checkbox, multipleselect		
+		'free_no_display5' => (object) array ( 	'type'=> 'multipleselect', //checkbox, multipleselect		
 												'ValidateAsSet' => true,
 												'ValidateAsSet' => "Input not set",		
 													'values_for_select' => array(	"January" => "1", ////The key is displayed & value = value
