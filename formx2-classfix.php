@@ -243,12 +243,25 @@ function prt($string){
 function alert($string){		
 	echo "<script>alert('" .$string . "');</script>" . "\n";	
 	}
+	
 function form_render($data){
 	foreach($data as $writer)
 	{
 		echo $writer. "\n";
 	}
 }
+
+	
+function error_render($data){
+	foreach($data as $writer_key=>$writer_value)
+	{
+		foreach($writer_value as $writer_keyx=>$writer_valuex)
+		{
+			echo $writer_valuex. "\n";
+		}
+	}
+}
+
 
 public $validation_error = array();
 public $allow_sql = 0;
@@ -280,6 +293,9 @@ public $set_client_validator = array();
 public $print_client_validator = "";
 
 public $client_validator_array = array();
+
+public $server_error = array();
+public $error_renderer = array();
 
 
 
@@ -3049,11 +3065,28 @@ else{
 $form_error_separator = "<hr />";
 }
 
+
+if(isset($display->form_validate_outline_all)){
+$form_validate_outline_all = $display->form_validate_outline_all;
+}
+else{
+$form_validate_outline_all = "ul";
+}
+
+
+if(isset($display->form_validate_outline_each)){
+$form_validate_outline_each = $display->form_validate_outline_each;
+}
+else{
+$form_validate_outline_each = "li";
+}
 }///END set default values
 ///check validation error
 foreach($this->validation_error as $val_error=>$val_error_msg)
 		{
-			echo "<ul style=\"$form_validate_list_style\" class=\"$form_validate_list_class\">";
+
+$this->server_error[$val_error][] = "<$form_validate_outline_all style=\"$form_validate_list_style\" class=\"$form_validate_list_class\">";
+		//	echo "<$form_validate_outline_all style=\"$form_validate_list_style\" class=\"$form_validate_list_class\">";
 			
 				foreach($val_error_msg as $val_error_print)
 			{
@@ -3088,11 +3121,15 @@ $val_error_print = str_replace("@label", $label_lang, $val_error_print);
 
 $val_error_print = str_replace("@value", $this_value, $val_error_print);
 
-				echo "<li><span>$val_error_print</span></li>";
-			
-			
+$this->server_error[$val_error][] = "<$form_validate_outline_each>$val_error_print</$form_validate_outline_each>";
+
+			//	echo "<$form_validate_outline_each>$val_error_print</$form_validate_outline_each>";
+						
 			}
-		echo "</ul>";
+
+$this->server_error[$val_error][] = "</$form_validate_outline_all>";
+	
+	//	echo "</$form_validate_outline_all>";
 			
 		}
 ///check validation error
@@ -4043,9 +4080,18 @@ else
 							$client_error_script .= $cli_err_value;							
 						}
 					}
-					
+							
+			
+			///error_render
+		//	echo $fieldname;
+		if(array_key_exists($fieldname, $this->server_error)){
+	//		echo $fieldname;
+			$this->error_renderer[] = $this->server_error[$fieldname];
+		}				
 					}
+
 				}
+
 			}
 			
 			
@@ -4120,6 +4166,14 @@ else
 								</script>\n" . $this->pre_print['call_client_validator'];
 								$first_error +=1;
 							}
+
+$fieldname = $fieldkey;					
+///error_render	
+//			echo $fieldname;					
+		if(array_key_exists($fieldname, $this->server_error)){
+//			echo $fieldname;
+			$this->error_renderer[] = $this->server_error[$fieldname];
+		}	
 						}
 	//$client_error_script
 	if(array_key_exists($fieldkey,$this->client_validator_array)){
@@ -7585,6 +7639,8 @@ array(	'foo' => 'bar',
 		'form_validate_list' => true, //inline //list
 		'form_validate_inline_position' => "after", //before,after      //before or after elemen
 		'form_validate_each_container' => "span", //span, p, div 
+		'form_validate_outline_all' => "ul", //span, p, div /////printing outline error
+		'form_validate_outline_each' => "li", //span, p, div  /////printing outline error
 		'form_validate_each_class' => "", //span, p, div 
 		'form_validate_each_style' => "color:red;", //span, p, div 
 		'form_validate_all_container' => "span", //span, p, div 
@@ -7602,7 +7658,7 @@ array(	'foo' => 'bar',
 		'form_error_element_style' => "",
 		'form_error_separator' => "",
 		'custom_tab' => $ctab,
-		'tabs' => array("PERSONAL"=>'faculty_auto,faculty_auto2,faculty_sel,faculty_sel2,faculty_day_added,faculty_year_added,faculty_campus,faculty_shortname,faculty_id,faculty_note',
+		'tabsX' => array("PERSONAL"=>'faculty_auto,faculty_auto2,faculty_sel,faculty_sel2,faculty_day_added,faculty_year_added,faculty_campus,faculty_shortname,faculty_id,faculty_note',
 						"OFFICE"=>'faculty_text,faculty_files,location,faculty_logo,faculty_fullname,institution_id',
 						"OTHERS"=>'house,free_no_display,free_no_display2,free_no_display3,free_no_display4,free_no_display5,free_no_display6,joint,cvupload,2ndpasswprd,faculty_code,faculty_month_added'),
 		
@@ -8343,7 +8399,9 @@ $form2->db_username = "root";
 $form2->db_password = "";
 $form2->formx($tablename, $print_form, $exception,$sort_array, $display, $addtional_field,$add_free_field,$field_processor, $custom_to_db, $lang);
 $renderer2 = $form2->renderer;
+$error_renderer2 = $form2->error_renderer;
 //form_render($caster);
+$form2->error_render($error_renderer2);
 $form2->form_render($renderer2);
 
 ?>
