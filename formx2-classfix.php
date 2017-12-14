@@ -25,6 +25,7 @@
 
 
 
+
 function testalert($msg){
 
 echo "<script>alert(\"$msg\");</script>";
@@ -299,8 +300,9 @@ function ValidateAsEmail($name,$value,$validate_error){
 }
 
 
-function ValidateAsInteger($name,$value,$validate_error){
-	if(preg_match("/^[0-9]+$/",$value))////email
+function ValidateAsInteger($name,$value,$validate_error,$upper_limit,$lower_limit,$upper_err,$lower_err){
+	
+	if(preg_match("/^[-+0-9]+$/",$value))////email
 	{
 		///nothing runs here
 	}
@@ -309,9 +311,89 @@ function ValidateAsInteger($name,$value,$validate_error){
 		if($validate_error =="**not_set"){$validate_error ="$value is not an Integer";}
 		$this->validation_error["$name"][] = $validate_error;
 		$this->allow_sql += 1;
+	}
+	
+	if(is_integer($upper_limit))
+	{
+
+			if($value<=$upper_limit)////email
+		{
+			///nothing runs here
+		}
+		else
+		{
+			if($upper_err =="**not_set"){$upper_err ="$value is above limit";}
+			$this->validation_error["$name"][] = $upper_err;
+			$this->allow_sql += 1;
+		}	
+		
+	}
+	
+	if(is_integer($lower_limit))
+	{
+		
+			if($value>=$lower_limit)////email
+		{
+			///nothing runs here
+		}
+		else
+		{
+			if($lower_err =="**not_set"){$lower_err ="$value is below limit";}
+			$this->validation_error["$name"][] = $lower_err;
+			$this->allow_sql += 1;
+		}	
+		
 	}	
+	
 }
 
+
+
+function ValidateAsFloat($name,$value,$validate_error,$upper_limit,$lower_limit,$upper_err,$lower_err){
+	if(preg_match("/^[-+0-9]+[.]+[0-9]+$/",$value))////email
+	{
+		///nothing runs here
+	}
+	else
+	{
+		//ValidateAsFloatErrorMessage
+		if($validate_error =="**not_set"){$validate_error ="$value is not a Float";}
+		$this->validation_error["$name"][] = $validate_error;
+		$this->allow_sql += 1;
+	}	
+	
+	
+	if(is_integer($upper_limit))
+	{
+	//			$this->alert($value.$lower_limit.$upper_limit);
+			if($value<=$upper_limit)////email
+		{
+			///nothing runs here
+		}
+		else
+		{
+			if($upper_err =="**not_set"){$upper_err ="$value is above limit";}
+			$this->validation_error["$name"][] = $upper_err;
+			$this->allow_sql += 1;
+		}	
+		
+	}
+	
+	if(is_integer($lower_limit))
+	{
+			if($value>=$lower_limit)////email
+		{
+			///nothing runs here
+		}
+		else
+		{
+			if($lower_err =="**not_set"){$lower_err ="$value is below limit";}
+			$this->validation_error["$name"][] = $lower_err;
+			$this->allow_sql += 1;
+		}	
+		
+	}	
+}
 
 function ValidateAsNotEmpty($name,$value,$validate_error){
 	if($value != "")////email
@@ -341,21 +423,6 @@ function ValidateAsSet($name,$value,$validate_error){
 }
 
 
-
-function ValidateAsFloat($name,$value,$validate_error){
-	if(preg_match("/^[0-9.]+[0-9.]+$/",$value))////email
-	{
-		///nothing runs here
-	}
-	else
-	{
-		//ValidateAsFloatErrorMessage
-		if($validate_error =="**not_set"){$validate_error ="$value is not a Float";}
-		$this->validation_error["$name"][] = $validate_error;
-		$this->allow_sql += 1;
-	}	
-}
-
 function ValidateAsDate($name,$value,$separator,$validate_error){
 	$num_split = explode($separator, $value);
 	$array_cnum = count($num_split);
@@ -368,6 +435,125 @@ function ValidateAsDate($name,$value,$separator,$validate_error){
 	{
 		//ValidateAsFloatErrorMessage
 		if($validate_error =="**not_set"){$validate_error ="$value is not a valid date format";}
+		$this->validation_error["$name"][] = $validate_error;
+		$this->allow_sql += 1;
+	}	
+}
+
+
+function ValidateAsDifferentFromText($name,$value,$other_text,$validate_error){
+	if($value != $other_text)
+	{
+		///nothing runs here
+	}
+	else
+	{
+		//ValidateAsFloatErrorMessage
+		if($validate_error =="**not_set"){$validate_error ="Value must be different from $value ";}
+		$this->validation_error["$name"][] = $validate_error;
+		$this->allow_sql += 1;
+	}	
+}
+
+
+function ValidateAsEqualTo($name,$value,$other_text,$validate_error){
+	if($value == $other_text)
+	{
+		///nothing runs here
+	}
+	else
+	{
+		//ValidateAsFloatErrorMessage
+		if($validate_error =="**not_set"){$validate_error ="Value is different from other field ";}
+		$this->validation_error["$name"][] = $validate_error;
+		$this->allow_sql += 1;
+	}	
+}
+
+
+function ValidateAsDifferentFrom($name,$value,$other_text,$validate_error){
+	if($value != $other_text)
+	{
+		///nothing runs here
+	}
+	else
+	{
+		//ValidateAsFloatErrorMessage
+		if($validate_error =="**not_set"){$validate_error ="Must be different from other field";}
+		$this->validation_error["$name"][] = $validate_error;
+		$this->allow_sql += 1;
+	}	
+}
+
+
+function ValidateMinimumLength($name,$value,$min_length,$validate_error){
+	if(strlen($value) >= $min_length)
+	{
+		///nothing runs here
+	}
+	else
+	{
+		//ValidateAsFloatErrorMessage
+		if($validate_error =="**not_set"){$validate_error ="Value is too short";}
+		$this->validation_error["$name"][] = $validate_error;
+		$this->allow_sql += 1;
+	}	
+}
+
+
+function ValidateMaximumLength($name,$value,$max_length,$validate_error){
+	if(strlen($value) <= $max_length)
+	{
+		///nothing runs here
+	}
+	else
+	{
+		//ValidateAsFloatErrorMessage
+		if($validate_error =="**not_set"){$validate_error ="Value is too long";}
+		$this->validation_error["$name"][] = $validate_error;
+		$this->allow_sql += 1;
+	}	
+}
+
+
+function ValidateAsEqualToText($name,$value,$other_text,$validate_error){
+	if($value == $other_text)
+	{
+		///nothing runs here
+	}
+	else
+	{
+
+		if($validate_error =="**not_set"){$validate_error ="Must be equal to $value";}
+		$this->validation_error["$name"][] = $validate_error;
+		$this->allow_sql += 1;
+	}	
+}
+
+
+function ValidateRegularExpression($name,$value,$reg_exp,$validate_error){
+	if(preg_match($reg_exp,$value))
+	{
+		///nothing runs here
+	}
+	else
+	{
+
+		if($validate_error =="**not_set"){$validate_error ="Invalid format";}
+		$this->validation_error["$name"][] = $validate_error;
+		$this->allow_sql += 1;
+	}	
+}
+
+function ValidateAsNotRegularExpression($name,$value,$reg_exp,$validate_error){
+	if(!preg_match($reg_exp,$value))
+	{
+		///nothing runs here
+	}
+	else
+	{
+
+		if($validate_error =="**not_set"){$validate_error ="Matches invalid format";}
 		$this->validation_error["$name"][] = $validate_error;
 		$this->allow_sql += 1;
 	}	
@@ -854,10 +1040,34 @@ $reprint->$name = $value;
 				{
 					if($display->fields->$name->ValidateAsInteger == true){
 					$validate_error = "**not_set";				
-								if(isset($display->fields->$name->ValidateAsIntegerErrorMessage))
+					$upper_limit = false;				
+					$lower_limit = false;
+					$upper_err = "**not_set";
+					$lower_err = "**not_set";
+						if(isset($display->fields->$name->ValidateAsIntegerErrorMessage))
 						{
 							$validate_error = $display->fields->$name->ValidateAsIntegerErrorMessage;
 						}
+						
+						if(isset($display->fields->$name->ValidationUpperLimit))
+						{
+							$upper_limit = $display->fields->$name->ValidationUpperLimit;
+						}
+						
+						if(isset($display->fields->$name->ValidationLowerLimit))
+						{
+							$lower_limit = $display->fields->$name->ValidationLowerLimit;
+						}
+						
+						if(isset($display->fields->$name->ValidationLowerLimitErrorMessage))
+						{
+							$upper_err = $display->fields->$name->ValidationUpperLimitErrorMessage;
+						}	
+						
+						if(isset($display->fields->$name->ValidationLowerLimitErrorMessage))
+						{
+							$lower_err = $display->fields->$name->ValidationLowerLimitErrorMessage;
+						}						
 										///set as callback	
 				$xvalidate_error = $validate_error;
 				if(is_callable($validate_error)){
@@ -865,18 +1075,42 @@ $reprint->$name = $value;
 				}
 				if(!$validate_error){$validate_error = $xvalidate_error;}	
 				///set as callback
-					$this->ValidateAsInteger($name,$value,$validate_error);
+					$this->ValidateAsInteger($name,$value,$validate_error,$upper_limit,$lower_limit,$upper_err,$lower_err);
 				}
 				}
 
 				if(isset($display->fields->$name->ValidateAsFloat))
 				{
 					if($display->fields->$name->ValidateAsFloat == true){
-					$validate_error = "**not_set";					
+					$validate_error = "**not_set";
+					$upper_limit = false;				
+					$lower_limit = false;
+					$upper_err = "**not_set";
+					$lower_err = "**not_set";					
 					if(isset($display->fields->$name->ValidateAsFloatErrorMessage))
 						{
 							$validate_error = $display->fields->$name->ValidateAsFloatErrorMessage;
 						}
+						
+						if(isset($display->fields->$name->ValidationUpperLimit))
+						{
+							$upper_limit = $display->fields->$name->ValidationUpperLimit;
+						}
+						
+						if(isset($display->fields->$name->ValidationLowerLimit))
+						{
+							$lower_limit = $display->fields->$name->ValidationLowerLimit;
+						}
+						
+						if(isset($display->fields->$name->ValidationLowerLimitErrorMessage))
+						{
+							$upper_err = $display->fields->$name->ValidationUpperLimitErrorMessage;
+						}	
+						
+						if(isset($display->fields->$name->ValidationLowerLimitErrorMessage))
+						{
+							$lower_err = $display->fields->$name->ValidationLowerLimitErrorMessage;
+						}							
 										///set as callback	
 				$xvalidate_error = $validate_error;
 				if(is_callable($validate_error)){
@@ -884,7 +1118,7 @@ $reprint->$name = $value;
 				}
 				if(!$validate_error){$validate_error = $xvalidate_error;}	
 				///set as callback
-				$this->ValidateAsFloat($name,$value,$validate_error);
+				$this->ValidateAsFloat($name,$value,$validate_error,$upper_limit,$lower_limit,$upper_err,$lower_err);
 				}
 				}
 				
@@ -929,6 +1163,8 @@ $reprint->$name = $value;
 				}				
 				
 
+				
+				
 								
 				if(isset($display->fields->$name->ValidateAsDate))
 				{
@@ -955,7 +1191,214 @@ $reprint->$name = $value;
 					$this->ValidateAsDate($name,$value,$separator,$validate_error);
 					}
 				}
+				
+
+				
+						
+				if(isset($display->fields->$name->ValidateAsDifferentFromText))
+				{
+				
+					$validate_error = "**not_set";				
+					if(isset($display->fields->$name->ValidateAsDifferentFromTextErrorMessage))
+						{
+							$validate_error = $display->fields->$name->ValidateAsDifferentFromTextErrorMessage;
+						}
+										///set as callback	
+				$xvalidate_error = $validate_error;
+				if(is_callable($validate_error)){
+				$validate_error = call_user_func($validate_error,$name,$value,$arr,$lang);
+				}
+				if(!$validate_error){$validate_error = $xvalidate_error;}	
+				///set as callback
+						
+						
+
+				$other_text = $display->fields->$name->ValidateAsDifferentFromText;
+
+				$this->ValidateAsDifferentFromText($name,$value,$other_text,$validate_error);
+
+				}				
+
+				
+						
+				if(isset($display->fields->$name->ValidateAsEqualTo))
+				{
+				
+					$validate_error = "**not_set";				
+					if(isset($display->fields->$name->ValidateAsEqualToErrorMessage))
+						{
+							$validate_error = $display->fields->$name->ValidateAsEqualToErrorMessage;
+						}
+										///set as callback	
+				$xvalidate_error = $validate_error;
+				if(is_callable($validate_error)){
+				$validate_error = call_user_func($validate_error,$name,$value,$arr,$lang);
+				}
+				if(!$validate_error){$validate_error = $xvalidate_error;}	
+				///set as callback
+						
+						
+
+				$other_text_key = $display->fields->$name->ValidateAsEqualTo;
+				
+				$other_text = $arr[$other_text_key];
+						
+				$this->ValidateAsEqualTo($name,$value,$other_text,$validate_error);
+				}	
+
+				
+						
+				if(isset($display->fields->$name->ValidateAsDifferentFrom))
+				{
+				
+					$validate_error = "**not_set";				
+					if(isset($display->fields->$name->ValidateAsDifferentFromErrorMessage))
+						{
+							$validate_error = $display->fields->$name->ValidateAsDifferentFromErrorMessage;
+						}
+										///set as callback	
+				$xvalidate_error = $validate_error;
+				if(is_callable($validate_error)){
+				$validate_error = call_user_func($validate_error,$name,$value,$arr,$lang);
+				}
+				if(!$validate_error){$validate_error = $xvalidate_error;}	
+				///set as callback
+
+				$other_text_key = $display->fields->$name->ValidateAsDifferentFrom;
+				
+				$other_text = $arr[$other_text_key];
+						
+				$this->ValidateAsDifferentFrom($name,$value,$other_text,$validate_error);
+				}				
+
+				
+						
+				if(isset($display->fields->$name->ValidateMinimumLength))
+				{
+				
+					$validate_error = "**not_set";				
+					if(isset($display->fields->$name->ValidateMinimumLengthErrorMessage))
+						{
+							$validate_error = $display->fields->$name->ValidateMinimumLengthErrorMessage;
+						}
+										///set as callback	
+				$xvalidate_error = $validate_error;
+				if(is_callable($validate_error)){
+				$validate_error = call_user_func($validate_error,$name,$value,$arr,$lang);
+				}
+				if(!$validate_error){$validate_error = $xvalidate_error;}	
+				///set as callback
 					
+
+				$min_length = $display->fields->$name->ValidateMinimumLength;
+
+				$this->ValidateMinimumLength($name,$value,$min_length,$validate_error);
+
+				}
+				
+						
+				if(isset($display->fields->$name->ValidateMaximumLength))
+				{
+				
+					$validate_error = "**not_set";				
+					if(isset($display->fields->$name->ValidateMaximumLengthErrorMessage))
+						{
+							$validate_error = $display->fields->$name->ValidateMaximumLengthErrorMessage;
+						}
+										///set as callback	
+				$xvalidate_error = $validate_error;
+				if(is_callable($validate_error)){
+				$validate_error = call_user_func($validate_error,$name,$value,$arr,$lang);
+				}
+				if(!$validate_error){$validate_error = $xvalidate_error;}	
+				///set as callback
+					
+
+				$max_length = $display->fields->$name->ValidateMaximumLength;
+
+				$this->ValidateMaximumLength($name,$value,$max_length,$validate_error);
+
+				}
+				
+						
+				if(isset($display->fields->$name->ValidateAsEqualToText))
+				{
+				
+					$validate_error = "**not_set";				
+					if(isset($display->fields->$name->ValidateAsEqualToTextErrorMessage))
+						{
+							$validate_error = $display->fields->$name->ValidateAsEqualToTextErrorMessage;
+						}
+										///set as callback	
+				$xvalidate_error = $validate_error;
+				if(is_callable($validate_error)){
+				$validate_error = call_user_func($validate_error,$name,$value,$arr,$lang);
+				}
+				if(!$validate_error){$validate_error = $xvalidate_error;}	
+				///set as callback
+						
+						
+
+				$other_text = $display->fields->$name->ValidateAsEqualToText;
+
+				$this->ValidateAsEqualToText($name,$value,$other_text,$validate_error);
+
+				}
+
+				
+				
+				
+				if(isset($display->fields->$name->ValidateRegularExpression))
+				{
+				
+					$validate_error = "**not_set";				
+					if(isset($display->fields->$name->ValidateRegularExpressionErrorMessage))
+						{
+							$validate_error = $display->fields->$name->ValidateRegularExpressionErrorMessage;
+						}
+										///set as callback	
+				$xvalidate_error = $validate_error;
+				if(is_callable($validate_error)){
+				$validate_error = call_user_func($validate_error,$name,$value,$arr,$lang);
+				}
+				if(!$validate_error){$validate_error = $xvalidate_error;}	
+				///set as callback
+						
+						
+
+				$reg_exp = $display->fields->$name->ValidateRegularExpression;
+
+				$this->ValidateRegularExpression($name,$value,$reg_exp,$validate_error);
+
+				}
+				
+				
+				
+				if(isset($display->fields->$name->ValidateAsNotRegularExpression))
+				{
+				
+					$validate_error = "**not_set";				
+					if(isset($display->fields->$name->ValidateAsNotRegularExpressionErrorMessage))
+						{
+							$validate_error = $display->fields->$name->ValidateAsNotRegularExpressionErrorMessage;
+						}
+										///set as callback	
+				$xvalidate_error = $validate_error;
+				if(is_callable($validate_error)){
+				$validate_error = call_user_func($validate_error,$name,$value,$arr,$lang);
+				}
+				if(!$validate_error){$validate_error = $xvalidate_error;}	
+				///set as callback
+						
+						
+
+				$reg_exp = $display->fields->$name->ValidateAsNotRegularExpression;
+
+				$this->ValidateAsNotRegularExpression($name,$value,$reg_exp,$validate_error);
+
+				}
+
+				
 								
 				if(isset($display->fields->$name->CustomValidate))
 				{$validate_error = "**not_set";
@@ -2928,7 +3371,7 @@ function validateForm_$form_id(this_form){\n
 prevent_submit = 0;\n 
 var validation = [];
 var error = [];
-
+var error_field = [];
 var ini_tab = 0;
 
 ";
@@ -3624,6 +4067,8 @@ for(f in validation){
 //alert(validation[f][0]);	
 validation_type = 	validation[f][0];
 var get_input_value;
+var get_input_value_other;
+
 var tab_set = 1;
 switch (validation_type) {//start witch
 ";	
@@ -4234,15 +4679,47 @@ if(isset($display->form_validate_inline)){ ////setting inline error details
 	}
 }
 	
+	
+	
+	
 
 //////CLEINT VALIDATE AS INTERGER				
 if(isset($display->fields->$dfieldx->ValidateAsInteger)){
 		if($display->fields->$dfieldx->ValidateAsInteger == true){
-		$validate_error = "Invalid integer";				
-					if(isset($display->fields->$dfieldx->ValidateAsIntegerErrorMessage))
+		$validate_error = "Invalid integer";
+		
+			$upper_limit = 'false';				
+			$lower_limit = 'false';
+			$upper_err = "Above Limit";
+			$lower_err = "Below Limit";
+					
+
+
+			if(isset($display->fields->$dfieldx->ValidateAsIntegerErrorMessage))
 			{
 				$validate_error = $display->fields->$dfieldx->ValidateAsIntegerErrorMessage;
 			}
+		
+			if(isset($display->fields->$dfieldx->ValidationUpperLimit))
+			{
+				$upper_limit = $display->fields->$dfieldx->ValidationUpperLimit;
+			}
+			
+			if(isset($display->fields->$dfieldx->ValidationLowerLimit))
+			{
+				$lower_limit = $display->fields->$dfieldx->ValidationLowerLimit;
+			}
+			
+			if(isset($display->fields->$dfieldx->ValidationLowerLimitErrorMessage))
+			{
+				$upper_err = $display->fields->$dfieldx->ValidationUpperLimitErrorMessage;
+			}	
+			
+			if(isset($display->fields->$dfieldx->ValidationLowerLimitErrorMessage))
+			{
+				$lower_err = $display->fields->$dfieldx->ValidationLowerLimitErrorMessage;
+			}			
+			
 							///set as callback	
 	$xvalidate_error = $validate_error;
 	if(is_callable($validate_error)){
@@ -4250,7 +4727,7 @@ if(isset($display->fields->$dfieldx->ValidateAsInteger)){
 	}
 	if(!$validate_error){$validate_error = $xvalidate_error;}	
 
-	$call_error_call = "validation.push(['ValidateAsInteger',this_form,'$dfield','$validate_error']); \n ";
+	$call_error_call = "validation.push(['ValidateAsInteger',this_form,'$dfield','$validate_error','$upper_limit','$lower_limit','$upper_err','$lower_err']); \n ";
 	
 //	$this->pre_print['call_client_validator'] .= $call_error_call;
 	
@@ -4266,7 +4743,7 @@ if(validation[f][1][validation[f][2]].type){
 	get_input_value = 	validation[f][1][validation[f][2]].value;
 }
 else{
-	//get_input_value = 	document.querySelector('input[name=faculty_shortname][checked]').value;	
+	//get_input_value = 	document.querySelector('input[name=' + [validation[f][2] +'][checked]').value;	
 	var radios = 	validation[f][1][validation[f][2]];
 	
     // loop through list of radio buttons
@@ -4278,7 +4755,24 @@ else{
     }	
 }
 
-/////ADD ERROR MESSAGE AT TOP, OR ALERT ERROR MESSAGE
+
+
+//////COLLECT FROM OBJECT OF LIMIT VALUES
+///////set limit
+/*
+var upper_limit = $upper_limit;				
+var lower_limit = $lower_limit;
+var upper_err = 'About limit';
+var lower_err = 'Below limit';
+*/
+///////end set limit
+/*
+if(get_input_value > ){
+	alert('is number');
+}
+*/
+
+
 
 if(tab_set == 1){
 val_str = 'tabindex_' + validation[f][2];
@@ -4286,7 +4780,7 @@ err_tab = eval(val_str);
 }
 inline_validate = $inline_validate;
 if(get_input_value != undefined){
-eval('var field_value' + \"='\" + get_input_value + \"';var n = field_value.search(/^[0-9]+$/);if(n == -1){prevent_submit += 1;document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ document.getElementById('tab_button_id_' + err_tab).click(); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{document.getElementById(validation[f][2]).className='';document.getElementById(validation[f][2] + '_label').className=''; if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
+eval('var field_value' + \"='\" + get_input_value + \"';var n = field_value.search(/^[-+0-9]+$/);if(n == -1 || field_value > parseInt(validation[f][4]) || field_value < parseInt(validation[f][5])){prevent_submit += 1;error_field.push('$dfield'); if(field_value > parseInt(validation[f][4])){validation[f][3] = validation[f][6];} if(field_value < parseInt(validation[f][5])){validation[f][3] = validation[f][7];}  document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ var cc = document.getElementById('tab_button_id_' + err_tab).getAttribute('onclick');var ctab = document.getElementById('tab_button_id_' + err_tab); cc = cc.replace('return false', ''); cc = cc.replace('this.className', 'ctab.className');  eval(cc); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{if(error_field.indexOf(validation[f][2]) == -1){document.getElementById(validation[f][2]).className='';document.getElementById(validation[f][2] + '_label').className='';} if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
 	
 	}	
 	}
@@ -4309,7 +4803,127 @@ $this->print_client_validator .= $client_error;
 
 //////END CLEINT VALIDATE AS INTERGER	
 
+		
 
+//////CLEINT VALIDATE AS FLOAT				
+if(isset($display->fields->$dfieldx->ValidateAsFloat)){
+		if($display->fields->$dfieldx->ValidateAsFloat == true){
+		$validate_error = "Invalid float";
+		
+			$upper_limit = 'false';				
+			$lower_limit = 'false';
+			$upper_err = "Above Limit";
+			$lower_err = "Below Limit";
+					
+
+
+			if(isset($display->fields->$dfieldx->ValidateAsFloatErrorMessage))
+			{
+				$validate_error = $display->fields->$dfieldx->ValidateAsFloatErrorMessage;
+			}
+		
+			if(isset($display->fields->$dfieldx->ValidationUpperLimit))
+			{
+				$upper_limit = $display->fields->$dfieldx->ValidationUpperLimit;
+			}
+			
+			if(isset($display->fields->$dfieldx->ValidationLowerLimit))
+			{
+				$lower_limit = $display->fields->$dfieldx->ValidationLowerLimit;
+			}
+			
+			if(isset($display->fields->$dfieldx->ValidationLowerLimitErrorMessage))
+			{
+				$upper_err = $display->fields->$dfieldx->ValidationUpperLimitErrorMessage;
+			}	
+			
+			if(isset($display->fields->$dfieldx->ValidationLowerLimitErrorMessage))
+			{
+				$lower_err = $display->fields->$dfieldx->ValidationLowerLimitErrorMessage;
+			}			
+			
+							///set as callback	
+	$xvalidate_error = $validate_error;
+	if(is_callable($validate_error)){
+	$validate_error = call_user_func($validate_error,$dfield,$value,$arr,$lang);
+	}
+	if(!$validate_error){$validate_error = $xvalidate_error;}	
+
+	$call_error_call = "validation.push(['ValidateAsFloat',this_form,'$dfield','$validate_error','$upper_limit','$lower_limit','$upper_err','$lower_err']); \n ";
+	
+//	$this->pre_print['call_client_validator'] .= $call_error_call;
+	
+	$this->client_validator_array[$dfield][] = $call_error_call;
+	
+	
+
+	if(!isset($this->set_client_validator['ValidateAsFloat'])){
+	$client_error = "
+case 'ValidateAsFloat':
+	{	
+if(validation[f][1][validation[f][2]].type){
+	get_input_value = 	validation[f][1][validation[f][2]].value;
+}
+else{
+	//get_input_value = 	document.querySelector('input[name=' + [validation[f][2] +'][checked]').value;	
+	var radios = 	validation[f][1][validation[f][2]];
+	
+    // loop through list of radio buttons
+    for (var i=0, len=radios.length; i<len; i++) {
+        if ( radios[i].checked || radios[i].selected) { // radio checked?
+            get_input_value = radios[i].value; // if so, hold its value in val
+            break; // and break out of for loop
+        }
+    }	
+}
+
+
+
+//////COLLECT FROM OBJECT OF LIMIT VALUES
+///////set limit
+/*
+var upper_limit = $upper_limit;				
+var lower_limit = $lower_limit;
+var upper_err = 'About limit';
+var lower_err = 'Below limit';
+*/
+///////end set limit
+/*
+if(get_input_value > ){
+	alert('is number');
+}
+*/
+
+
+
+if(tab_set == 1){
+val_str = 'tabindex_' + validation[f][2];
+err_tab = eval(val_str);
+}
+inline_validate = $inline_validate;
+if(get_input_value != undefined){
+eval('var field_value' + \"='\" + get_input_value + \"';var n = field_value.search(/^[-+0-9]+[.]+[0-9]+$/);if(n == -1 || field_value > parseInt(validation[f][4]) || field_value < parseInt(validation[f][5])){prevent_submit += 1;error_field.push('$dfield'); if(field_value > parseInt(validation[f][4])){validation[f][3] = validation[f][6];} if(field_value < parseInt(validation[f][5])){validation[f][3] = validation[f][7];}  document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ var cc = document.getElementById('tab_button_id_' + err_tab).getAttribute('onclick');var ctab = document.getElementById('tab_button_id_' + err_tab); cc = cc.replace('return false', ''); cc = cc.replace('this.className', 'ctab.className');  eval(cc); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{if(error_field.indexOf(validation[f][2]) == -1){document.getElementById(validation[f][2]).className='';document.getElementById(validation[f][2] + '_label').className='';} if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
+	
+	}	
+	}
+	break;
+";
+
+$this->print_client_validator .= $client_error;
+
+
+	$this->set_client_validator['ValidateAsFloat'] = true;
+		}
+		
+		
+		
+		
+		
+	}
+
+}
+
+//////END CLEINT VALIDATE AS FLOAT	
 
 
 
@@ -4345,7 +4959,7 @@ if(validation[f][1][validation[f][2]].type){
 	get_input_value = 	validation[f][1][validation[f][2]].value;
 }
 else{
-	//get_input_value = 	document.querySelector('input[name=faculty_shortname][checked]').value;	
+	//get_input_value = 	document.querySelector('input[name=' + [validation[f][2] +'][checked]').value;	
 	var radios = 	validation[f][1][validation[f][2]];
 	
     // loop through list of radio buttons
@@ -4365,7 +4979,7 @@ err_tab = eval(val_str);
 }
 inline_validate = $inline_validate;
 if(get_input_value != undefined){
-eval('var field_value' + \"='\" + get_input_value + \"';var n = field_value.search(/^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-._]+..[a-zA-Z0-9-.]+$/);if(n == -1){prevent_submit += 1;document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ document.getElementById('tab_button_id_' + err_tab).click(); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{document.getElementById(validation[f][2]).className='';document.getElementById(validation[f][2] + '_label').className=''; if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
+eval('var field_value' + \"='\" + get_input_value + \"';var n = field_value.search(/^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-._]+..[a-zA-Z0-9-.]+$/);if(n == -1){prevent_submit += 1;error_field.push('$dfield');document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ var cc = document.getElementById('tab_button_id_' + err_tab).getAttribute('onclick');var ctab = document.getElementById('tab_button_id_' + err_tab); cc = cc.replace('return false', ''); cc = cc.replace('this.className', 'ctab.className');  eval(cc); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{if(error_field.indexOf(validation[f][2]) == -1){document.getElementById(validation[f][2]).className='';document.getElementById(validation[f][2] + '_label').className='';} if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
 	
 	}	
 	}
@@ -4388,10 +5002,6 @@ $this->print_client_validator .= $client_error;
 
 //////END CLEINT VALIDATE AS EMAIL	
 ////////////////////////////////////
-
-
-
-
 
 
 
@@ -4484,7 +5094,7 @@ err_tab = eval(val_str);
 inline_validate = $inline_validate;
 
 if(get_input_value != undefined){
-eval('var field_value' + \"='\" + get_input_value + \"';if(get_input_value == 'not_set'){prevent_submit += 1;document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement;  /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ document.getElementById('tab_button_id_' + err_tab).click(); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{document.getElementById(validation[f][2]).className='';document.getElementById(validation[f][2] + '_label').className=''; if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
+eval('var field_value' + \"='\" + get_input_value + \"';if(get_input_value == 'not_set'){prevent_submit += 1;error_field.push('$dfield');document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement;  /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ var cc = document.getElementById('tab_button_id_' + err_tab).getAttribute('onclick');var ctab = document.getElementById('tab_button_id_' + err_tab); cc = cc.replace('return false', ''); cc = cc.replace('this.className', 'ctab.className');  eval(cc); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{if(error_field.indexOf(validation[f][2]) == -1){document.getElementById(validation[f][2]).className='';document.getElementById(validation[f][2] + '_label').className='';} if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
 	
 	}	
 	}
@@ -4516,90 +5126,6 @@ $this->print_client_validator .= $client_error;
 
 
 
-
-	
-//////CLEINT VALIDATE AS FLOAT
-if(isset($display->fields->$dfieldx->ValidateAsFloat)){
-		if($display->fields->$dfieldx->ValidateAsFloat == true){
-		$validate_error = "Invalid float";
-		
-			if(isset($display->fields->$dfieldx->ValidateAsFloatErrorMessage))
-			{
-				$validate_error = $display->fields->$dfieldx->ValidateAsFloatErrorMessage;
-			}
-
-
-			///set as callback	
-	$xvalidate_error = $validate_error;
-	if(is_callable($validate_error)){
-	$validate_error = call_user_func($validate_error,$dfield,$value,$arr,$lang);
-	}
-	if(!$validate_error){$validate_error = $xvalidate_error;}	
-	
-
-
-
-	$call_error_call = "validation.push(['ValidateAsFloat',this_form,'$dfield','$validate_error']); \n ";
-	
-//	$this->pre_print['call_client_validator'] .= $call_error_call;
-	
-	$this->client_validator_array[$dfield][] = $call_error_call;
-	
-	
-
-	if(!isset($this->set_client_validator['ValidateAsFloat'])){
-	$client_error = "
-case 'ValidateAsFloat':
-	{	
-if(validation[f][1][validation[f][2]].type){
-	get_input_value = 	validation[f][1][validation[f][2]].value;
-}
-else{
-	//get_input_value = 	document.querySelector('input[name=faculty_shortname][checked]').value;	
-	var radios = 	validation[f][1][validation[f][2]];
-	
-    // loop through list of radio buttons
-    for (var i=0, len=radios.length; i<len; i++) {
-        if ( radios[i].checked || radios[i].selected) { // radio checked?
-            get_input_value = radios[i].value; // if so, hold its value in val
-            break; // and break out of for loop
-        }
-    }	
-}
-
-/////ADD ERROR MESSAGE AT TOP, OR ALERT ERROR MESSAGE
-
-if(tab_set == 1){
-val_str = 'tabindex_' + validation[f][2];
-err_tab = eval(val_str);
-}
-inline_validate = $inline_validate;
-
-
-if(get_input_value != undefined){
-eval('var field_value' + \"='\" + get_input_value + \"';var n = field_value.search(/^[0-9.]+[0-9.]+$/);if(n == -1){prevent_submit += 1;document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ document.getElementById('tab_button_id_' + err_tab).click(); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{document.getElementById(validation[f][2]).className='';document.getElementById(validation[f][2] + '_label').className=''; if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
-	
-	}	
-	}
-	break;
-";
-
-$this->print_client_validator .= $client_error;
-
-
-	$this->set_client_validator['ValidateAsFloat'] = true;
-		}
-		
-		
-		
-		
-		
-	}
-
-}
-
-//////END CLEINT VALIDATE AS FLOAT	
-////////////////////////////////////
 
 
 
@@ -4642,7 +5168,7 @@ if(validation[f][1][validation[f][2]].type){
 	get_input_value = 	validation[f][1][validation[f][2]].value;
 }
 else{
-	//get_input_value = 	document.querySelector('input[name=faculty_shortname][checked]').value;	
+	//get_input_value = 	document.querySelector('input[name=' + [validation[f][2] +'][checked]').value;	
 	var radios = 	validation[f][1][validation[f][2]];
 	
     // loop through list of radio buttons
@@ -4664,7 +5190,7 @@ inline_validate = $inline_validate;
 
 
 if(get_input_value != undefined){
-eval('var field_value' + \"='\" + get_input_value + \"';if(field_value == ''){prevent_submit += 1;document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ document.getElementById('tab_button_id_' + err_tab).click(); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{document.getElementById(validation[f][2]).className='';document.getElementById(validation[f][2] + '_label').className=''; if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
+eval('var field_value' + \"='\" + get_input_value + \"';if(field_value == ''){prevent_submit += 1;error_field.push('$dfield');document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ var cc = document.getElementById('tab_button_id_' + err_tab).getAttribute('onclick');var ctab = document.getElementById('tab_button_id_' + err_tab); cc = cc.replace('return false', ''); cc = cc.replace('this.className', 'ctab.className');  eval(cc); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{if(error_field.indexOf(validation[f][2]) == -1){document.getElementById(validation[f][2]).className='';document.getElementById(validation[f][2] + '_label').className='';} if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
 	
 	}	
 	}
@@ -4700,13 +5226,12 @@ if(isset($display->fields->$dfieldx->ValidateAsDate)){
 		if($display->fields->$dfieldx->ValidateAsDate == true){
 		$validate_error = "Invalid Date Format";				
 		$separator = '-';
-		
-			if(isset($display->fields->$dfieldx->ValidateAsFloatErrorMessage))
+			
+			if(isset($display->fields->$dfieldx->ValidateAsNotDateErrorMessage))
 			{
-				$separator = $display->fields->$dfieldx->ValidateAsFloatErrorMessage;
+				$validate_error = $display->fields->$dfieldx->ValidateAsDateErrorMessage;
 			}
-
-//DateSeparator			
+			
 			if(isset($display->fields->$dfieldx->DateSeparator))
 			{
 				$separator = $display->fields->$dfieldx->DateSeparator;
@@ -4733,7 +5258,7 @@ if(validation[f][1][validation[f][2]].type){
 	get_input_value = 	validation[f][1][validation[f][2]].value;
 }
 else{
-	//get_input_value = 	document.querySelector('input[name=faculty_shortname][checked]').value;	
+	//get_input_value = 	document.querySelector('input[name=' + [validation[f][2] +'][checked]').value;	
 	var radios = 	validation[f][1][validation[f][2]];
 	
     // loop through list of radio buttons
@@ -4755,7 +5280,7 @@ inline_validate = $inline_validate;
 
 
 if(get_input_value != undefined){
-eval('var field_value' + \"='\" + get_input_value + \"';var n = field_value.search(/^[0-9]+$separator"."[0-9]+$separator"."[0-9]+$/);if(n == -1){prevent_submit += 1;document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ document.getElementById('tab_button_id_' + err_tab).click(); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{document.getElementById(validation[f][2]).className='';document.getElementById(validation[f][2] + '_label').className=''; if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
+eval('var field_value' + \"='\" + get_input_value + \"';var n = field_value.search(/^[0-9]+$separator"."[0-9]+$separator"."[0-9]+$/);if(n == -1){prevent_submit += 1;error_field.push('$dfield');document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ var cc = document.getElementById('tab_button_id_' + err_tab).getAttribute('onclick');var ctab = document.getElementById('tab_button_id_' + err_tab); cc = cc.replace('return false', ''); cc = cc.replace('this.className', 'ctab.className');  eval(cc); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{if(error_field.indexOf(validation[f][2]) == -1){document.getElementById(validation[f][2]).className='';document.getElementById(validation[f][2] + '_label').className='';} if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
 	
 	}	
 	}
@@ -4782,6 +5307,714 @@ $this->print_client_validator .= $client_error;
 
 
 
+
+
+	
+//////CLEINT VALIDATE AS DIFFERENT FROM TEXT
+if(isset($display->fields->$dfieldx->ValidateAsDifferentFromText)){
+
+	$other_text = $display->fields->$dfieldx->ValidateAsDifferentFromText;	
+	
+	$validate_error = "Value should be different from $other_text";	
+
+		if(isset($display->fields->$dfieldx->ValidateAsDifferentFromTextErrorMessage))
+	{
+		$validate_error = $display->fields->$dfieldx->ValidateAsDifferentFromTextErrorMessage;
+	}	
+
+	
+							///set as callback	
+	$xvalidate_error = $validate_error;
+	if(is_callable($validate_error)){
+	$validate_error = call_user_func($validate_error,$dfield,$value,$arr,$lang);
+	}
+	if(!$validate_error){$validate_error = $xvalidate_error;}	
+
+	$call_error_call = "validation.push(['ValidateAsDifferentFromText',this_form,'$dfield','$validate_error']); \n ";
+	
+//	$this->pre_print['call_client_validator'] .= $call_error_call;
+	
+	$this->client_validator_array[$dfield][] = $call_error_call;
+	
+	
+	if(!isset($this->set_client_validator['ValidateAsDifferentFromText'])){
+	$client_error = "
+case 'ValidateAsDifferentFromText':
+	{	
+if(validation[f][1][validation[f][2]].type){
+	get_input_value = 	validation[f][1][validation[f][2]].value;
+}
+else{
+	//get_input_value = 	document.querySelector('input[name=' + [validation[f][2] +'][checked]').value;	
+	var radios = 	validation[f][1][validation[f][2]];
+	
+    // loop through list of radio buttons
+    for (var i=0, len=radios.length; i<len; i++) {
+        if ( radios[i].checked || radios[i].selected) { // radio checked?
+            get_input_value = radios[i].value; // if so, hold its value in val
+            break; // and break out of for loop
+        }
+    }	
+}
+
+/////ADD ERROR MESSAGE AT TOP, OR ALERT ERROR MESSAGE
+
+if(tab_set == 1){
+val_str = 'tabindex_' + validation[f][2];
+err_tab = eval(val_str);
+}
+inline_validate = $inline_validate;
+
+
+if(get_input_value != undefined){
+eval('var field_value' + \"='\" + get_input_value + \"';if(field_value == '$other_text'){prevent_submit += 1;error_field.push('$dfield');document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ var cc = document.getElementById('tab_button_id_' + err_tab).getAttribute('onclick');var ctab = document.getElementById('tab_button_id_' + err_tab); cc = cc.replace('return false', ''); cc = cc.replace('this.className', 'ctab.className');  eval(cc); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{if(error_field.indexOf(validation[f][2]) == -1){document.getElementById(validation[f][2]).className='';document.getElementById(validation[f][2] + '_label').className='';} if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
+	
+	}	
+	}
+	break;
+";
+
+$this->print_client_validator .= $client_error;
+
+
+	$this->set_client_validator['ValidateAsDifferentFromText'] = true;
+		}
+		
+		
+		
+		
+		
+
+
+}
+
+//////END CLEINT VALIDATE AS DIFFERENT FROM TEXT
+////////////////////////////////////
+
+
+
+	
+//////CLEINT VALIDATE AS EQUAL TO TEXT
+if(isset($display->fields->$dfieldx->ValidateAsEqualToText)){
+
+	$other_text = $display->fields->$dfieldx->ValidateAsEqualToText;	
+	
+	$validate_error = "Must be equal to $other_text";	
+
+		if(isset($display->fields->$dfieldx->ValidateAsEqualToTextErrorMessage))
+	{
+		$validate_error = $display->fields->$dfieldx->ValidateAsEqualToTextErrorMessage;
+	}	
+
+	
+							///set as callback	
+	$xvalidate_error = $validate_error;
+	if(is_callable($validate_error)){
+	$validate_error = call_user_func($validate_error,$dfield,$value,$arr,$lang);
+	}
+	if(!$validate_error){$validate_error = $xvalidate_error;}	
+
+	$call_error_call = "validation.push(['ValidateAsEqualToText',this_form,'$dfield','$validate_error']); \n ";
+	
+//	$this->pre_print['call_client_validator'] .= $call_error_call;
+	
+	$this->client_validator_array[$dfield][] = $call_error_call;
+	
+	
+	if(!isset($this->set_client_validator['ValidateAsEqualToText'])){
+	$client_error = "
+case 'ValidateAsEqualToText':
+	{	
+if(validation[f][1][validation[f][2]].type){
+	get_input_value = 	validation[f][1][validation[f][2]].value;
+}
+else{
+	//get_input_value = 	document.querySelector('input[name=' + [validation[f][2] +'][checked]').value;	
+	var radios = 	validation[f][1][validation[f][2]];
+	
+    // loop through list of radio buttons
+    for (var i=0, len=radios.length; i<len; i++) {
+        if ( radios[i].checked || radios[i].selected) { // radio checked?
+            get_input_value = radios[i].value; // if so, hold its value in val
+            break; // and break out of for loop
+        }
+    }	
+}
+
+/////ADD ERROR MESSAGE AT TOP, OR ALERT ERROR MESSAGE
+
+if(tab_set == 1){
+val_str = 'tabindex_' + validation[f][2];
+err_tab = eval(val_str);
+}
+inline_validate = $inline_validate;
+
+
+if(get_input_value != undefined){
+eval('var field_value' + \"='\" + get_input_value + \"';if(field_value != '$other_text'){prevent_submit += 1;error_field.push('$dfield');document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ var cc = document.getElementById('tab_button_id_' + err_tab).getAttribute('onclick');var ctab = document.getElementById('tab_button_id_' + err_tab); cc = cc.replace('return false', ''); cc = cc.replace('this.className', 'ctab.className');  eval(cc); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{if(error_field.indexOf(validation[f][2]) == -1){document.getElementById(validation[f][2]).className='';document.getElementById(validation[f][2] + '_label').className='';} if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
+	
+	}	
+	}
+	break;
+";
+
+$this->print_client_validator .= $client_error;
+
+
+	$this->set_client_validator['ValidateAsEqualToText'] = true;
+		}
+		
+		
+		
+		
+		
+
+
+}
+
+
+
+//////END CLEINT VALIDATE AS EQUAL TO
+//////////////////////////////////////////CLEINT VALIDATE AS EQUAL TO TEXT
+if(isset($display->fields->$dfieldx->ValidateAsEqualTo)){
+
+	$other_text = $display->fields->$dfieldx->ValidateAsEqualTo;	
+	
+	$validate_error = "Must be equal certain set value";	
+
+		if(isset($display->fields->$dfieldx->ValidateAsEqualToErrorMessage))
+	{
+		$validate_error = $display->fields->$dfieldx->ValidateAsEqualToErrorMessage;
+	}	
+
+	
+							///set as callback	
+	$xvalidate_error = $validate_error;
+	if(is_callable($validate_error)){
+	$validate_error = call_user_func($validate_error,$dfield,$value,$arr,$lang);
+	}
+	if(!$validate_error){$validate_error = $xvalidate_error;}	
+
+	$call_error_call = "validation.push(['ValidateAsEqualTo',this_form,'$dfield','$validate_error']); \n ";
+	
+//	$this->pre_print['call_client_validator'] .= $call_error_call;
+	
+	$this->client_validator_array[$dfield][] = $call_error_call;
+	
+	
+	if(!isset($this->set_client_validator['ValidateAsEqualTo'])){
+	$client_error = "
+case 'ValidateAsEqualTo':
+	{	
+if(validation[f][1][validation[f][2]].type){
+	get_input_value = 	validation[f][1][validation[f][2]].value;
+}
+else{
+
+	var radios = 	validation[f][1][validation[f][2]];
+	
+    // loop through list of radio buttons
+    for (var i=0, len=radios.length; i<len; i++) {
+        if ( radios[i].checked || radios[i].selected) { // radio checked?
+            get_input_value = radios[i].value; // if so, hold its value in val
+            break; // and break out of for loop
+        }
+    }	
+}
+
+if(validation[f][1][validation[f][2]].type){
+	get_input_value_other = 	validation[f][1]['$other_text'].value;
+}
+else{
+
+	var radios = 	validation[f][1]['$other_text'];
+	
+    // loop through list of radio buttons
+    for (var i=0, len=radios.length; i<len; i++) {
+        if ( radios[i].checked || radios[i].selected) { // radio checked?
+            get_input_value_other = radios[i].value; // if so, hold its value in val
+            break; // and break out of for loop
+        }
+    }	
+}
+
+
+/////ADD ERROR MESSAGE AT TOP, OR ALERT ERROR MESSAGE
+
+if(tab_set == 1){
+val_str = 'tabindex_' + validation[f][2];
+err_tab = eval(val_str);
+}
+inline_validate = $inline_validate;
+
+
+if(get_input_value != undefined){
+eval('var field_value' + \"='\" + get_input_value + \"';if(field_value != get_input_value_other){prevent_submit += 1;error_field.push('$dfield');document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ var cc = document.getElementById('tab_button_id_' + err_tab).getAttribute('onclick');var ctab = document.getElementById('tab_button_id_' + err_tab); cc = cc.replace('return false', ''); cc = cc.replace('this.className', 'ctab.className');  eval(cc); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{if(error_field.indexOf(validation[f][2]) == -1){document.getElementById(validation[f][2]).className='';document.getElementById(validation[f][2] + '_label').className='';} if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
+	
+	}	
+	}
+	break;
+";
+
+$this->print_client_validator .= $client_error;
+
+
+	$this->set_client_validator['ValidateAsEqualTo'] = true;
+		}
+		
+		
+		
+		
+		
+
+
+}
+
+//////END CLEINT VALIDATE AS EQUAL TO
+////////////////////////////////////
+
+
+
+
+//////CLEINT VALIDATE AS DIFFERENT FROM
+if(isset($display->fields->$dfieldx->ValidateAsDifferentFrom)){
+
+	$other_text = $display->fields->$dfieldx->ValidateAsDifferentFrom;	
+	
+	$validate_error = "Must be different certain set value";	
+
+		if(isset($display->fields->$dfieldx->ValidateAsDifferentFromErrorMessage))
+	{
+		$validate_error = $display->fields->$dfieldx->ValidateAsDifferentFromErrorMessage;
+	}	
+
+	
+							///set as callback	
+	$xvalidate_error = $validate_error;
+	if(is_callable($validate_error)){
+	$validate_error = call_user_func($validate_error,$dfield,$value,$arr,$lang);
+	}
+	if(!$validate_error){$validate_error = $xvalidate_error;}	
+
+	$call_error_call = "validation.push(['ValidateAsDifferentFrom',this_form,'$dfield','$validate_error']); \n ";
+	
+//	$this->pre_print['call_client_validator'] .= $call_error_call;
+	
+	$this->client_validator_array[$dfield][] = $call_error_call;
+	
+	
+	if(!isset($this->set_client_validator['ValidateAsDifferentFrom'])){
+	$client_error = "
+case 'ValidateAsDifferentFrom':
+	{	
+if(validation[f][1][validation[f][2]].type){
+	get_input_value = 	validation[f][1][validation[f][2]].value;
+}
+else{
+
+	var radios = 	validation[f][1][validation[f][2]];
+	
+    // loop through list of radio buttons
+    for (var i=0, len=radios.length; i<len; i++) {
+        if ( radios[i].checked || radios[i].selected) { // radio checked?
+            get_input_value = radios[i].value; // if so, hold its value in val
+            break; // and break out of for loop
+        }
+    }	
+}
+
+if(validation[f][1][validation[f][2]].type){
+	get_input_value_other = 	validation[f][1]['$other_text'].value;
+}
+else{
+
+	var radios = 	validation[f][1]['$other_text'];
+	
+    // loop through list of radio buttons
+    for (var i=0, len=radios.length; i<len; i++) {
+        if ( radios[i].checked || radios[i].selected) { // radio checked?
+            get_input_value_other = radios[i].value; // if so, hold its value in val
+            break; // and break out of for loop
+        }
+    }	
+}
+
+
+/////ADD ERROR MESSAGE AT TOP, OR ALERT ERROR MESSAGE
+
+if(tab_set == 1){
+val_str = 'tabindex_' + validation[f][2];
+err_tab = eval(val_str);
+}
+inline_validate = $inline_validate;
+
+
+if(get_input_value != undefined){
+eval('var field_value' + \"='\" + get_input_value + \"';if(field_value == get_input_value_other){prevent_submit += 1;error_field.push('$dfield');document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ var cc = document.getElementById('tab_button_id_' + err_tab).getAttribute('onclick');var ctab = document.getElementById('tab_button_id_' + err_tab); cc = cc.replace('return false', ''); cc = cc.replace('this.className', 'ctab.className');  eval(cc); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{if(error_field.indexOf(validation[f][2]) == -1){document.getElementById(validation[f][2]).className='';document.getElementById(validation[f][2] + '_label').className='';} if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
+	
+	}	
+	}
+	break;
+";
+
+$this->print_client_validator .= $client_error;
+
+
+	$this->set_client_validator['ValidateAsDifferentFrom'] = true;
+		}
+		
+		
+		
+		
+		
+
+
+}
+
+//////END CLEINT VALIDATE AS DIFFERENT FROM
+////////////////////////////////////
+
+
+
+
+	
+//////CLEINT VALIDATE MINIMUM LENGTH
+if(isset($display->fields->$dfieldx->ValidateMinimumLength)){
+
+	$min_length = $display->fields->$dfieldx->ValidateMinimumLength;	
+	
+	$validate_error = "Value is too short";	
+
+		if(isset($display->fields->$dfieldx->ValidateMinimumLengthErrorMessage))
+	{
+		$validate_error = $display->fields->$dfieldx->ValidateMinimumLengthErrorMessage;
+	}	
+
+	
+							///set as callback	
+	$xvalidate_error = $validate_error;
+	if(is_callable($validate_error)){
+	$validate_error = call_user_func($validate_error,$dfield,$value,$arr,$lang);
+	}
+	if(!$validate_error){$validate_error = $xvalidate_error;}	
+
+	$call_error_call = "validation.push(['ValidateMinimumLength',this_form,'$dfield','$validate_error']); \n ";
+	
+//	$this->pre_print['call_client_validator'] .= $call_error_call;
+	
+	$this->client_validator_array[$dfield][] = $call_error_call;
+	
+	
+	if(!isset($this->set_client_validator['ValidateMinimumLength'])){
+	$client_error = "
+case 'ValidateMinimumLength':
+	{	
+if(validation[f][1][validation[f][2]].type){
+	get_input_value = 	validation[f][1][validation[f][2]].value;
+}
+else{
+	//get_input_value = 	document.querySelector('input[name=' + [validation[f][2] +'][checked]').value;	
+	var radios = 	validation[f][1][validation[f][2]];
+	
+    // loop through list of radio buttons
+    for (var i=0, len=radios.length; i<len; i++) {
+        if ( radios[i].checked || radios[i].selected) { // radio checked?
+            get_input_value = radios[i].value; // if so, hold its value in val
+            break; // and break out of for loop
+        }
+    }	
+}
+
+/////ADD ERROR MESSAGE AT TOP, OR ALERT ERROR MESSAGE
+
+if(tab_set == 1){
+val_str = 'tabindex_' + validation[f][2];
+err_tab = eval(val_str);
+}
+inline_validate = $inline_validate;
+
+
+if(get_input_value != undefined){
+eval('var field_value' + \"='\" + get_input_value + \"';if(field_value.length < '$min_length'){prevent_submit += 1;error_field.push('$dfield');document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ var cc = document.getElementById('tab_button_id_' + err_tab).getAttribute('onclick');var ctab = document.getElementById('tab_button_id_' + err_tab); cc = cc.replace('return false', ''); cc = cc.replace('this.className', 'ctab.className');  eval(cc); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{if(error_field.indexOf(validation[f][2]) == -1){document.getElementById(validation[f][2]).className='';document.getElementById(validation[f][2] + '_label').className='';} if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
+	
+	}	
+	}
+	break;
+";
+
+$this->print_client_validator .= $client_error;
+
+
+	$this->set_client_validator['ValidateMinimumLength'] = true;
+		}
+		
+		
+		
+		
+		
+
+
+}
+
+//////END CLEINT VALIDATE MINIMUM LENGTH
+////////////////////////////////////
+
+
+
+
+
+
+
+	
+//////CLEINT VALIDATE MAXIMUM LENGTH
+if(isset($display->fields->$dfieldx->ValidateMaximumLength)){
+
+	$max_length = $display->fields->$dfieldx->ValidateMaximumLength;	
+	
+	$validate_error = "Value is too long";	
+
+		if(isset($display->fields->$dfieldx->ValidateMaximumLengthErrorMessage))
+	{
+		$validate_error = $display->fields->$dfieldx->ValidateMaximumLengthErrorMessage;
+	}	
+
+	
+							///set as callback	
+	$xvalidate_error = $validate_error;
+	if(is_callable($validate_error)){
+	$validate_error = call_user_func($validate_error,$dfield,$value,$arr,$lang);
+	}
+	if(!$validate_error){$validate_error = $xvalidate_error;}	
+
+	$call_error_call = "validation.push(['ValidateMaximumLength',this_form,'$dfield','$validate_error']); \n ";
+	
+//	$this->pre_print['call_client_validator'] .= $call_error_call;
+	
+	$this->client_validator_array[$dfield][] = $call_error_call;
+	
+	
+	if(!isset($this->set_client_validator['ValidateMaximumLength'])){
+	$client_error = "
+case 'ValidateMaximumLength':
+	{	
+if(validation[f][1][validation[f][2]].type){
+	get_input_value = 	validation[f][1][validation[f][2]].value;
+}
+else{
+	//get_input_value = 	document.querySelector('input[name=' + [validation[f][2] +'][checked]').value;	
+	var radios = 	validation[f][1][validation[f][2]];
+	
+    // loop through list of radio buttons
+    for (var i=0, len=radios.length; i<len; i++) {
+        if ( radios[i].checked || radios[i].selected) { // radio checked?
+            get_input_value = radios[i].value; // if so, hold its value in val
+            break; // and break out of for loop
+        }
+    }	
+}
+
+/////ADD ERROR MESSAGE AT TOP, OR ALERT ERROR MESSAGE
+
+if(tab_set == 1){
+val_str = 'tabindex_' + validation[f][2];
+err_tab = eval(val_str);
+}
+inline_validate = $inline_validate;
+
+
+if(get_input_value != undefined){
+eval('var field_value' + \"='\" + get_input_value + \"';if(field_value.length > '$max_length'){prevent_submit += 1;error_field.push('$dfield');document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ var cc = document.getElementById('tab_button_id_' + err_tab).getAttribute('onclick');var ctab = document.getElementById('tab_button_id_' + err_tab); cc = cc.replace('return false', ''); cc = cc.replace('this.className', 'ctab.className');  eval(cc); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{if(error_field.indexOf(validation[f][2]) == -1){document.getElementById(validation[f][2]).className='';document.getElementById(validation[f][2] + '_label').className='';} if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
+	
+	}	
+	}
+	break;
+";
+
+$this->print_client_validator .= $client_error;
+
+
+	$this->set_client_validator['ValidateMaximumLength'] = true;
+		}
+		
+		
+		
+		
+		
+
+
+}
+
+//////END CLEINT VALIDATE MINIMUM LENGTH
+////////////////////////////////////
+
+
+
+
+//////CLEINT VALIDATE AS REGULAR EXPRESION 
+if(isset($display->fields->$dfieldx->ValidateRegularExpression)){
+
+	$reg_exp = $display->fields->$dfieldx->ValidateRegularExpression;	
+	
+	$validate_error = "Invalid format";	
+
+		if(isset($display->fields->$dfieldx->ValidateRegularExpressionErrorMessage))
+	{
+		$validate_error = $display->fields->$dfieldx->ValidateRegularExpressionErrorMessage;
+	}	
+
+	
+							///set as callback	
+	$xvalidate_error = $validate_error;
+	if(is_callable($validate_error)){
+	$validate_error = call_user_func($validate_error,$dfield,$value,$arr,$lang);
+	}
+	if(!$validate_error){$validate_error = $xvalidate_error;}	
+
+	$call_error_call = "validation.push(['ValidateRegularExpression',this_form,'$dfield','$validate_error']); \n ";
+	
+//	$this->pre_print['call_client_validator'] .= $call_error_call;
+	
+	$this->client_validator_array[$dfield][] = $call_error_call;
+	
+	
+	if(!isset($this->set_client_validator['ValidateRegularExpression'])){
+	$client_error = "
+case 'ValidateRegularExpression':
+	{	
+if(validation[f][1][validation[f][2]].type){
+	get_input_value = 	validation[f][1][validation[f][2]].value;
+}
+else{
+	//get_input_value = 	document.querySelector('input[name=' + [validation[f][2] +'][checked]').value;	
+	var radios = 	validation[f][1][validation[f][2]];
+	
+    // loop through list of radio buttons
+    for (var i=0, len=radios.length; i<len; i++) {
+        if ( radios[i].checked || radios[i].selected) { // radio checked?
+            get_input_value = radios[i].value; // if so, hold its value in val
+            break; // and break out of for loop
+        }
+    }	
+}
+
+/////ADD ERROR MESSAGE AT TOP, OR ALERT ERROR MESSAGE
+
+if(tab_set == 1){
+val_str = 'tabindex_' + validation[f][2];
+err_tab = eval(val_str);
+}
+inline_validate = $inline_validate;
+
+
+if(get_input_value != undefined){
+eval('var field_value' + \"='\" + get_input_value + \"';var n = field_value.search($reg_exp);if(n == -1){prevent_submit += 1;error_field.push('$dfield');document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ var cc = document.getElementById('tab_button_id_' + err_tab).getAttribute('onclick');var ctab = document.getElementById('tab_button_id_' + err_tab); cc = cc.replace('return false', ''); cc = cc.replace('this.className', 'ctab.className');  eval(cc); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{if(error_field.indexOf(validation[f][2]) == -1){document.getElementById(validation[f][2]).className='';document.getElementById(validation[f][2] + '_label').className='';} if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
+	
+	}	
+	}
+	break;
+";
+
+$this->print_client_validator .= $client_error;
+
+
+	$this->set_client_validator['ValidateRegularExpression'] = true;
+		}
+		
+		
+		
+		
+		
+
+
+}
+
+//////END CLEINT VALIDATE AS REGULAR EXPRESION 
+////////////////////////////////////
+
+
+
+
+
+//////CLEINT VALIDATE AS REGULAR EXPRESION 
+if(isset($display->fields->$dfieldx->ValidateAsNotRegularExpression)){
+
+	$reg_exp = $display->fields->$dfieldx->ValidateAsNotRegularExpression;	
+	
+	$validate_error = "Matches invalid format";	
+
+		if(isset($display->fields->$dfieldx->ValidateAsNotRegularExpressionErrorMessage))
+	{
+		$validate_error = $display->fields->$dfieldx->ValidateAsNotRegularExpressionErrorMessage;
+	}	
+
+	
+							///set as callback	
+	$xvalidate_error = $validate_error;
+	if(is_callable($validate_error)){
+	$validate_error = call_user_func($validate_error,$dfield,$value,$arr,$lang);
+	}
+	if(!$validate_error){$validate_error = $xvalidate_error;}	
+
+	$call_error_call = "validation.push(['ValidateAsNotRegularExpression',this_form,'$dfield','$validate_error']); \n ";
+	
+//	$this->pre_print['call_client_validator'] .= $call_error_call;
+	
+	$this->client_validator_array[$dfield][] = $call_error_call;
+	
+	
+	if(!isset($this->set_client_validator['ValidateAsNotRegularExpression'])){
+	$client_error = "
+case 'ValidateAsNotRegularExpression':
+	{	
+if(validation[f][1][validation[f][2]].type){
+	get_input_value = 	validation[f][1][validation[f][2]].value;
+}
+else{
+	//get_input_value = 	document.querySelector('input[name=' + [validation[f][2] +'][checked]').value;	
+	var radios = 	validation[f][1][validation[f][2]];
+	
+    // loop through list of radio buttons
+    for (var i=0, len=radios.length; i<len; i++) {
+        if ( radios[i].checked || radios[i].selected) { // radio checked?
+            get_input_value = radios[i].value; // if so, hold its value in val
+            break; // and break out of for loop
+        }
+    }	
+}
+
+/////ADD ERROR MESSAGE AT TOP, OR ALERT ERROR MESSAGE
+
+if(tab_set == 1){
+val_str = 'tabindex_' + validation[f][2];
+err_tab = eval(val_str);
+}
+inline_validate = $inline_validate;
+
+
+if(get_input_value != undefined){
+eval('var field_value' + \"='\" + get_input_value + \"';var n = field_value.search($reg_exp);if(n != -1){prevent_submit += 1;error_field.push('$dfield');document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ var cc = document.getElementById('tab_button_id_' + err_tab).getAttribute('onclick');var ctab = document.getElementById('tab_button_id_' + err_tab); cc = cc.replace('return false', ''); cc = cc.replace('this.className', 'ctab.className');  eval(cc); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{if(error_field.indexOf(validation[f][2]) == -1){document.getElementById(validation[f][2]).className='';document.getElementById(validation[f][2] + '_label').className='';} if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
+	
+	}	
+	}
+	break;
+";
+
+$this->print_client_validator .= $client_error;
+
+
+	$this->set_client_validator['ValidateAsNotRegularExpression'] = true;
+		}
+		
+		
+		
+		
+		
+
+
+}
+
+//////END CLEINT VALIDATE AS REGULAR EXPRESION 
+////////////////////////////////////
 
 
 
@@ -6311,6 +7544,7 @@ $add_free_field  = array( //must add proccessors   ////when $add_free_field is d
 					array("free_no_display3","text"),
 					array("free_no_display4","text"),
 					array("free_no_display5","multipleselect"),
+					array("free_no_display6","text"),
 					//array("","");
 						);
 
@@ -6370,7 +7604,7 @@ array(	'foo' => 'bar',
 		'custom_tab' => $ctab,
 		'tabs' => array("PERSONAL"=>'faculty_auto,faculty_auto2,faculty_sel,faculty_sel2,faculty_day_added,faculty_year_added,faculty_campus,faculty_shortname,faculty_id,faculty_note',
 						"OFFICE"=>'faculty_text,faculty_files,location,faculty_logo,faculty_fullname,institution_id',
-						"OTHERS"=>'house,free_no_display,free_no_display2,free_no_display3,free_no_display4,free_no_display5,joint,cvupload,2ndpasswprd,faculty_code,faculty_month_added'),
+						"OTHERS"=>'house,free_no_display,free_no_display2,free_no_display3,free_no_display4,free_no_display5,free_no_display6,joint,cvupload,2ndpasswprd,faculty_code,faculty_month_added'),
 		
 		'update' => $update, /////UPDATE
 		'stop_sql' => false, /////UPDATE
@@ -6443,8 +7677,24 @@ array(	'foo' => 'bar',
 												),	
 		'free_no_display' => (object) array ( 	'type'=> 'text', //checkbox, multipleselect		
 												'ValidateAsInteger' => true,
+												'ValidateAsIntegerErrorMessage' => "not a whole number",														
+												'ValidationLowerLimit' => 0,
+												'ValidationUpperLimit' => 50,
+												'ValidateAsNotEmpty' => true,
+												'ValidateAsDifferentFromText' => '33',
+												'ValidateAsDifferentFromTextErrorMessage' => 'pick another value',												'ValidateAsEqualToText' => '32',
+												'ValidateAsEqualToTextErrorMessage' => 'Is not equal to 32',
+												'ValidateMinimumLength' => 2,
+												'ValidateMinimumLengthErrorMessage' => 'Value is too short',
+												'ValidateMaximumLength' => 2,
+												'ValidateMaximumLengthErrorMessage' => 'Value is too long',
+												'ValidateAsEqualTo' => 'free_no_display4',
+												'ValidateAsEqualToErrorMessage' => 'Not equal to field set',												
+												'ValidateAsDifferentFrom' => 'free_no_display4',
+												'ValidateAsDifferentFromErrorMessage' => 'Should be different from the other field',
 											//	'ValidateAsIntegerErrorMessage' => "@name @label @value is not an integer",
-												'ValidateAsIntegerErrorMessage' => "not a whole number",		
+												'ValidationUpperLimitErrorMessage' => 'too big',
+												'ValidationLowerLimitErrorMessage' => 'too small',
 													'values_for_select' => array(	"January" => "1", ////The key is displayed & value = value
 																					"February" => "2",
 																					"March" => "3"
@@ -6472,6 +7722,8 @@ array(	'foo' => 'bar',
 												),
 		'free_no_display3' => (object) array ( 	'type'=> 'text', //checkbox, multipleselect		
 												'ValidateAsFloat' => true,
+												'ValidationLowerLimit' => 0,
+												'ValidationUpperLimit' => 50,
 											//	'ValidateAsIntegerErrorMessage' => "@name @label @value is not an integer",
 												'ValidateAsFloatErrorMessage' => "not a valid float",		
 													'values_for_select' => array(	"January" => "1", ////The key is displayed & value = value
@@ -6501,7 +7753,18 @@ array(	'foo' => 'bar',
 																				),
 													'element_separator' => '<br />', ///HTML TAG
 												//	'checked' => array('1')
-												),												
+												),
+		'free_no_display6' => (object) array ( 	'type'=> 'text', //checkbox, multipleselect		
+												'ValidateRegularExpression' => '/^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-._]+..[a-zA-Z0-9-.]+$/',
+												'ValidateRegularExpressionErrorMessage' => "Reg Expression does not match",													'ValidateAsNotRegularExpression' => '/^[-+0-9]+$/',
+												'ValidateAsNotRegularExpressionErrorMessage' => "Invalid reg exp format",		
+													'values_for_select' => array(	"January" => "1", ////The key is displayed & value = value
+																					"February" => "2",
+																					"March" => "3"
+																				),
+													'element_separator' => '<br />', ///HTML TAG
+												//	'checked' => array('1')
+												),													
 		'institution_id' => (object) array ( 	'type'=> 'select',
 												'id' => 'insssss',		
 								/*
