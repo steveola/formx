@@ -7658,7 +7658,7 @@ array(	'foo' => 'bar',
 		'form_error_element_style' => "",
 		'form_error_separator' => "",
 		'custom_tab' => $ctab,
-		'tabsX' => array("PERSONAL"=>'faculty_auto,faculty_auto2,faculty_sel,faculty_sel2,faculty_day_added,faculty_year_added,faculty_campus,faculty_shortname,faculty_id,faculty_note',
+		'tabs' => array("PERSONAL"=>'faculty_auto,faculty_auto2,faculty_sel,faculty_sel2,faculty_day_added,faculty_year_added,faculty_campus,faculty_shortname,faculty_id,faculty_note',
 						"OFFICE"=>'faculty_text,faculty_files,location,faculty_logo,faculty_fullname,institution_id',
 						"OTHERS"=>'house,free_no_display,free_no_display2,free_no_display3,free_no_display4,free_no_display5,free_no_display6,joint,cvupload,2ndpasswprd,faculty_code,faculty_month_added'),
 		
