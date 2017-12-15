@@ -262,7 +262,7 @@ function error_render($data){
 	}
 }
 
-
+public $form_id = "";
 public $validation_error = array();
 public $allow_sql = 0;
 
@@ -293,6 +293,9 @@ public $set_client_validator = array();
 public $print_client_validator = "";
 
 public $client_validator_array = array();
+
+
+public $live_validate_script = "";
 
 public $server_error = array();
 public $error_renderer = array();
@@ -3396,6 +3399,8 @@ if(isset($display->form_id))
 $form_id = $display->form_id;
 }
 
+$this->form_id = $form_id;
+
 $form_action = "";
 if(isset($display->form_action))
 {
@@ -3404,7 +3409,7 @@ $form_action = $display->form_action;
 
 
 $this->pre_print['call_client_validator'] .= "<script>
-function validateForm_$form_id(this_form){\n
+function validateForm_$form_id(this_form,live_val){\n
 prevent_submit = 0;\n 
 var validation = [];
 var error = [];
@@ -3803,7 +3808,11 @@ $this->post_print['form_printer'] .= $row_end;
 
 	
 		$this->post_print['form_printer'] .= $container_close;
-$this->post_print['form_printer'] .="</form>";	
+		
+		
+$this->post_print['form_printer'] .="</form>";
+
+$this->post_print['form_printer'] .= $this->live_validate_script;
 //$newfields = $newfields;	
 
 
@@ -4109,6 +4118,16 @@ $this->pre_print['call_client_validator'] =  "<script>" . $client_error_tab . "<
 $this->pre_print['call_client_validator'] .=  $client_error_script;
 
 $this->pre_print['call_client_validator'] .= "
+if(live_val != undefined){
+var val_replace = [];
+	for(z in validation){
+		if(validation[z][2] == live_val){
+		val_replace.push(validation[z]);	
+		}
+	}	
+validation = val_replace;
+}
+
 for(f in validation){
 //alert(validation[f][0]);	
 validation_type = 	validation[f][0];
@@ -4116,6 +4135,8 @@ var get_input_value;
 var get_input_value_other;
 
 var tab_set = 1;
+
+
 switch (validation_type) {//start witch
 ";	
 
@@ -4126,6 +4147,9 @@ if(isset($display->client_submit)){
 $client_submit = $display->client_submit;
 }
 
+
+
+
 $this->pre_print['call_client_validator'] .= "	
 }//end switch
 
@@ -4135,19 +4159,26 @@ client_submit = $client_submit;
 if(prevent_submit > 0 || client_submit == 0){
 
 if(prevent_submit == 0){
+	if(live_val == undefined){
 	$client_success;
+	}
 }
 else{
+	if(live_val == undefined){
 	$client_failure;
+	}
 }
 	
 	return false;
 }
 else{
+	if(live_val == undefined){
 	$client_success;
+	}
 	return true;
 }
- }</script>";
+ }
+ </script>";
 
 //	echo $client_error_script;
 //	print_r($fields_array);		
@@ -4184,11 +4215,23 @@ $fieldname = $fieldkey;
 	}	
 $this->pre_print['call_client_validator'] .=  $client_error_script;	
 $this->pre_print['call_client_validator'] .= "
+if(live_val != undefined){
+var val_replace = [];
+	for(z in validation){
+		if(validation[z][2] == live_val){
+		val_replace.push(validation[z]);	
+		}
+	}	
+validation = val_replace;
+}
+
 for(f in validation){
 //alert(validation[f][0]);	
 validation_type = 	validation[f][0];
 var get_input_value;
+
 var tab_set = 0;
+
 switch (validation_type) {//start witch
 ";	
 
@@ -4198,6 +4241,7 @@ $client_submit = 1;
 if(isset($display->client_submit)){
 $client_submit = $display->client_submit;
 }
+
 
 $this->pre_print['call_client_validator'] .= "	
 }//end switch
@@ -4211,7 +4255,8 @@ if(prevent_submit > 0 || client_submit == 0){
 else{
 	return true;
 }
- }</script>";	
+ }
+ </script>";	
 	
 //	echo $client_error_script;
 //	print_r($sorted_data); //use to print validation function
@@ -4582,6 +4627,29 @@ $this->field_data["$dfield"] = "";
 
 		
 $this->input_label["$dfield"] = "<label for=\"$dfield\" accesskey=\"\" id='$dfield"."_label' class=\"$form_error_label_class\" style=\"$form_error_label_style\">".  $print_lang . "</label> ";//LABEL
+
+$form_id = $this->form_id;
+/////////LIVE VALIDATION SCRIPT//////////////
+if(isset($display->live_validate)){
+	if($display->live_validate == true){	
+$this->live_validate_script .= "<script>
+document.getElementById(\"$dfield\").addEventListener('keyup', function (event) {
+validateForm_$form_id(this.form,'$dfield');
+}, true);
+
+document.getElementById(\"$dfield\").addEventListener('change', function (event) {
+validateForm_$form_id(this.form,'$dfield');
+}, true);
+</script>";
+		
+	}	
+}
+/////////END LIVE VALIDATION SCRIPT//////////////
+
+
+
+
+
 /////////////////////////////////////
 ////////////CLIENT SIDE VALIDATION//
 /////////////////////////////////////
@@ -7632,6 +7700,7 @@ array(	'foo' => 'bar',
 		'submit_attr' => "style=''",
 		'server_validate' => true,
 		'client_submit' => 1,
+		'live_validate' => true,
 	//	'client_success' => "alert('form is success ' + validation[f][1][4].value)",  ////carry form details in validation[f][1] array check using compact mode for IE, EDGE
 		'client_success' => "alert('form is success ' + validation[f][1]['faculty_id'].value)",  ////details in validation[f][1] array check using compact mode for IE, EDGE
 		'client_failure' => "alert('form is failed ' + error)",
