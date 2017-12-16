@@ -4640,6 +4640,10 @@ validateForm_$form_id(this.form,'$dfield');
 document.getElementById(\"$dfield\").addEventListener('change', function (event) {
 validateForm_$form_id(this.form,'$dfield');
 }, true);
+
+document.getElementById(\"$dfield\").addEventListener('click', function (event) {
+validateForm_$form_id(document.getElementById('$form_id'),'$dfield');
+}, true);
 </script>";
 		
 	}	
