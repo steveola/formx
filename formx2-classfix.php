@@ -20,6 +20,8 @@
 
 .error_class {background:blue;}
 .error_label_class {background:blue;}
+.valid {background:green;}
+.validl {background:green;}
 </style>
 <?php
 
@@ -306,7 +308,7 @@ public $error_renderer = array();
 ////END TAB PROPERTIES
 
 function ValidateAsEmail($name,$value,$validate_error){
-	if(preg_match("/^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-._]+..[a-zA-Z0-9-.]+$/",$value))////email
+	if(preg_match("/^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-._]+..[a-zA-Z0-9-]+$/",$value))////email
 	{
 		///nothing runs here
 	}
@@ -442,6 +444,20 @@ function ValidateAsSet($name,$value,$validate_error){
 }
 
 
+function ValidateAsCreditCard($name,$value,$validate_error){
+	if(preg_match("/^(?:4[0-9]{12}(?:[0-9]{3})?|[25][1-7][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\d{3})\d{11})$/", $value))////email
+	{
+		///nothing runs here
+	}
+	else
+	{
+		if($validate_error =="**not_set"){$validate_error ="Input card";}
+		$this->validation_error["$name"][] = $validate_error;
+		$this->allow_sql += 1;
+	}	
+}
+
+
 function ValidateAsDate($name,$value,$separator,$validate_error){
 	$num_split = explode($separator, $value);
 	$array_cnum = count($num_split);
@@ -469,6 +485,21 @@ function ValidateAsDifferentFromText($name,$value,$other_text,$validate_error){
 	{
 		//ValidateAsFloatErrorMessage
 		if($validate_error =="**not_set"){$validate_error ="Value must be different from $value ";}
+		$this->validation_error["$name"][] = $validate_error;
+		$this->allow_sql += 1;
+	}	
+}
+
+//^-?[0-9]+(\\.[0-9]{0,PLACES})?\$
+function ValidationDecimalPlaces($name,$value,$dp,$validate_error){
+	if(preg_match("/^-?[0-9]+(\\.[0-9]{0,$dp})?\$/", $value))
+	{
+		///nothing runs here
+	}
+	else
+	{
+		//ValidateAsFloatErrorMessage
+		if($validate_error =="**not_set"){$validate_error ="Invalid decimal places";}
 		$this->validation_error["$name"][] = $validate_error;
 		$this->allow_sql += 1;
 	}	
@@ -1179,6 +1210,26 @@ $reprint->$name = $value;
 				///set as callback
 				$this->ValidateAsSet($name,$value,$validate_error);
 				}
+				}	
+				
+				
+				if(isset($display->fields->$name->ValidateAsCreditCard))
+				{
+					if($display->fields->$name->ValidateAsCreditCard == true){
+					$validate_error = "**not_set";					
+					if(isset($display->fields->$name->ValidateAsCreditCardErrorMessage))
+						{
+							$validate_error = $display->fields->$name->ValidateAsCreditCardErrorMessage;
+						}
+										///set as callback	
+				$xvalidate_error = $validate_error;
+				if(is_callable($validate_error)){
+				$validate_error = call_user_func($validate_error,$name,$value,$arr,$lang);
+				}
+				if(!$validate_error){$validate_error = $xvalidate_error;}	
+				///set as callback
+				$this->ValidateAsCreditCard($name,$value,$validate_error);
+				}
 				}				
 				
 
@@ -1235,6 +1286,32 @@ $reprint->$name = $value;
 				$other_text = $display->fields->$name->ValidateAsDifferentFromText;
 
 				$this->ValidateAsDifferentFromText($name,$value,$other_text,$validate_error);
+
+				}				
+
+				
+						
+				if(isset($display->fields->$name->ValidationDecimalPlaces))
+				{
+				
+					$validate_error = "**not_set";				
+					if(isset($display->fields->$name->ValidationDecimalPlacesErrorMessage))
+						{
+							$validate_error = $display->fields->$name->ValidationDecimalPlacesErrorMessage;
+						}
+										///set as callback	
+				$xvalidate_error = $validate_error;
+				if(is_callable($validate_error)){
+				$validate_error = call_user_func($validate_error,$name,$value,$arr,$lang);
+				}
+				if(!$validate_error){$validate_error = $xvalidate_error;}	
+				///set as callback
+						
+						
+
+				$dp = $display->fields->$name->ValidationDecimalPlaces;
+
+				$this->ValidationDecimalPlaces($name,$value,$dp,$validate_error);
 
 				}				
 
@@ -4792,6 +4869,21 @@ else{
 $error_separator = "";
 }
 
+
+if(isset($display->form_valid_element_class)){
+$form_valid_element_class = $display->form_valid_element_class;
+}
+else{
+$form_valid_element_class = "";
+}
+
+if(isset($display->form_valid_label_class)){
+$form_valid_label_class = $display->form_valid_label_class;
+}
+else{
+$form_valid_label_class = "";
+}
+
 }///END set default values
 
 $inline_validate = 1;
@@ -4906,7 +4998,7 @@ err_tab = eval(val_str);
 }
 inline_validate = $inline_validate;
 if(get_input_value != undefined){
-eval('var field_value' + \"='\" + get_input_value + \"';var n = field_value.search(/^[-+0-9]+$/);if(n == -1 || field_value > parseInt(validation[f][4]) || field_value < parseInt(validation[f][5])){prevent_submit += 1;error_field.push('$dfield'); if(field_value > parseInt(validation[f][4])){validation[f][3] = validation[f][6];} if(field_value < parseInt(validation[f][5])){validation[f][3] = validation[f][7];}  document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ var cc = document.getElementById('tab_button_id_' + err_tab).getAttribute('onclick');var ctab = document.getElementById('tab_button_id_' + err_tab); cc = cc.replace('return false', ''); cc = cc.replace('this.className', 'ctab.className');  eval(cc); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{if(error_field.indexOf(validation[f][2]) == -1){document.getElementById(validation[f][2]).className='';document.getElementById(validation[f][2] + '_label').className='';} if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
+eval('var field_value' + \"='\" + get_input_value + \"';var n = field_value.search(/^[-+0-9]+$/);if(n == -1 || field_value > parseInt(validation[f][4]) || field_value < parseInt(validation[f][5])){prevent_submit += 1;error_field.push('$dfield'); if(field_value > parseInt(validation[f][4])){validation[f][3] = validation[f][6];} if(field_value < parseInt(validation[f][5])){validation[f][3] = validation[f][7];}  document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ var cc = document.getElementById('tab_button_id_' + err_tab).getAttribute('onclick');var ctab = document.getElementById('tab_button_id_' + err_tab); cc = cc.replace('return false', ''); cc = cc.replace('this.className', 'ctab.className');  eval(cc); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{if(error_field.indexOf(validation[f][2]) == -1){document.getElementById(validation[f][2]).className='$form_valid_element_class';document.getElementById(validation[f][2] + '_label').className='$form_valid_label_class';} if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
 	
 	}	
 	}
@@ -5028,7 +5120,7 @@ err_tab = eval(val_str);
 }
 inline_validate = $inline_validate;
 if(get_input_value != undefined){
-eval('var field_value' + \"='\" + get_input_value + \"';var n = field_value.search(/^[-+0-9]+[.]+[0-9]+$/);if(n == -1 || field_value > parseInt(validation[f][4]) || field_value < parseInt(validation[f][5])){prevent_submit += 1;error_field.push('$dfield'); if(field_value > parseInt(validation[f][4])){validation[f][3] = validation[f][6];} if(field_value < parseInt(validation[f][5])){validation[f][3] = validation[f][7];}  document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ var cc = document.getElementById('tab_button_id_' + err_tab).getAttribute('onclick');var ctab = document.getElementById('tab_button_id_' + err_tab); cc = cc.replace('return false', ''); cc = cc.replace('this.className', 'ctab.className');  eval(cc); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{if(error_field.indexOf(validation[f][2]) == -1){document.getElementById(validation[f][2]).className='';document.getElementById(validation[f][2] + '_label').className='';} if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
+eval('var field_value' + \"='\" + get_input_value + \"';var n = field_value.search(/^[-+0-9]+[.]+[0-9]+$/);if(n == -1 || field_value > parseInt(validation[f][4]) || field_value < parseInt(validation[f][5])){prevent_submit += 1;error_field.push('$dfield'); if(field_value > parseInt(validation[f][4])){validation[f][3] = validation[f][6];} if(field_value < parseInt(validation[f][5])){validation[f][3] = validation[f][7];}  document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ var cc = document.getElementById('tab_button_id_' + err_tab).getAttribute('onclick');var ctab = document.getElementById('tab_button_id_' + err_tab); cc = cc.replace('return false', ''); cc = cc.replace('this.className', 'ctab.className');  eval(cc); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{if(error_field.indexOf(validation[f][2]) == -1){document.getElementById(validation[f][2]).className='$form_valid_element_class';document.getElementById(validation[f][2] + '_label').className='$form_valid_label_class';} if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
 	
 	}	
 	}
@@ -5105,7 +5197,7 @@ err_tab = eval(val_str);
 }
 inline_validate = $inline_validate;
 if(get_input_value != undefined){
-eval('var field_value' + \"='\" + get_input_value + \"';var n = field_value.search(/^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-._]+..[a-zA-Z0-9-.]+$/);if(n == -1){prevent_submit += 1;error_field.push('$dfield');document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ var cc = document.getElementById('tab_button_id_' + err_tab).getAttribute('onclick');var ctab = document.getElementById('tab_button_id_' + err_tab); cc = cc.replace('return false', ''); cc = cc.replace('this.className', 'ctab.className');  eval(cc); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{if(error_field.indexOf(validation[f][2]) == -1){document.getElementById(validation[f][2]).className='';document.getElementById(validation[f][2] + '_label').className='';} if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
+eval('var field_value' + \"='\" + get_input_value + \"';var n = field_value.search(/^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-._]+..[a-zA-Z0-9-]+$/);if(n == -1){prevent_submit += 1;error_field.push('$dfield');document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ var cc = document.getElementById('tab_button_id_' + err_tab).getAttribute('onclick');var ctab = document.getElementById('tab_button_id_' + err_tab); cc = cc.replace('return false', ''); cc = cc.replace('this.className', 'ctab.className');  eval(cc); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{if(error_field.indexOf(validation[f][2]) == -1){document.getElementById(validation[f][2]).className='$form_valid_element_class';document.getElementById(validation[f][2] + '_label').className='$form_valid_label_class';} if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
 	
 	}	
 	}
@@ -5220,7 +5312,7 @@ err_tab = eval(val_str);
 inline_validate = $inline_validate;
 
 if(get_input_value != undefined){
-eval('var field_value' + \"='\" + get_input_value + \"';if(get_input_value == 'not_set'){prevent_submit += 1;error_field.push('$dfield');document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement;  /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ var cc = document.getElementById('tab_button_id_' + err_tab).getAttribute('onclick');var ctab = document.getElementById('tab_button_id_' + err_tab); cc = cc.replace('return false', ''); cc = cc.replace('this.className', 'ctab.className');  eval(cc); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{if(error_field.indexOf(validation[f][2]) == -1){document.getElementById(validation[f][2]).className='';document.getElementById(validation[f][2] + '_label').className='';} if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
+eval('var field_value' + \"='\" + get_input_value + \"';if(get_input_value == 'not_set'){prevent_submit += 1;error_field.push('$dfield');document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement;  /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ var cc = document.getElementById('tab_button_id_' + err_tab).getAttribute('onclick');var ctab = document.getElementById('tab_button_id_' + err_tab); cc = cc.replace('return false', ''); cc = cc.replace('this.className', 'ctab.className');  eval(cc); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{if(error_field.indexOf(validation[f][2]) == -1){document.getElementById(validation[f][2]).className='$form_valid_element_class';document.getElementById(validation[f][2] + '_label').className='$form_valid_label_class';} if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
 	
 	}	
 	}
@@ -5242,6 +5334,129 @@ $this->print_client_validator .= $client_error;
 }
 
 //////END CLEINT VALIDATE AS SET	
+////////////////////////////////////
+
+
+	
+//////CLEINT VALIDATE AS CREDIT CARD
+if(isset($display->fields->$dfieldx->ValidateAsCreditCard)){
+		if($display->fields->$dfieldx->ValidateAsCreditCard == true){
+		$validate_error = "Invalid card";				
+					if(isset($display->fields->$dfieldx->ValidateAsCreditCardErrorMessage))
+			{
+				$validate_error = $display->fields->$dfieldx->ValidateAsCreditCardErrorMessage;
+			}
+							///set as callback	
+	$xvalidate_error = $validate_error;
+	if(is_callable($validate_error)){
+	$validate_error = call_user_func($validate_error,$dfield,$value,$arr,$lang);
+	}
+	if(!$validate_error){$validate_error = $xvalidate_error;}	
+
+	$call_error_call = "validation.push(['ValidateAsCreditCard',this_form,'$dfield','$validate_error']); \n ";
+	
+//	$this->pre_print['call_client_validator'] .= $call_error_call;
+	
+	$this->client_validator_array[$dfield][] = $call_error_call;
+
+$input_settype = "	var radios = 	validation[f][1][validation[f][2]];
+	
+    // loop through list of radio buttons
+    for (var i=0, len=radios.length; i<len; i++) {
+        if ( radios[i].checked || radios[i].selected) { // radio checked?
+            get_input_value = radios[i].value; // if so, hold its value in val
+            break; // and break out of for loop
+        }
+		else
+		{
+			get_input_value = 'not_set';
+		}
+    }";
+
+if($display->fields->$dfieldx->type == 'radio'){
+$input_settype = "	var radios = 	validation[f][1][validation[f][2]];
+	
+    // loop through list of radio buttons
+    for (var i=0, len=radios.length; i<len; i++) {
+        if ( radios[i].checked || radios[i].selected) { // radio checked?
+            get_input_value = radios[i].value; // if so, hold its value in val
+            break; // and break out of for loop
+        }
+		else
+		{
+			get_input_value = 'not_set';
+		}
+    }";	
+}	
+
+
+if($display->fields->$dfieldx->type == 'checkbox'){
+$input_settype = "	var radios = 	document.getElementsByName(validation[f][2] + '[]');	
+    // loop through list of radio buttons
+    for (var i=0, len=radios.length; i<len; i++) {
+        if ( radios[i].checked == true) { // radio checked?
+            get_input_value = radios[i].value; // if so, hold its value in val
+            break; // and break out of for loop
+        }
+		else
+		{
+		get_input_value = 'not_set';	
+		}	
+    }";	
+}		
+
+	if(!isset($this->set_client_validator['ValidateAsCreditCard'])){
+	$client_error = "
+case 'ValidateAsCreditCard':
+	{	
+	
+if(validation[f][1][validation[f][2]].type){
+	get_input_value = 	validation[f][1][validation[f][2]].value;
+}
+else{
+	//get_input_value = 	document.querySelector('input[name=' + [validation[f][2] +'][checked]').value;	
+	var radios = 	validation[f][1][validation[f][2]];
+	
+    // loop through list of radio buttons
+    for (var i=0, len=radios.length; i<len; i++) {
+        if ( radios[i].checked || radios[i].selected) { // radio checked?
+            get_input_value = radios[i].value; // if so, hold its value in val
+            break; // and break out of for loop
+        }
+    }	
+}
+
+/////ADD ERROR MESSAGE AT TOP, OR ALERT ERROR MESSAGE
+
+if(tab_set == 1){
+val_str = 'tabindex_' + validation[f][2];
+err_tab = eval(val_str);
+}
+inline_validate = $inline_validate;
+
+if(get_input_value != undefined){
+eval('var field_value' + \"='\" + get_input_value + \"';var n = field_value.search(/^(?:4[0-9]{12}(?:[0-9]{3})?|[25][1-7][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\d{3})\d{11})$/);if(n == -1){prevent_submit += 1;error_field.push('$dfield');document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement;  /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ var cc = document.getElementById('tab_button_id_' + err_tab).getAttribute('onclick');var ctab = document.getElementById('tab_button_id_' + err_tab); cc = cc.replace('return false', ''); cc = cc.replace('this.className', 'ctab.className');  eval(cc); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{if(error_field.indexOf(validation[f][2]) == -1){document.getElementById(validation[f][2]).className='$form_valid_element_class';document.getElementById(validation[f][2] + '_label').className='$form_valid_label_class';} if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
+	
+	}	
+	}
+	break;
+";
+
+$this->print_client_validator .= $client_error;
+
+
+	$this->set_client_validator['ValidateAsCreditCard'] = true;
+		}
+		
+		
+		
+		
+		
+	}
+
+}
+
+//////END CLEINT VALIDATE AS CREDIT CARD	
 ////////////////////////////////////
 
 
@@ -5316,7 +5531,7 @@ inline_validate = $inline_validate;
 
 
 if(get_input_value != undefined){
-eval('var field_value' + \"='\" + get_input_value + \"';if(field_value == ''){prevent_submit += 1;error_field.push('$dfield');document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ var cc = document.getElementById('tab_button_id_' + err_tab).getAttribute('onclick');var ctab = document.getElementById('tab_button_id_' + err_tab); cc = cc.replace('return false', ''); cc = cc.replace('this.className', 'ctab.className');  eval(cc); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{if(error_field.indexOf(validation[f][2]) == -1){document.getElementById(validation[f][2]).className='';document.getElementById(validation[f][2] + '_label').className='';} if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
+eval('var field_value' + \"='\" + get_input_value + \"';if(field_value == ''){prevent_submit += 1;error_field.push('$dfield');document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ var cc = document.getElementById('tab_button_id_' + err_tab).getAttribute('onclick');var ctab = document.getElementById('tab_button_id_' + err_tab); cc = cc.replace('return false', ''); cc = cc.replace('this.className', 'ctab.className');  eval(cc); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{if(error_field.indexOf(validation[f][2]) == -1){document.getElementById(validation[f][2]).className='$form_valid_element_class';document.getElementById(validation[f][2] + '_label').className='$form_valid_label_class';} if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
 	
 	}	
 	}
@@ -5406,7 +5621,7 @@ inline_validate = $inline_validate;
 
 
 if(get_input_value != undefined){
-eval('var field_value' + \"='\" + get_input_value + \"';var n = field_value.search(/^[0-9]+$separator"."[0-9]+$separator"."[0-9]+$/);if(n == -1){prevent_submit += 1;error_field.push('$dfield');document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ var cc = document.getElementById('tab_button_id_' + err_tab).getAttribute('onclick');var ctab = document.getElementById('tab_button_id_' + err_tab); cc = cc.replace('return false', ''); cc = cc.replace('this.className', 'ctab.className');  eval(cc); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{if(error_field.indexOf(validation[f][2]) == -1){document.getElementById(validation[f][2]).className='';document.getElementById(validation[f][2] + '_label').className='';} if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
+eval('var field_value' + \"='\" + get_input_value + \"';var n = field_value.search(/^[0-9]+$separator"."[0-9]+$separator"."[0-9]+$/);if(n == -1){prevent_submit += 1;error_field.push('$dfield');document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ var cc = document.getElementById('tab_button_id_' + err_tab).getAttribute('onclick');var ctab = document.getElementById('tab_button_id_' + err_tab); cc = cc.replace('return false', ''); cc = cc.replace('this.className', 'ctab.className');  eval(cc); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{if(error_field.indexOf(validation[f][2]) == -1){document.getElementById(validation[f][2]).className='$form_valid_element_class';document.getElementById(validation[f][2] + '_label').className='$form_valid_label_class';} if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
 	
 	}	
 	}
@@ -5493,7 +5708,7 @@ inline_validate = $inline_validate;
 
 
 if(get_input_value != undefined){
-eval('var field_value' + \"='\" + get_input_value + \"';if(field_value == '$other_text'){prevent_submit += 1;error_field.push('$dfield');document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ var cc = document.getElementById('tab_button_id_' + err_tab).getAttribute('onclick');var ctab = document.getElementById('tab_button_id_' + err_tab); cc = cc.replace('return false', ''); cc = cc.replace('this.className', 'ctab.className');  eval(cc); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{if(error_field.indexOf(validation[f][2]) == -1){document.getElementById(validation[f][2]).className='';document.getElementById(validation[f][2] + '_label').className='';} if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
+eval('var field_value' + \"='\" + get_input_value + \"';if(field_value == '$other_text'){prevent_submit += 1;error_field.push('$dfield');document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ var cc = document.getElementById('tab_button_id_' + err_tab).getAttribute('onclick');var ctab = document.getElementById('tab_button_id_' + err_tab); cc = cc.replace('return false', ''); cc = cc.replace('this.className', 'ctab.className');  eval(cc); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{if(error_field.indexOf(validation[f][2]) == -1){document.getElementById(validation[f][2]).className='$form_valid_element_class';document.getElementById(validation[f][2] + '_label').className='$form_valid_label_class';} if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
 	
 	}	
 	}
@@ -5515,6 +5730,91 @@ $this->print_client_validator .= $client_error;
 }
 
 //////END CLEINT VALIDATE AS DIFFERENT FROM TEXT
+////////////////////////////////////
+
+
+
+
+	
+//////CLEINT VALIDATE AS DECIMAL PLACES
+if(isset($display->fields->$dfieldx->ValidationDecimalPlaces)){
+
+	$dp = $display->fields->$dfieldx->ValidationDecimalPlaces;	
+	
+	$validate_error = "Invalid decimal places";	
+
+		if(isset($display->fields->$dfieldx->ValidationDecimalPlacesErrorMessage))
+	{
+		$validate_error = $display->fields->$dfieldx->ValidationDecimalPlacesErrorMessage;
+	}	
+
+	
+							///set as callback	
+	$xvalidate_error = $validate_error;
+	if(is_callable($validate_error)){
+	$validate_error = call_user_func($validate_error,$dfield,$value,$arr,$lang);
+	}
+	if(!$validate_error){$validate_error = $xvalidate_error;}	
+
+	$call_error_call = "validation.push(['ValidationDecimalPlaces',this_form,'$dfield','$validate_error']); \n ";
+	
+//	$this->pre_print['call_client_validator'] .= $call_error_call;
+	
+	$this->client_validator_array[$dfield][] = $call_error_call;
+	
+	
+	if(!isset($this->set_client_validator['ValidationDecimalPlaces'])){
+	$client_error = "
+case 'ValidationDecimalPlaces':
+	{	
+if(validation[f][1][validation[f][2]].type){
+	get_input_value = 	validation[f][1][validation[f][2]].value;
+}
+else{
+	//get_input_value = 	document.querySelector('input[name=' + [validation[f][2] +'][checked]').value;	
+	var radios = 	validation[f][1][validation[f][2]];
+	
+    // loop through list of radio buttons
+    for (var i=0, len=radios.length; i<len; i++) {
+        if ( radios[i].checked || radios[i].selected) { // radio checked?
+            get_input_value = radios[i].value; // if so, hold its value in val
+            break; // and break out of for loop
+        }
+    }	
+}
+
+/////ADD ERROR MESSAGE AT TOP, OR ALERT ERROR MESSAGE
+
+if(tab_set == 1){
+val_str = 'tabindex_' + validation[f][2];
+err_tab = eval(val_str);
+}
+inline_validate = $inline_validate;
+
+
+if(get_input_value != undefined){
+eval('var field_value' + \"='\" + get_input_value + \"';var n = field_value.search(/^-?[0-9]+(\\.[0-9]{0,$dp})?\$/);if(n == -1){prevent_submit += 1;error_field.push('$dfield');document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ var cc = document.getElementById('tab_button_id_' + err_tab).getAttribute('onclick');var ctab = document.getElementById('tab_button_id_' + err_tab); cc = cc.replace('return false', ''); cc = cc.replace('this.className', 'ctab.className');  eval(cc); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{if(error_field.indexOf(validation[f][2]) == -1){document.getElementById(validation[f][2]).className='$form_valid_element_class';document.getElementById(validation[f][2] + '_label').className='$form_valid_label_class';} if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
+	
+	}	
+	}
+	break;
+";
+
+$this->print_client_validator .= $client_error;
+
+
+	$this->set_client_validator['ValidationDecimalPlaces'] = true;
+		}
+		
+		
+		
+		
+		
+
+
+}
+
+//////END CLEINT VALIDATE AS DECIMAL PLACES
 ////////////////////////////////////
 
 
@@ -5577,7 +5877,7 @@ inline_validate = $inline_validate;
 
 
 if(get_input_value != undefined){
-eval('var field_value' + \"='\" + get_input_value + \"';if(field_value != '$other_text'){prevent_submit += 1;error_field.push('$dfield');document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ var cc = document.getElementById('tab_button_id_' + err_tab).getAttribute('onclick');var ctab = document.getElementById('tab_button_id_' + err_tab); cc = cc.replace('return false', ''); cc = cc.replace('this.className', 'ctab.className');  eval(cc); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{if(error_field.indexOf(validation[f][2]) == -1){document.getElementById(validation[f][2]).className='';document.getElementById(validation[f][2] + '_label').className='';} if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
+eval('var field_value' + \"='\" + get_input_value + \"';if(field_value != '$other_text'){prevent_submit += 1;error_field.push('$dfield');document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ var cc = document.getElementById('tab_button_id_' + err_tab).getAttribute('onclick');var ctab = document.getElementById('tab_button_id_' + err_tab); cc = cc.replace('return false', ''); cc = cc.replace('this.className', 'ctab.className');  eval(cc); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{if(error_field.indexOf(validation[f][2]) == -1){document.getElementById(validation[f][2]).className='$form_valid_element_class';document.getElementById(validation[f][2] + '_label').className='$form_valid_label_class';} if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
 	
 	}	
 	}
@@ -5675,7 +5975,7 @@ inline_validate = $inline_validate;
 
 
 if(get_input_value != undefined){
-eval('var field_value' + \"='\" + get_input_value + \"';if(field_value != get_input_value_other){prevent_submit += 1;error_field.push('$dfield');document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ var cc = document.getElementById('tab_button_id_' + err_tab).getAttribute('onclick');var ctab = document.getElementById('tab_button_id_' + err_tab); cc = cc.replace('return false', ''); cc = cc.replace('this.className', 'ctab.className');  eval(cc); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{if(error_field.indexOf(validation[f][2]) == -1){document.getElementById(validation[f][2]).className='';document.getElementById(validation[f][2] + '_label').className='';} if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
+eval('var field_value' + \"='\" + get_input_value + \"';if(field_value != get_input_value_other){prevent_submit += 1;error_field.push('$dfield');document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ var cc = document.getElementById('tab_button_id_' + err_tab).getAttribute('onclick');var ctab = document.getElementById('tab_button_id_' + err_tab); cc = cc.replace('return false', ''); cc = cc.replace('this.className', 'ctab.className');  eval(cc); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{if(error_field.indexOf(validation[f][2]) == -1){document.getElementById(validation[f][2]).className='$form_valid_element_class';document.getElementById(validation[f][2] + '_label').className='$form_valid_label_class';} if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
 	
 	}	
 	}
@@ -5776,7 +6076,7 @@ inline_validate = $inline_validate;
 
 
 if(get_input_value != undefined){
-eval('var field_value' + \"='\" + get_input_value + \"';if(field_value == get_input_value_other){prevent_submit += 1;error_field.push('$dfield');document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ var cc = document.getElementById('tab_button_id_' + err_tab).getAttribute('onclick');var ctab = document.getElementById('tab_button_id_' + err_tab); cc = cc.replace('return false', ''); cc = cc.replace('this.className', 'ctab.className');  eval(cc); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{if(error_field.indexOf(validation[f][2]) == -1){document.getElementById(validation[f][2]).className='';document.getElementById(validation[f][2] + '_label').className='';} if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
+eval('var field_value' + \"='\" + get_input_value + \"';if(field_value == get_input_value_other){prevent_submit += 1;error_field.push('$dfield');document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ var cc = document.getElementById('tab_button_id_' + err_tab).getAttribute('onclick');var ctab = document.getElementById('tab_button_id_' + err_tab); cc = cc.replace('return false', ''); cc = cc.replace('this.className', 'ctab.className');  eval(cc); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{if(error_field.indexOf(validation[f][2]) == -1){document.getElementById(validation[f][2]).className='$form_valid_element_class';document.getElementById(validation[f][2] + '_label').className='$form_valid_label_class';} if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
 	
 	}	
 	}
@@ -5861,7 +6161,7 @@ inline_validate = $inline_validate;
 
 
 if(get_input_value != undefined){
-eval('var field_value' + \"='\" + get_input_value + \"';if(field_value.length < '$min_length'){prevent_submit += 1;error_field.push('$dfield');document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ var cc = document.getElementById('tab_button_id_' + err_tab).getAttribute('onclick');var ctab = document.getElementById('tab_button_id_' + err_tab); cc = cc.replace('return false', ''); cc = cc.replace('this.className', 'ctab.className');  eval(cc); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{if(error_field.indexOf(validation[f][2]) == -1){document.getElementById(validation[f][2]).className='';document.getElementById(validation[f][2] + '_label').className='';} if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
+eval('var field_value' + \"='\" + get_input_value + \"';if(field_value.length < '$min_length'){prevent_submit += 1;error_field.push('$dfield');document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ var cc = document.getElementById('tab_button_id_' + err_tab).getAttribute('onclick');var ctab = document.getElementById('tab_button_id_' + err_tab); cc = cc.replace('return false', ''); cc = cc.replace('this.className', 'ctab.className');  eval(cc); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{if(error_field.indexOf(validation[f][2]) == -1){document.getElementById(validation[f][2]).className='$form_valid_element_class';document.getElementById(validation[f][2] + '_label').className='$form_valid_label_class';} if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
 	
 	}	
 	}
@@ -5949,7 +6249,7 @@ inline_validate = $inline_validate;
 
 
 if(get_input_value != undefined){
-eval('var field_value' + \"='\" + get_input_value + \"';if(field_value.length > '$max_length'){prevent_submit += 1;error_field.push('$dfield');document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ var cc = document.getElementById('tab_button_id_' + err_tab).getAttribute('onclick');var ctab = document.getElementById('tab_button_id_' + err_tab); cc = cc.replace('return false', ''); cc = cc.replace('this.className', 'ctab.className');  eval(cc); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{if(error_field.indexOf(validation[f][2]) == -1){document.getElementById(validation[f][2]).className='';document.getElementById(validation[f][2] + '_label').className='';} if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
+eval('var field_value' + \"='\" + get_input_value + \"';if(field_value.length > '$max_length'){prevent_submit += 1;error_field.push('$dfield');document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ var cc = document.getElementById('tab_button_id_' + err_tab).getAttribute('onclick');var ctab = document.getElementById('tab_button_id_' + err_tab); cc = cc.replace('return false', ''); cc = cc.replace('this.className', 'ctab.className');  eval(cc); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{if(error_field.indexOf(validation[f][2]) == -1){document.getElementById(validation[f][2]).className='$form_valid_element_class';document.getElementById(validation[f][2] + '_label').className='$form_valid_label_class';} if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
 	
 	}	
 	}
@@ -6033,7 +6333,7 @@ inline_validate = $inline_validate;
 
 
 if(get_input_value != undefined){
-eval('var field_value' + \"='\" + get_input_value + \"';var n = field_value.search($reg_exp);if(n == -1){prevent_submit += 1;error_field.push('$dfield');document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ var cc = document.getElementById('tab_button_id_' + err_tab).getAttribute('onclick');var ctab = document.getElementById('tab_button_id_' + err_tab); cc = cc.replace('return false', ''); cc = cc.replace('this.className', 'ctab.className');  eval(cc); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{if(error_field.indexOf(validation[f][2]) == -1){document.getElementById(validation[f][2]).className='';document.getElementById(validation[f][2] + '_label').className='';} if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
+eval('var field_value' + \"='\" + get_input_value + \"';var n = field_value.search($reg_exp);if(n == -1){prevent_submit += 1;error_field.push('$dfield');document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ var cc = document.getElementById('tab_button_id_' + err_tab).getAttribute('onclick');var ctab = document.getElementById('tab_button_id_' + err_tab); cc = cc.replace('return false', ''); cc = cc.replace('this.className', 'ctab.className');  eval(cc); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{if(error_field.indexOf(validation[f][2]) == -1){document.getElementById(validation[f][2]).className='$form_valid_element_class';document.getElementById(validation[f][2] + '_label').className='$form_valid_label_class';} if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
 	
 	}	
 	}
@@ -6118,7 +6418,7 @@ inline_validate = $inline_validate;
 
 
 if(get_input_value != undefined){
-eval('var field_value' + \"='\" + get_input_value + \"';var n = field_value.search($reg_exp);if(n != -1){prevent_submit += 1;error_field.push('$dfield');document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ var cc = document.getElementById('tab_button_id_' + err_tab).getAttribute('onclick');var ctab = document.getElementById('tab_button_id_' + err_tab); cc = cc.replace('return false', ''); cc = cc.replace('this.className', 'ctab.className');  eval(cc); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{if(error_field.indexOf(validation[f][2]) == -1){document.getElementById(validation[f][2]).className='';document.getElementById(validation[f][2] + '_label').className='';} if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
+eval('var field_value' + \"='\" + get_input_value + \"';var n = field_value.search($reg_exp);if(n != -1){prevent_submit += 1;error_field.push('$dfield');document.getElementById(validation[f][2]).className='$error_element_class';document.getElementById(validation[f][2] + '_label').className='error_label_class'; var this_err_parent = document.getElementById(validation[f][2]).parentElement; /* */if(!document.getElementById(validation[f][2]  + '_inline_error')){var newItemAll = document.createElement('$validate_all_container'); newItemAll.className = '$validate_all_class';  newItemAll.id = validation[f][2]  + '_inline_error'; var typAll = document.createAttribute('style'); typAll.value = '$validate_all_style';	newItemAll.attributes.setNamedItem(typAll); if(inline_validate == 1){ if('after' == '$validate_inline_position'){this_err_parent.appendChild(newItemAll);}   if('before' == '$validate_inline_position'){ this_err_parent.insertBefore(newItemAll, document.getElementById(validation[f][2]));} }	} else { var newItemAll = document.getElementById(validation[f][2]  + '_inline_error'); if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} }  /* */ var newItem = document.createElement('$validate_each_container'); newItem.className = '$validate_each_class';  newItem.id = validation[f][2]  + '_inline_error_' + validation[f][0]; var typ = document.createAttribute('style');typ.value = '$validate_each_style';	newItem.attributes.setNamedItem(typ);	var textnode = document.createTextNode(validation[f][3]);newItem.appendChild(textnode);newItemAll.appendChild(newItem); alert('ERROR - ' + validation[f][3]);	if(ini_tab == 0 && tab_set == 1){ var cc = document.getElementById('tab_button_id_' + err_tab).getAttribute('onclick');var ctab = document.getElementById('tab_button_id_' + err_tab); cc = cc.replace('return false', ''); cc = cc.replace('this.className', 'ctab.className');  eval(cc); ini_tab += 1;document.getElementById(validation[f][2]).focus();}	error.push([validation[f][0],validation[f][2],validation[f][3]]); } else{if(error_field.indexOf(validation[f][2]) == -1){document.getElementById(validation[f][2]).className='$form_valid_element_class';document.getElementById(validation[f][2] + '_label').className='$form_valid_label_class';} if(document.getElementById(validation[f][2]  + '_inline_error')){ var newItemAll = document.getElementById(validation[f][2]  + '_inline_error');   if(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0])){	newItemAll.removeChild(document.getElementById(validation[f][2]  + '_inline_error_' + validation[f][0]));	} } }\");
 	
 	}	
 	}
@@ -7671,6 +7971,7 @@ $add_free_field  = array( //must add proccessors   ////when $add_free_field is d
 					array("free_no_display4","text"),
 					array("free_no_display5","multipleselect"),
 					array("free_no_display6","text"),
+					array("free_no_display7","text"),
 					//array("","");
 						);
 
@@ -7730,10 +8031,12 @@ array(	'foo' => 'bar',
 		'form_error_element_class' => "error_class",
 		'form_error_element_style' => "",
 		'form_error_separator' => "",
+		'form_valid_element_class' => "valid",
+		'form_valid_label_class' => "validl",
 		'custom_tab' => $ctab,
 		'tabs' => array("PERSONAL"=>'faculty_auto,faculty_auto2,faculty_sel,faculty_sel2,faculty_day_added,faculty_year_added,faculty_campus,faculty_shortname,faculty_id,faculty_note',
 						"OFFICE"=>'faculty_text,faculty_files,location,faculty_logo,faculty_fullname,institution_id',
-						"OTHERS"=>'house,free_no_display,free_no_display2,free_no_display3,free_no_display4,free_no_display5,free_no_display6,joint,cvupload,2ndpasswprd,faculty_code,faculty_month_added'),
+						"OTHERS"=>'house,free_no_display,free_no_display2,free_no_display3,free_no_display4,free_no_display5,free_no_display6,free_no_display7,joint,cvupload,2ndpasswprd,faculty_code,faculty_month_added'),
 		
 		'update' => $update, /////UPDATE
 		'stop_sql' => false, /////UPDATE
@@ -7853,19 +8156,13 @@ array(	'foo' => 'bar',
 												'ValidateAsFloat' => true,
 												'ValidationLowerLimit' => 0,
 												'ValidationUpperLimit' => 50,
-											//	'ValidateAsIntegerErrorMessage' => "@name @label @value is not an integer",
-												'ValidateAsFloatErrorMessage' => "not a valid float",		
-													'values_for_select' => array(	"January" => "1", ////The key is displayed & value = value
-																					"February" => "2",
-																					"March" => "3"
-																				),
-													'element_separator' => '<br />', ///HTML TAG
-												///	'checked' => array('2','3')
+												'ValidationDecimalPlaces' => 2,
+												'ValidationDecimalPlacesErrorMessage' => 'Incorrect decimal places',
 												),
 		'free_no_display4' => (object) array ( 	'type'=> 'text', //checkbox, multipleselect		
 												'ValidateAsNotEmpty' => true,
 											//	'ValidateAsIntegerErrorMessage' => "@name @label @value is not an integer",
-												'ValidateAsNotEmptyErrorMessage' => "Input is empty",		
+												'ValidateAsNotEmptyErrorMessage' => "Input is empty",
 													'values_for_select' => array(	"January" => "1", ////The key is displayed & value = value
 																					"February" => "2",
 																					"March" => "3"
@@ -7884,7 +8181,7 @@ array(	'foo' => 'bar',
 												//	'checked' => array('1')
 												),
 		'free_no_display6' => (object) array ( 	'type'=> 'text', //checkbox, multipleselect		
-												'ValidateRegularExpression' => '/^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-._]+..[a-zA-Z0-9-.]+$/',
+												'ValidateRegularExpression' => '/^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-._]+..[a-zA-Z0-9-]+$/',
 												'ValidateRegularExpressionErrorMessage' => "Reg Expression does not match",													'ValidateAsNotRegularExpression' => '/^[-+0-9]+$/',
 												'ValidateAsNotRegularExpressionErrorMessage' => "Invalid reg exp format",		
 													'values_for_select' => array(	"January" => "1", ////The key is displayed & value = value
@@ -7893,6 +8190,10 @@ array(	'foo' => 'bar',
 																				),
 													'element_separator' => '<br />', ///HTML TAG
 												//	'checked' => array('1')
+												),
+		'free_no_display7' => (object) array ( 	'type'=> 'text', //checkbox, multipleselect		
+												'ValidateAsCreditCard' => true,
+												'ValidateAsCreditCardErrorMessage' => "invalid card",
 												),													
 		'institution_id' => (object) array ( 	'type'=> 'select',
 												'id' => 'insssss',		
