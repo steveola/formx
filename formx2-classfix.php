@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<script src="jquery.js"></script>
+ <meta http-equiv="Content-Type" content="text/html;charset=ISO-8859-1"> 
 </head>
 <body>
 <style>
@@ -253,6 +253,17 @@ function form_render($data){
 	}
 }
 
+
+////for replace pattern
+function filter_string($var)
+{
+$new_var = 	array();
+foreach($var as $var_key =>$var_value){
+//$new_var[$var_key] = $var_value . "jjjj";	
+$new_var[$var_key] = "/" . $var_value . "/";	
+}
+return $new_var;
+}
 	
 function error_render($data){
 	foreach($data as $writer_key=>$writer_value)
@@ -301,6 +312,8 @@ public $live_validate_script = "";
 
 public $server_error = array();
 public $error_renderer = array();
+
+public $ReplacePatterns = array();
 
 
 
@@ -1037,6 +1050,89 @@ if(!isset($type[$name])){
 	//////END STILL CHECK
 			////////Check if $POSTED ITEM IS AN ARRAY INCASE OF A CHECK BOX
 		
+////REPLACE PATTERN, CAPITALISATION
+if(is_string($value)){
+	$additional_found = false;	
+	$additional_found_pattern = array();
+	$found_capitalisation = false;
+	$capitalisation = "uppercase";
+
+	
+	$ReplacePatterns = "no_pattern";	
+	if(isset($display->fields->$name->ReplacePatterns)){
+		$ReplacePatterns = $display->fields->$name->ReplacePatterns;
+	}
+	
+	if(isset($display->fields->$name->Capitalization)){
+		$found_capitalisation = true;
+	}
+
+	////////	PARSE ADDTIONAL FIELDS
+
+		
+	foreach($addtional_field as $a_field=>$a_data){
+		foreach($a_data as $a_fieldfname=>$a_sub_data){
+			if(isset($a_sub_data->newfield)){
+				if($a_sub_data->newfield == $name){
+					if(isset($a_sub_data->ReplacePatterns)){
+						$additional_found = true;	
+						$additional_found_pattern = $a_sub_data->ReplacePatterns;
+					}
+					if(isset($a_sub_data->Capitalization)){
+						$found_capitalisation = true;	
+						$capitalisation = $a_sub_data->Capitalization;
+					}		
+				}			
+			}				
+		}		
+	}
+
+	if($additional_found == true){
+		$ReplacePatterns = $additional_found_pattern;
+	}
+	////////	PARSE ADDTIONAL FIELDS	
+
+	if(is_array($ReplacePatterns)){
+$this->ReplacePatterns[$name] = $ReplacePatterns;		
+$patterns = array_keys($ReplacePatterns);
+$replace = array_values($ReplacePatterns);
+$patterns = $this->filter_string($patterns);
+$value = preg_replace($patterns, $replace, $value);	
+	}
+	
+	if($found_capitalisation == true){
+	switch ($capitalisation) {
+    case "lowercase":
+		{
+			$value = strtolower($value);
+		}
+        break;
+    case "uppercase":
+		{
+			$value = strtoupper($value);
+		}
+        break;
+    case "sentence":
+		{
+			$value = ucfirst($value);
+		}        
+		break;
+    case "word":
+		{
+			$value = ucwords($value);
+		}
+        break;
+    default:
+		{}
+}
+
+	
+	}
+	
+	
+}
+////END REPLACE PATTERN
+
 $reprint->$name = $value;		
 
 					/////validation execution
@@ -2893,12 +2989,13 @@ if(isset($_REQUEST['update_submit_button']) || isset($_REQUEST["active_tabnamex"
 	foreach($to_update_array as $to_update_key=>$to_update){	
 //	$to_update = $display->fields->$this_name->to_update;
 
+	////////	PARSE ADDTIONAL FIELDS
 $additional_found = false;	
 $additional_found_values = array();	
 $additional_found_from = false;	
 $additional_found_from_where = array();	
 
-	////////	PARSE ADDTIONAL FIELDS
+
 		foreach($addtional_field as $a_field=>$a_data){
 			foreach($a_data as $a_fieldfname=>$a_sub_data){
 				if(isset($a_sub_data->newfield)){
@@ -4727,7 +4824,124 @@ validateForm_$form_id(document.getElementById('$form_id'),'$dfield');
 }
 /////////END LIVE VALIDATION SCRIPT//////////////
 
+//////CLEINT REPLACE PATTERN
 
+////REPLACE PATTERN
+	////////	PARSE ADDTIONAL FIELDS
+	$additional_found = false;	
+	$additional_found_pattern = array();
+	$found_capitalisation = false;
+
+	
+	$ReplacePatterns = "no_pattern";	
+	if(isset($display->fields->$dfield->ReplacePatterns)){
+		$ReplacePatterns = $display->fields->$dfield->ReplacePatterns;
+	}
+
+	$capitalisation = "uppercase";	
+	if(isset($display->fields->$dfield->Capitalization)){
+		$found_capitalisation = true;
+		$capitalisation = $display->fields->$dfield->Capitalization;
+	}
+
+		
+	foreach($addtional_field as $a_field=>$a_data){
+		foreach($a_data as $a_fieldfname=>$a_sub_data){
+			if(isset($a_sub_data->newfield)){
+				if($a_sub_data->newfield == $dfield){
+					if(isset($a_sub_data->ReplacePatterns)){
+						$additional_found = true;	
+						$additional_found_pattern = $a_sub_data->ReplacePatterns;
+					}
+					if(isset($a_sub_data->Capitalization)){
+						$found_capitalisation = true;	
+						$capitalisation = $a_sub_data->Capitalization;
+					}					
+				}			
+			}				
+		}		
+	}
+
+	if($additional_found == true){
+		$ReplacePatterns = $additional_found_pattern;
+	}
+	////////	PARSE ADDTIONAL FIELDS	
+
+	if(is_array($ReplacePatterns)){
+$this->ReplacePatterns[$dfield] = $ReplacePatterns;		
+//		$value = "...." . $value;	
+$patterns = array_keys($ReplacePatterns);
+$replace = array_values($ReplacePatterns);	
+	}
+	
+
+if(isset($this->ReplacePatterns[$dfield])){
+$js_replace = "";
+for($r=0;$r<count($patterns);$r++){
+$patterns_string = $patterns[$r];
+$replace_string = $replace[$r];
+$js_replace .= '.replace(/' . $patterns_string . '/g,\'' . $replace_string  . '\')';	
+}	
+$this->live_validate_script .= "<script>
+document.getElementById(\"$dfield\").addEventListener('change', function (event) {
+	
+new_value=this.value; if(new_value.replace) {
+new_value=new_value$js_replace;
+	};
+if(new_value!=this.value) this.value=new_value ;
+}, true);
+</script>";	
+}
+////END REPLACE PATTERN
+/*
+new_value=value; if(new_value.replace) { new_value=new_value.replace(new RegExp('^\\s+','g'), '').replace(new RegExp('\\s+$','g'), '').replace(new RegExp('^([wW]{3}\\.)','g'), 'http://$1').replace(new RegExp('^([^:]+)$','g'), 'http://$1').replace(new RegExp('^(http|https)://(([-!#$%&amp;\'*+.0-9=?A-Z^_`a-z{|}~'+unescape('%7f]+\\.)+[A-Za-z]{2,6}(:[0-9]+)?)$'),'g'), '$1://$2/'); } ;  if(new_value!=value) value=new_value ;
+*/
+
+//////END CLEINT REPLACE PATTERN
+
+
+
+////CLIENT CAPITILIZATION
+$case_function = ""; ///toUpperCase
+	
+	if($found_capitalisation == true){
+	switch ($capitalisation) {
+    case "lowercase":
+		{
+			$case_function = "if(new_value.toLowerCase){this.value = new_value.toLowerCase();}";
+		}
+        break;
+    case "uppercase":
+		{
+			$case_function = "if(new_value.toUpperCase){this.value = new_value.toUpperCase();}";
+		}
+        break;
+    case "sentence":
+		{
+			$case_function = "var first_char = new_value[0].toUpperCase();  this.value = first_char + new_value.slice(1);";
+		}        
+		break;
+    case "word":
+		{
+			$case_function = "if(new_value.toUpperCase){this.value = new_value.toUpperCase();}";
+		}
+        break;
+    default:
+		{}
+}
+
+$this->live_validate_script .= "<script>
+document.getElementById(\"$dfield\").addEventListener('change', function (event) {
+	
+new_value=this.value; 
+$case_function	
+}, true);
+</script>";	
+}
+	
+
+
+///END CLIENT CAPILISATION
 
 
 
@@ -7972,6 +8186,7 @@ $add_free_field  = array( //must add proccessors   ////when $add_free_field is d
 					array("free_no_display5","multipleselect"),
 					array("free_no_display6","text"),
 					array("free_no_display7","text"),
+					array("replace_pattern","text"),
 					//array("","");
 						);
 
@@ -8036,7 +8251,7 @@ array(	'foo' => 'bar',
 		'custom_tab' => $ctab,
 		'tabs' => array("PERSONAL"=>'faculty_auto,faculty_auto2,faculty_sel,faculty_sel2,faculty_day_added,faculty_year_added,faculty_campus,faculty_shortname,faculty_id,faculty_note',
 						"OFFICE"=>'faculty_text,faculty_files,location,faculty_logo,faculty_fullname,institution_id',
-						"OTHERS"=>'house,free_no_display,free_no_display2,free_no_display3,free_no_display4,free_no_display5,free_no_display6,free_no_display7,joint,cvupload,2ndpasswprd,faculty_code,faculty_month_added'),
+						"OTHERS"=>'house,free_no_display,free_no_display2,free_no_display3,free_no_display4,free_no_display5,free_no_display6,free_no_display7,replace_pattern,replace_pattern2,joint,cvupload,2ndpasswprd,faculty_code,faculty_month_added'),
 		
 		'update' => $update, /////UPDATE
 		'stop_sql' => false, /////UPDATE
@@ -8194,6 +8409,15 @@ array(	'foo' => 'bar',
 		'free_no_display7' => (object) array ( 	'type'=> 'text', //checkbox, multipleselect		
 												'ValidateAsCreditCard' => true,
 												'ValidateAsCreditCardErrorMessage' => "invalid card",
+												),
+		'replace_pattern' => (object) array ( 	'type'=> 'text', //checkbox, multipleselect
+												"ReplacePatterns"=>array(
+																			/* trim whitespace at the beginning of the text value */
+																			'(19|20)(\d{2})-(\d{1,2})-(\d{1,2})' => '\3/\4/\1\2',
+																		//	'/\s\s+/' => ' ',
+																			'^\s*{(\w+)}\s*=' => '$\1 ='
+																	),
+												'Capitalization' => 'sentence',
 												),													
 		'institution_id' => (object) array ( 	'type'=> 'select',
 												'id' => 'insssss',		
@@ -8517,6 +8741,15 @@ array(	'foo' => 'bar',
 					//	'selected' => array('3')
 													
 							),
+'faculty_shortname' => (object) array ( 	
+						'newfield'=> 'replace_pattern2',
+						'type'=> 'text', //checkbox, multipleselect
+						"ReplacePatterns"=>array(
+												"\\s\s+" => ' ',
+												"^\\s+" => '',
+											),
+						'Capitalization' => 'word',	// lowercase, word				
+						),						
 'faculty_logo' => (object) array ( 	
 												'type'=> 'textarea',
 												'newfield'=> 'cvupload',
