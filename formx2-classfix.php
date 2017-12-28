@@ -1055,8 +1055,9 @@ if(is_string($value)){
 	$additional_found = false;	
 	$additional_found_pattern = array();
 	$found_capitalisation = false;
+	$found_truncate = false;
 	$capitalisation = "uppercase";
-
+	$truncate = 0;
 	
 	$ReplacePatterns = "no_pattern";	
 	if(isset($display->fields->$name->ReplacePatterns)){
@@ -1065,6 +1066,12 @@ if(is_string($value)){
 	
 	if(isset($display->fields->$name->Capitalization)){
 		$found_capitalisation = true;
+		$capitalisation = $display->fields->$name->Capitalization;
+	}
+	
+	if(isset($display->fields->$name->truncate)){
+		$found_truncate = true;
+		$truncate = $display->fields->$name->truncate;
 	}
 
 	////////	PARSE ADDTIONAL FIELDS
@@ -1081,7 +1088,11 @@ if(is_string($value)){
 					if(isset($a_sub_data->Capitalization)){
 						$found_capitalisation = true;	
 						$capitalisation = $a_sub_data->Capitalization;
-					}		
+					}
+					if(isset($a_sub_data->truncate)){
+						$found_truncate = true;	
+						$truncate = $a_sub_data->truncate;
+					}						
 				}			
 			}				
 		}		
@@ -1129,6 +1140,9 @@ $value = preg_replace($patterns, $replace, $value);
 	
 	}
 	
+	if($found_truncate == true){
+		$value = substr($value,0,$truncate);
+	}
 	
 }
 ////END REPLACE PATTERN
@@ -4834,37 +4848,17 @@ validateForm_$form_id(document.getElementById('$form_id'),'$dfield');
 
 	
 	$ReplacePatterns = "no_pattern";	
-	if(isset($display->fields->$dfield->ReplacePatterns)){
-		$ReplacePatterns = $display->fields->$dfield->ReplacePatterns;
+	if(isset($display->fields->$dfieldx->ReplacePatterns)){
+		$ReplacePatterns = $display->fields->$dfieldx->ReplacePatterns;
 	}
 
 	$capitalisation = "uppercase";	
-	if(isset($display->fields->$dfield->Capitalization)){
+	if(isset($display->fields->$dfieldx->Capitalization)){
 		$found_capitalisation = true;
-		$capitalisation = $display->fields->$dfield->Capitalization;
+		$capitalisation = $display->fields->$dfieldx->Capitalization;
 	}
 
-		
-	foreach($addtional_field as $a_field=>$a_data){
-		foreach($a_data as $a_fieldfname=>$a_sub_data){
-			if(isset($a_sub_data->newfield)){
-				if($a_sub_data->newfield == $dfield){
-					if(isset($a_sub_data->ReplacePatterns)){
-						$additional_found = true;	
-						$additional_found_pattern = $a_sub_data->ReplacePatterns;
-					}
-					if(isset($a_sub_data->Capitalization)){
-						$found_capitalisation = true;	
-						$capitalisation = $a_sub_data->Capitalization;
-					}					
-				}			
-			}				
-		}		
-	}
 
-	if($additional_found == true){
-		$ReplacePatterns = $additional_found_pattern;
-	}
 	////////	PARSE ADDTIONAL FIELDS	
 
 	if(is_array($ReplacePatterns)){
@@ -4943,7 +4937,27 @@ $case_function
 
 ///END CLIENT CAPILISATION
 
+///////TRUNCATE
 
+	$truncate = 0;	
+	if(isset($display->fields->$dfieldx->truncate)){
+		$truncate = $display->fields->$dfieldx->truncate;	
+		
+		$this->live_validate_script .= "<script>
+		document.getElementById(\"$dfield\").addEventListener('change', function (event) {			
+		this.value = this.value.substring(0,$truncate);
+		}, true);
+		
+		document.getElementById(\"$dfield\").addEventListener('keyup', function (event) {			
+		this.value = this.value.substring(0,$truncate);
+		}, true);
+		
+		</script>";	
+		
+	}
+	
+	
+////END TRUNCATE
 
 /////////////////////////////////////
 ////////////CLIENT SIDE VALIDATION//
@@ -8418,6 +8432,7 @@ array(	'foo' => 'bar',
 																			'^\s*{(\w+)}\s*=' => '$\1 ='
 																	),
 												'Capitalization' => 'sentence',
+												'truncate' => 10,
 												),													
 		'institution_id' => (object) array ( 	'type'=> 'select',
 												'id' => 'insssss',		
@@ -8749,6 +8764,7 @@ array(	'foo' => 'bar',
 												"^\\s+" => '',
 											),
 						'Capitalization' => 'word',	// lowercase, word				
+						'truncate' => 10,	// lowercase, word				
 						),						
 'faculty_logo' => (object) array ( 	
 												'type'=> 'textarea',
