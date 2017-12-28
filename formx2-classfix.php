@@ -4923,7 +4923,7 @@ $case_function = ""; ///toUpperCase
 		break;
     case "word":
 		{
-			$case_function = "if(new_value.toUpperCase){this.value = new_value.toUpperCase();}";
+			$case_function = "var new_value_array = new_value.split('');  var l = 0; for(l=0;l<new_value_array.length;l++){if(l == 0){new_value_array[0]=new_value_array[0].toUpperCase();} if( (new_value_array[l] == ' ') || (new_value_array[l] == '\\t')  || (new_value_array[l] == '\\s')  || (new_value_array[l] == '\\n')  || (new_value_array[l] == '\\r')   || (new_value_array[l] == '.')    || (new_value_array[l] == ',')     || (new_value_array[l] == ';')  || (new_value_array[l] == '(')    || (new_value_array[l] == ')')   ){new_value_array[l+1]=new_value_array[l+1].toUpperCase();}	this.value = new_value_array.join('');} ";
 		}
         break;
     default:
